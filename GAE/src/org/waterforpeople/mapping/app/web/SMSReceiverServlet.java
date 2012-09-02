@@ -21,6 +21,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.json.JSONObject;
 import org.waterforpeople.mapping.app.web.dto.SMSRestRequest;
 import org.waterforpeople.mapping.dao.AccessPointDao;
 import org.waterforpeople.mapping.domain.AccessPoint;
@@ -66,12 +67,14 @@ public class SMSReceiverServlet extends AbstractRestApiServlet {
 	protected RestResponse handleRequest(RestRequest req) throws Exception {
 		SMSRestRequest smsReq = (SMSRestRequest) req;
 		SMSMessage message = new SMSMessage();
+		SMSMessageDao smsDao = new SMSMessageDao();
 		message.setFrom(smsReq.getFrom());
 		message.setText(smsReq.getText());
 		message.setSentDate(smsReq.getTimestamp());
 		smsDao.save(message);
 		String[] parts = message.getText().split(" ");
 		if (parts.length == 2) {
+			AccessPointDao apDao = new AccessPointDao();
 			AccessPoint ap = apDao.findAccessPointBySMSCode(parts[0]);
 			if (ap != null) {
 				Status status = STATUS_MAP.get(parts[1]);
@@ -88,7 +91,16 @@ public class SMSReceiverServlet extends AbstractRestApiServlet {
 
 	@Override
 	protected void writeOkResponse(RestResponse resp) throws Exception {
-		resp.setCode("200");
+		/** resp.setCode("200"); */
+		getResponse().setStatus(200);
+		
+		/** standard FLOW response */
+		/**JSONObject obj = new JSONObject(resp, true); 
+		getResponse().getWriter().println(obj.toString());**/
+		
+		String smsSyncSuccess="{\"payload\": {\"success\": \"true\"}}";
+		getResponse().getWriter().println(smsSyncSuccess);
+		
 	}
 
 }
