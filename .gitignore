@@ -4,6 +4,7 @@
 .project
 .settings
 *.rpc
+*.pyc
 *.class
 .gwt-log
 
