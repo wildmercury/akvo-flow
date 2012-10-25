@@ -35,6 +35,7 @@
 		<service android:name=".service.PrecacheService" />
 		<service android:name=".service.BootstrapService" />
 		<service android:name=".service.ExceptionReportingService" />
+		<service android:name=".service.ApkUpdateService"/>
 
 		<receiver android:name=".broadcast.BroadcastDispatcher" >
 			<intent-filter>

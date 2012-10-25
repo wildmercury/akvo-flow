@@ -431,6 +431,14 @@
 		<url-pattern>/org.waterforpeople.mapping.portal.portal/devicerpcservice</url-pattern>
 	</servlet-mapping>
 	<servlet>
+		<servlet-name>DeviceAppRpcServlet</servlet-name>
+		<servlet-class>org.waterforpeople.mapping.app.gwt.server.device.DeviceApplicationServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DeviceAppRpcServlet</servlet-name>
+		<url-pattern>/org.waterforpeople.mapping.portal.portal/deviceapprpcservice</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>UserRpcServlet</servlet-name>
 		<servlet-class>com.gallatinsystems.user.app.gwt.server.UserServiceImpl</servlet-class>
 	</servlet>
@@ -527,6 +535,14 @@
 	<servlet-mapping>
 		<servlet-name>SurveyRestApi</servlet-name>
 		<url-pattern>/surveyrestapi</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>DeviceAppRestApi</servlet-name>
+		<servlet-class>org.waterforpeople.mapping.app.web.DeviceApplicationRestService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DeviceAppRestApi</servlet-name>
+		<url-pattern>/deviceapprest</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>DeviceFilesRestApi</servlet-name>
@@ -669,7 +685,7 @@
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
- <servlet>
+ <!-- <servlet>
   <servlet-name>SystemServiceServlet</servlet-name>
   <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
   <init-param>
@@ -680,5 +696,19 @@
  <servlet-mapping>
   <servlet-name>SystemServiceServlet</servlet-name>
   <url-pattern>/_ah/spi/*</url-pattern>
- </servlet-mapping>
+ </servlet-mapping> -->
+  <servlet>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+    <init-param>
+      <param-name>services</param-name>
+      <param-value/>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <url-pattern>/_ah/spi/*</url-pattern>
+  </servlet-mapping>
+
 </web-app>
