@@ -29,7 +29,8 @@ import com.gallatinsystems.survey.device.util.GeoUtil;
 import com.gallatinsystems.survey.device.view.PointsOfInterestOverlay;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
-import com.google.android.maps.MyLocationOverlay;
+//import com.google.android.maps.MyLocationOverlay;
+import com.gallatinsystems.survey.device.view.AkvoFLOWLocationOverlay;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
@@ -91,8 +92,9 @@ public class PointOfInterestMapActivity extends MapActivity {
 			overlays.add(overlay);
 			
 			// add 'where am I' dot
-			MyLocationOverlay myLocationOverlay = new MyLocationOverlay(this, mapView);
+			AkvoFLOWLocationOverlay myLocationOverlay = new AkvoFLOWLocationOverlay(this, mapView);
 			myLocationOverlay.enableMyLocation();
+			myLocationOverlay.enableCompass();
 			overlays.add(myLocationOverlay);
 			
 		}
