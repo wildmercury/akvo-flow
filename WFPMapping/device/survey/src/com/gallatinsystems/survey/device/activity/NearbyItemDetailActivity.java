@@ -18,6 +18,7 @@ package com.gallatinsystems.survey.device.activity;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 import android.app.Activity;
 import android.content.Context;
@@ -146,12 +147,13 @@ public class NearbyItemDetailActivity extends Activity implements
 	 * put loaded data into the views for display
 	 */
 	private void populateFields() {
+		DecimalFormat df = new DecimalFormat("#");
 		if (pointOfInterest != null) {
 			nameField.setText(" " + pointOfInterest.getName());
 			typeField.setText(" " + pointOfInterest.getType());
 			Double dist=pointOfInterest.getDistance();
 			if (dist  != null )
-				distanceField.setText(" " + Math.rint(dist) + "m");//show whole meters
+				distanceField.setText(" " + df.format(dist) + "m");//show whole meters
 			if (pointOfInterest.getPropertyNames() != null) {
 				LinearLayout l = new LinearLayout(this);
 				l.setOrientation(LinearLayout.VERTICAL);
