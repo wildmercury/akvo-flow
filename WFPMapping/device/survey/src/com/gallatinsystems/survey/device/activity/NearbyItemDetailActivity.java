@@ -153,24 +153,33 @@ public class NearbyItemDetailActivity extends Activity implements
 			if (dist  != null )
 				distanceField.setText(" " + Math.rint(dist) + "m");//show whole meters
 			if (pointOfInterest.getPropertyNames() != null) {
+				LinearLayout l = new LinearLayout(this);
+				l.setOrientation(LinearLayout.VERTICAL);
 				for (int i = 0; i < pointOfInterest.getPropertyNames().size(); i++) {
 					if (pointOfInterest.getPropertyValues().size() > i) {
 						String val = pointOfInterest.getPropertyValues().get(i);
+						
 						if (val != null && val.trim().length() > 0
 								&& !"null".equalsIgnoreCase(val.trim())) {
-							LinearLayout l = new LinearLayout(this);
-							l.setOrientation(LinearLayout.HORIZONTAL);
+							
+							LinearLayout subl = new LinearLayout(this);
+							subl.setOrientation(LinearLayout.HORIZONTAL);
+							
 							TextView labelView = new TextView(this);
 							labelView.setText(pointOfInterest
 									.getPropertyNames().get(i) + ": ");
-							l.addView(labelView);
+							subl.addView(labelView);
 							TextView valView = new TextView(this);
 							valView.setText(val);
-							l.addView(valView);
-							scrollView.addView(l);
+							subl.addView(valView);
+							l.addView(subl);
+							
 						}
+						
 					}
+					
 				}
+				scrollView.addView(l);
 			}
 		}
 	}
