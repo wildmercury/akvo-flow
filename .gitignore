@@ -26,6 +26,7 @@ GAE/war/com.gallatinsystems.framework.gwt.PortletFramework/*
 
 WFPMapping/device/debugcert
 WFPMapping/device/survey/res/raw/survey.properties
+WFPMapping/device/survey/res/values/arrays.xml
 WFPMapping/device/survey_test/bin/*
 WFPMapping/device/survey/bin/*
 WFPMapping/device/calabash/.calabash_settings
