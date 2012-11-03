@@ -252,7 +252,7 @@ public class NearbyItemDetailActivity extends Activity implements
 	 */
 	private void updateArrow() {
 		Matrix matrix = new Matrix();
-		matrix.postRotate(lastBearing + lastOrientation);
+		matrix.postRotate(lastBearing - lastOrientation);
 		Bitmap resizedBitmap = Bitmap.createBitmap(arrowBitmap, 0, 0, 30, 30,
 				matrix, true);
 		arrowView.setImageDrawable(new BitmapDrawable(res, resizedBitmap));
