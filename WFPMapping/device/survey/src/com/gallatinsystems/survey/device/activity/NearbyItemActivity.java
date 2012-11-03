@@ -160,7 +160,7 @@ public class NearbyItemActivity extends ListActivity implements
 				};
 			
 		} else {
-			nearbyRadius = 100000.0d;//default to 100 km, TODO: move this to constants
+			nearbyRadius = 10000000.0d;//default to 100 km, TODO: move this to constants
 		}
 
 		
