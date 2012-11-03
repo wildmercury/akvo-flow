@@ -17,6 +17,7 @@
 package com.gallatinsystems.survey.device.domain;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -164,8 +165,14 @@ public class PointOfInterest implements Serializable {
 		if (name != null) {
 			builder.append(name).append("\n");
 		}
-		if (latitude != null && longitude != null) {
-			builder.append(latitude).append(",").append(longitude);
+		//if (latitude != null && longitude != null) {
+		//	builder.append(latitude).append(",").append(longitude);
+		//}
+		DecimalFormat df = new DecimalFormat("#");
+		if (distance!=null){
+			builder.append("distance: ").append(df.format(distance)).append("m");
+		} else {
+			builder.append("distance: unknown") ;
 		}
 		return builder.toString();
 	}
