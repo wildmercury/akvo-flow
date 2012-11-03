@@ -97,8 +97,12 @@ public class PointOfInterestServlet extends AbstractRestApiServlet {
 				dto.setLatitude(ap.getLatitude());
 				dto.setLongitude(ap.getLongitude());
 				dto.setCountry(ap.getCountryCode());
-				dto.addProperty("status", ap.getPointStatus() != null ? ap
-						.getPointStatus().toString() : "unknown");
+				dto.addProperty("Status", ap.getPointStatus() != null ? ap
+					.getPointStatus().toString() : "unknown");
+				dto.addProperty("Technology", ap.getTypeTechnologyString() != null ? ap
+					.getTypeTechnologyString().toString() : "unknown");
+				dto.addProperty("Description", ap.getSecondaryTechnologyString() != null ? ap
+					.getSecondaryTechnologyString().toString() : "unknown");
 				dtoList.add(dto);
 			}
 			resp.setPointsOfInterest(dtoList);
