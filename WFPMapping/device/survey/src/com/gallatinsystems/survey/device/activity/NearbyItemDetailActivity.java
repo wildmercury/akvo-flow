@@ -147,13 +147,26 @@ public class NearbyItemDetailActivity extends Activity implements
 	 * put loaded data into the views for display
 	 */
 	private void populateFields() {
-		DecimalFormat df = new DecimalFormat("#");
+		DecimalFormat df = new DecimalFormat("#.#");
+		String unit = "km";
+		Double factor = 0.001; // convert from meters to km
+		
 		if (pointOfInterest != null) {
 			nameField.setText(" " + pointOfInterest.getName());
 			typeField.setText(" " + pointOfInterest.getType());
 			Double dist=pointOfInterest.getDistance();
-			if (dist  != null )
-				distanceField.setText(" " + df.format(dist) + "m");//show whole meters
+			if (dist  != null ) {
+				// for distances smaller than 1 km, use meters as unit
+				if (dist < 1000.0) {
+					factor = 1.0;
+					df = new DecimalFormat("#");
+					// TODO couple this to the units package used above
+					unit = "m";
+				} 
+				
+				dist=dist*factor;
+				distanceField.setText(" " + df.format(dist) + " " + unit); //show whole meters
+			}
 			if (pointOfInterest.getPropertyNames() != null) {
 				LinearLayout l = new LinearLayout(this);
 				l.setOrientation(LinearLayout.VERTICAL);
@@ -230,13 +243,27 @@ public class NearbyItemDetailActivity extends Activity implements
 	public void onLocationChanged(Location loc) {
 		// set the distance value
 		float distance = apLocation.distanceTo(loc);
-		int unitsIdx = 0;
-		if (distance > 1000) {
-			distance /= 1000;
-			unitsIdx = 1;
+		DecimalFormat df = new DecimalFormat("#.#");
+		String unit = "km";
+		float factor = 0.001f; // convert from meters to km
+		
+		//int unitsIdx = 0;
+		//if (distance > 1000) {
+		//	distance /= 1000;
+		//	unitsIdx = 1;
+		//}
+		//distanceField.setText(" " + distanceFormat.format(distance) + " "
+		//		+ units[unitsIdx]);
+		
+		if (distance < 1000.0) {
+			factor = 1.0f;
+			// TODO couple this to the units package used above
+			unit = "m";
+			df = new DecimalFormat("#");
 		}
-		distanceField.setText(" " + distanceFormat.format(distance) + " "
-				+ units[unitsIdx]);
+		distance=distance*factor;
+		distanceField.setText(" " + df.format(distance) + " " + unit);
+		
 		// only update the bearing and the corresponding image representation of
 		// it if it changed more than MIN_CHANGE degrees
 		// so we're not always manipulating the image

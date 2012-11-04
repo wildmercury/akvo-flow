@@ -168,9 +168,35 @@ public class PointOfInterest implements Serializable {
 		//if (latitude != null && longitude != null) {
 		//	builder.append(latitude).append(",").append(longitude);
 		//}
-		DecimalFormat df = new DecimalFormat("#");
+	
+		//if (distance!=null){
+		//	builder.append("distance: ").append(df.format(distance)).append("m");
+		//} else {
+		//	builder.append("distance: unknown") ;
+		//}
+		
+		int numProps = propertyNames.size();
+		for (int i = 0; i < numProps; i++){
+			if (propertyNames.get(i)=="Technology"){
+				builder.append("Technology:").append(propertyValues.get(i)).append("\n");
+			}
+		} 
+			
 		if (distance!=null){
-			builder.append("distance: ").append(df.format(distance)).append("m");
+			// default: no decimal point, km as unit
+			DecimalFormat df = new DecimalFormat("#.#");
+			String unit = "km";
+			Double factor = 0.001; // convert from meters to km
+			
+			// for distances smaller than 1 km, use meters as unit
+			if (distance < 1000.0) {
+				factor = 1.0;
+				unit = "m";
+				df = new DecimalFormat("#"); // only whole meters
+			} 
+		
+			double dist = distance * factor;
+			builder.append("distance: ").append(df.format(dist)).append(" ").append(unit);
 		} else {
 			builder.append("distance: unknown") ;
 		}
