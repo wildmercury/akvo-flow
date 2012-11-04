@@ -55,12 +55,18 @@ public class HomeMenuViewAdapter extends BaseAdapter {
 	private static final Integer[] postSurveyLabels = { R.string.reviewlabel,
 			R.string.settingslabel };
 	
-	private static final Integer[] optionalButtons = { R.drawable.plotting,
-			R.drawable.infoactivity, R.drawable.calc };
-	private static final Integer[] optionalLabels = { R.string.plottinglabel,
-			R.string.nearbylabel, R.string.waterflowcalclabel };
+	//private static final Integer[] optionalButtons = { R.drawable.plotting,
+	//		R.drawable.infoactivity, R.drawable.calc };
+	//private static final Integer[] optionalLabels = { R.string.plottinglabel,
+	//		R.string.nearbylabel, R.string.waterflowcalclabel };
 	
-	private static final String[] optionalOperations = {ConstantUtil.PLOT_OP,ConstantUtil.NEARBY_OP,ConstantUtil.WATERFLOW_CALC_OP};
+	//private static final String[] optionalOperations = {ConstantUtil.PLOT_OP,ConstantUtil.NEARBY_OP,
+	//		ConstantUtil.WATERFLOW_CALC_OP};
+	
+	// For now, remove area plotting and waterflowcalc
+	private static final Integer[] optionalButtons = { R.drawable.infoactivity };
+	private static final Integer[] optionalLabels = { R.string.nearbylabel };
+	private static final String[] optionalOperations = { ConstantUtil.NEARBY_OP };
 
 	// references to our buttons
 	private Integer[] buttonImages = new Integer[0];
