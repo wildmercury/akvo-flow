@@ -175,12 +175,16 @@ public class PointOfInterest implements Serializable {
 		//	builder.append("distance: unknown") ;
 		//}
 		
-		int numProps = propertyNames.size();
-		for (int i = 0; i < numProps; i++){
-			if (propertyNames.get(i)=="Technology"){
-				builder.append("Technology:").append(propertyValues.get(i)).append("\n");
-			}
-		} 
+		if (propertyNames!=null){
+			int numProps = propertyNames.size();
+			for (int i = 0; i < numProps; i++){
+				if (propertyNames.get(i).equals("Technology") || propertyNames.get(i).equals("techtype")){
+					if (propertyValues!=null){
+						builder.append("Technology:").append(propertyValues.get(i)).append("\n");
+					}
+				}
+			} 
+		}
 			
 		if (distance!=null){
 			// default: no decimal point, km as unit
