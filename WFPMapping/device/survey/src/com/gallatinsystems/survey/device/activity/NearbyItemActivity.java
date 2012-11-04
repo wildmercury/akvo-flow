@@ -265,7 +265,7 @@ public class NearbyItemActivity extends ListActivity implements
 					}
 				} else {
 					pointsOfInterest = databaseAdapter.listPointsOfInterest(
-							country, prefix, lat, lon, nearbyRadius);
+							country, prefix, lon, lat, nearbyRadius);
 				}
 				dataHandler.post(resultsUpdater);
 				additive = false;
