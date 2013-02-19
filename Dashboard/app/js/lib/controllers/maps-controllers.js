@@ -32,13 +32,13 @@ FLOW.placemarkDetailControl = Ember.ArrayController.create({
 });
 
 
-FLOW.countryControl = Ember.Object.create({
+FLOW.CountryControl = Ember.Object.extend({
   content: null,
   country: null,
-  
+
   init: function() {
     this._super();
-    if ( !Ember.none(FLOW.Env) && !Ember.none(FLOW.Env.countries) ) {
+    if ( !Ember.isNone(FLOW.Env) && !Ember.isNone(FLOW.Env.countries) ) {
       this.set('content', this.getContent(FLOW.Env.countries));
     }
   },
@@ -53,12 +53,12 @@ FLOW.countryControl = Ember.Object.create({
     });
 
     for (var i = 0; i < countries.length; i++) {
-      if ( !Ember.none(countries[i].centroidLat) && !Ember.none(countries[i].centroidLon) ) {
+      if ( !Ember.isNone(countries[i].centroidLat) && !Ember.isNone(countries[i].centroidLon) ) {
         var zoom = 7; // default zoom level
-        if (!Ember.none(countries[i].zoomLevel)) {
+        if (!Ember.isNone(countries[i].zoomLevel)) {
           zoom = countries[i].zoomLevel;
         }
-        
+
         countryList.push(
           Ember.Object.create({
             label: countries[i].name,
@@ -74,3 +74,5 @@ FLOW.countryControl = Ember.Object.create({
   }
 
 });
+
+FLOW.countryControl = FLOW.CountryControl.create();

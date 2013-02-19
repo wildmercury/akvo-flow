@@ -30,7 +30,7 @@ FLOW.SurveySidebarView = FLOW.View.extend({
 	},
 
 	isExistingSurvey: function() {
-		return !Ember.none(FLOW.selectedControl.selectedSurvey.get('keyId'));
+		return !Ember.isNone(FLOW.selectedControl.selectedSurvey.get('keyId'));
 	}.property('FLOW.selectedControl.selectedSurvey.keyId'),
 
 	setIsDirty: function() {
@@ -38,23 +38,23 @@ FLOW.SurveySidebarView = FLOW.View.extend({
 		survey = FLOW.selectedControl.get('selectedSurvey');
 		isDirty = this.get('surveyTitle') != survey.get('name');
 
-		if(!Ember.none(this.get('surveyDescription'))) {
+		if(!Ember.isNone(this.get('surveyDescription'))) {
 			isDirty = isDirty || this.get('surveyDescription') != survey.get('description');
 		} else {
 			// if we don't have one now, but we had one before, it has also changed
-			isDirty = isDirty || !Ember.none(survey.get('surveyDescription'));
+			isDirty = isDirty || !Ember.isNone(survey.get('surveyDescription'));
 		}
 
-		if(!Ember.none(this.get('surveyPointType'))) {
+		if(!Ember.isNone(this.get('surveyPointType'))) {
 			// if we have a surveyPointType, compare them
 			isDirty = isDirty || this.surveyPointType.get('value') != survey.get('pointType');
 		} else {
 			// if we don't have one now, but we had one before, it has also changed
 			// TODO - this breaks when the pointType is an old point Type
-			//isDirty = isDirty || !Ember.none(survey.get('pointType'));
+			//isDirty = isDirty || !Ember.isNone(survey.get('pointType'));
 		}
 
-		if(!Ember.none(this.get('language'))) {
+		if(!Ember.isNone(this.get('language'))) {
 			isDirty = isDirty || this.language.get('value') != survey.get('defaultLanguageCode');
 		} else {
 			isDirty = isDirty || !Ember.empty(survey.get('defaultLanguageCode'));
@@ -67,14 +67,14 @@ FLOW.SurveySidebarView = FLOW.View.extend({
 	}.property('FLOW.selectedControl.selectedSurvey.status'),
 
 	numberQuestions: function() {
-		if(Ember.none(FLOW.questionControl.get('filterContent'))) {
+		if(Ember.isNone(FLOW.questionControl.get('filterContent'))) {
 			return 0;
 		}
 		return FLOW.questionControl.filterContent.toArray().length;
 	}.property('FLOW.questionControl.filterContent.@each'),
 
 	numberQuestionGroups: function() {
-		if(Ember.none(FLOW.questionGroupControl.get('content'))) {
+		if(Ember.isNone(FLOW.questionGroupControl.get('content'))) {
 			return 0;
 		}
 		return FLOW.questionGroupControl.content.toArray().length;
@@ -110,7 +110,7 @@ FLOW.SurveySidebarView = FLOW.View.extend({
 		// check if survey has unsaved changes
 		survey = FLOW.store.find(FLOW.Survey, FLOW.selectedControl.selectedSurvey.get('keyId'));
 		this.setIsDirty();
-		if(!Ember.none(survey) && this.get('isDirty')) {
+		if(!Ember.isNone(survey) && this.get('isDirty')) {
 			FLOW.dialogControl.set('activeAction', "ignore");
 			FLOW.dialogControl.set('header', Ember.String.loc('_you_have_unsaved_changes'));
 			FLOW.dialogControl.set('message', Ember.String.loc('_before_publishing_'));
@@ -130,7 +130,7 @@ FLOW.SurveySidebarView = FLOW.View.extend({
 	doSurveysMain: function() {
 		var item;
 		// if the survey does not have a keyId, it has not been saved, so delete it.
-		if(Ember.none(FLOW.selectedControl.selectedSurvey.get('keyId'))) {
+		if(Ember.isNone(FLOW.selectedControl.selectedSurvey.get('keyId'))) {
 			item = FLOW.selectedControl.get('selectedSurvey');
 			item.deleteRecord();
 		}

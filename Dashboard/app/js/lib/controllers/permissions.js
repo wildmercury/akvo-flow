@@ -1,4 +1,4 @@
-FLOW.permControl = Ember.Controller.create({
+FLOW.PermControl = Ember.Controller.extend({
   perms: [],
 
   init: function() {
@@ -140,6 +140,7 @@ FLOW.permControl = Ember.Controller.create({
   }
 });
 
+FLOW.permControl = FLOW.PermControl.create();
 
 FLOW.dialogControl = Ember.Object.create({
   delSG: "delSG",

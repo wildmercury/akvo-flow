@@ -19,7 +19,7 @@ FLOW.deviceGroupControl = Ember.ArrayController.create({
   }
 });
 
-FLOW.deviceControl = Ember.ArrayController.create({
+FLOW.DeviceControl = Ember.ArrayController.extend({
   sortProperties: null,
   sortAscending: true,
   selected: null,
@@ -51,6 +51,7 @@ FLOW.deviceControl = Ember.ArrayController.create({
   }
 });
 
+FLOW.deviceControl = FLOW.DeviceControl.create();
 
 FLOW.devicesInGroupControl = Ember.ArrayController.create({
   content: null,

@@ -123,7 +123,7 @@ FLOW.SingleUserView = FLOW.View.extend({
       return item.value == this.content.get('permissionList');
     }, this);
 
-    if(!Ember.none(role)) {
+    if(!Ember.isNone(role)) {
       this.set('roleLabel', role.label);
       this.set('roleClass', Ember.String.camelize(role.label));
     }

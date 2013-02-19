@@ -128,7 +128,7 @@ FLOW.surveyGroupControl = Ember.ArrayController.create({
 
   // load all Survey Groups
   populate: function() {
-    FLOW.store.find(FLOW.SurveyGroup);
+    FLOW.SurveyGroup.find();
     this.setFilteredContent();
   },
 
@@ -143,7 +143,7 @@ FLOW.surveyGroupControl = Ember.ArrayController.create({
       }
     });
 
-    return(surveys.get('content').length > 0);
+    return surveys.get('content').length > 0;
   }
 });
 
@@ -201,7 +201,7 @@ FLOW.surveyControl = Ember.ArrayController.create({
 });
 
 
-FLOW.questionGroupControl = Ember.ArrayController.create({
+FLOW.QuestionGroupControl = Ember.ArrayController.extend({
   sortProperties: ['order'],
   sortAscending: true,
   content: null,
@@ -235,7 +235,7 @@ FLOW.questionGroupControl = Ember.ArrayController.create({
   // used in models.js
   allRecordsSaved: function() {
     var allSaved = true;
-    if(Ember.none(this.get('content'))) {
+    if(Ember.isNone(this.get('content'))) {
       return true;
     } else {
       this.get('content').forEach(function(item) {
@@ -248,8 +248,9 @@ FLOW.questionGroupControl = Ember.ArrayController.create({
   }.property('content.@each.isSaving')
 });
 
+FLOW.questionGroupControl = FLOW.QuestionGroupControl.create();
 
-FLOW.questionControl = Ember.ArrayController.create({
+FLOW.QuestionControl = Ember.ArrayController.extend({
   content: null,
   OPTIONcontent: null,
   earlierOptionQuestions: null,
@@ -311,7 +312,7 @@ FLOW.questionControl = Ember.ArrayController.create({
   // used for display of dependencies: a question can only be dependent on earlier questions
   setEarlierOptionQuestions: function() {
 
-    if(!Ember.none(FLOW.selectedControl.get('selectedQuestion')) && !Ember.none(FLOW.selectedControl.get('selectedQuestionGroup'))) {
+    if(!Ember.isNone(FLOW.selectedControl.get('selectedQuestion')) && !Ember.isNone(FLOW.selectedControl.get('selectedQuestionGroup'))) {
       var optionQuestionList, sId, questionGroupOrder, qgOrder, qg, questionOrder;
       sId = FLOW.selectedControl.selectedSurvey.get('keyId');
       questionGroupOrder = FLOW.selectedControl.selectedQuestionGroup.get('order');
@@ -344,6 +345,8 @@ FLOW.questionControl = Ember.ArrayController.create({
     return allSaved;
   }.property('content.@each.isSaving')
 });
+
+FLOW.questionControl = FLOW.QuestionControl.create();
 
 // TODO turn this into radio buttons
 FLOW.optionListControl = Ember.ArrayController.create({

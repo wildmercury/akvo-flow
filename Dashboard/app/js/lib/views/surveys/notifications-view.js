@@ -11,12 +11,12 @@ FLOW.NotificationsView = FLOW.View.extend({
   addNotification: function() {
     var date;
 
-    this.set('optionEmpty', Ember.none(this.get('notificationOption')));
-    this.set('typeEmpty', Ember.none(this.get('notificationType')));
-    this.set('destinationEmpty', Ember.none(this.get('notificationDestination')));
-    this.set('dateEmpty', Ember.none(this.get('expiryDate')));
+    this.set('optionEmpty', Ember.isNone(this.get('notificationOption')));
+    this.set('typeEmpty', Ember.isNone(this.get('notificationType')));
+    this.set('destinationEmpty', Ember.isNone(this.get('notificationDestination')));
+    this.set('dateEmpty', Ember.isNone(this.get('expiryDate')));
 
-    if(Ember.none(this.get('expiryDate'))) {
+    if(Ember.isNone(this.get('expiryDate'))) {
       date = null;
     } else {
       date = Date.parse(this.get('expiryDate'));

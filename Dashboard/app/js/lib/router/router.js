@@ -3,6 +3,32 @@
 // ***********************************************//
 require('akvo-flow/core');
 
+FLOW.Router.map(function () {
+  this.route('navUsers');
+  this.route('navMessages');
+});
+
+FLOW.IndexRoute = Ember.Route.extend({
+  redirect: function () {
+    this.transitionTo('navUsers');
+  }
+});
+
+FLOW.NavMessagesRoute = Ember.Route.extend({
+  setupController: function () {
+    FLOW.messageControl.populate();
+    FLOW.selectedControl.set('selectedSurveyGroup', null);
+    FLOW.selectedControl.set('selectedSurvey', null);
+  }
+});
+
+FLOW.NavUsersRoute = Ember.Route.extend({
+  setupController: function () {
+    FLOW.userControl.populate();
+  }
+});
+
+/*
 FLOW.Router = Ember.Router.extend({
   enableLogging: true,
   loggedIn: false,
@@ -159,7 +185,7 @@ FLOW.Router = Ember.Router.extend({
             router.get('navSurveysEditController').connectOutlet({
               name: 'editQuestions'
             });
-           
+
           }
         })
       })
@@ -382,3 +408,4 @@ FLOW.Router = Ember.Router.extend({
     })
   })
 });
+*/

@@ -50,7 +50,7 @@ FLOW.QuestionView = FLOW.View.extend({
 
 	amNoOptionsType: function() {
 		var val;
-		if(!Ember.none(this.type)) {
+		if(!Ember.isNone(this.type)) {
 			val = this.type.get('value');
 			return(val == 'GEO' || val == 'FREE_TEXT' || val == 'PHOTO' || val == 'VIDEO' || val == 'BARCODE');
 		}

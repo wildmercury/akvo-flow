@@ -73,7 +73,7 @@ FLOW.NavMapsView = Ember.View.extend({
 
     country = this.get('country');
     map = FLOW.placemarkControl.get('map');
-    if (!Ember.none(country)) {
+    if (!Ember.isNone(country)) {
       latLon = new mxn.LatLonPoint(country.get('lat'), country.get('lon'));
       map.getMap().clearOverlays();
       map.setCenterAndZoom(latLon, country.get('zoom'));
@@ -254,7 +254,7 @@ FLOW.NavMapsView = Ember.View.extend({
       marker.placemark.toggleMarker(marker.placemark);
 
       oldSelected = FLOW.placemarkControl.get('selected');
-      if(Ember.none(oldSelected)) {
+      if(Ember.isNone(oldSelected)) {
         FLOW.placemarkControl.set('selected', placemark);
       } else {
         if(this.marker === oldSelected.marker) {

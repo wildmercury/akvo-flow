@@ -1,11 +1,11 @@
 require('akvo-flow/templ');
-Ember.LOG_BINDINGS = false;
+Ember.LOG_BINDINGS = true;
 // Create the application
 window.FLOW = Ember.Application.create({
   VERSION: '0.0.1'
 });
 
-/* Generic FLOW view that also handles lanague rerenders*/
+/* Generic FLOW view that also handles language rerenders*/
 FLOW.View = Ember.View.extend({
   onLanguageChange: function() {
     this.rerender();

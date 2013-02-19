@@ -14,7 +14,7 @@ Ember.View.reopen({
         throw new Ember.Error(fmt('%@ - Unable to find %@ "%@".', [this, type, name]));
       }
     }
-
+    Ember.debug('templateForName: ' + name);
     return template;
   }
 });

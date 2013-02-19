@@ -1,4 +1,4 @@
-FLOW.dashboardLanguageControl = Ember.Object.create({
+FLOW.LanguageControl = Ember.Object.extend({
   dashboardLanguage: null,
 
   init: function() {
@@ -49,6 +49,7 @@ FLOW.dashboardLanguageControl = Ember.Object.create({
   }.observes('this.dashboardLanguage')
 });
 
+FLOW.dashboardLanguageControl = FLOW.LanguageControl.create();
 
 FLOW.selectedControl = Ember.Controller.create({
   selectedSurveyGroup: null,

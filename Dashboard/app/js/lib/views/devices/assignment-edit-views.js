@@ -20,7 +20,7 @@ FLOW.ArrNoDupe = function (a) {
 };
 
 FLOW.formatDate = function (value) {
-  if(!Ember.none(value)) {
+  if(!Ember.isNone(value)) {
     return value.getFullYear() + "/" + (value.getMonth() + 1) + "/" + value.getDate();
   } else return null;
 };
@@ -72,7 +72,7 @@ FLOW.AssignmentEditView = FLOW.View.extend({
   },
 
   detectChangeTab: function() {
-    if(Ember.none(FLOW.selectedControl.selectedSurveyAssignment.get('keyId'))) {
+    if(Ember.isNone(FLOW.selectedControl.selectedSurveyAssignment.get('keyId'))) {
       FLOW.selectedControl.get('selectedSurveyAssignment').deleteRecord();
     }
     FLOW.selectedControl.set('selectedSurveyAssignment', null);
@@ -85,13 +85,13 @@ FLOW.AssignmentEditView = FLOW.View.extend({
 
     sa.set('name', this.get('assignmentName'));
 
-    if(!Ember.none(FLOW.dateControl.get('toDate'))) {
+    if(!Ember.isNone(FLOW.dateControl.get('toDate'))) {
       endDateParse = Date.parse(FLOW.dateControl.get('toDate'));
     } else {
       endDateParse = null;
     }
 
-    if(!Ember.none(FLOW.dateControl.get('fromDate'))) {
+    if(!Ember.isNone(FLOW.dateControl.get('fromDate'))) {
       startDateParse = Date.parse(FLOW.dateControl.get('fromDate'));
     } else {
       startDateParse = null;
@@ -116,7 +116,7 @@ FLOW.AssignmentEditView = FLOW.View.extend({
   },
 
   cancelEditSurveyAssignment: function() {
-    if(Ember.none(FLOW.selectedControl.selectedSurveyAssignment.get('keyId'))) {
+    if(Ember.isNone(FLOW.selectedControl.selectedSurveyAssignment.get('keyId'))) {
       FLOW.selectedControl.get('selectedSurveyAssignment').deleteRecord();
     }
     FLOW.selectedControl.set('selectedSurveyAssignment', null);

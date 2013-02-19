@@ -26,7 +26,7 @@ FLOW.attributeControl = Ember.ArrayController.create({
   }
 });
 
-FLOW.surveyInstanceControl = Ember.ArrayController.create({
+FLOW.SurveyInstanceControl = Ember.ArrayController.extend({
   sortProperties: ['collectionDate'],
   sortAscending: false,
   selectedSurvey: null,
@@ -68,6 +68,7 @@ FLOW.surveyInstanceControl = Ember.ArrayController.create({
   }
 });
 
+FLOW.surveyInstanceControl = FLOW.SurveyInstanceControl.create();
 
 FLOW.questionAnswerControl = Ember.ArrayController.create({
   content: null,

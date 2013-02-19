@@ -1,6 +1,6 @@
 // this function is also present in assignment-edit-views.js, we need to consolidate using moment.js
 function formatDate(value) {
-  if(!Ember.none(value)) {
+  if(!Ember.isNone(value)) {
     return value.getFullYear() + "/" + (value.getMonth() + 1) + "/" + value.getDate();
   } else return null;
 }
@@ -58,7 +58,7 @@ doInit: function() {
       this.set('numberValue',this.content.get('value'));
     }
 
-    if(this.get('isDateType') && !Ember.none(this.content.get('value'))) {
+    if(this.get('isDateType') && !Ember.isNone(this.content.get('value'))) {
       date = new Date(parseInt(this.content.get('value'),10));
       this.set('date',formatDate(date));
     }
