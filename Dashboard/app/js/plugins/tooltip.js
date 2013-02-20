@@ -1,7 +1,7 @@
-this.tooltip = function(){
+function tooltip (){
 /* CONFIG */
-xOffset = 10;
-yOffset = 20;
+var xOffset = 10;
+var yOffset = 20;
 // these 2 variable determine popup's distance from the cursor
 // you might want to adjust to get the right result
 /* END CONFIG */
@@ -23,7 +23,8 @@ $("#tooltip")
 .css("top",(e.pageY - xOffset) + "px")
 .css("left",(e.pageX + yOffset) + "px");
 });
-};
+}
+
 // starting the script on page load
 $(document).ready(function(){
 tooltip();

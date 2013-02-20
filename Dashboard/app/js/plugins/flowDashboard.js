@@ -1,90 +1,96 @@
 // Akvo Flow DashBoard Interaction
 // loic@akvo.org
 
-this.tooltip = function () {
+ function tooltip () {
   /* CONFIG */
-  xOffset = 10;
-  yOffset = 20;
+  var xOffset = 10;
+  var yOffset = 20;
   // these 2 variable determine popup's distance from the cursor
   // you might want to adjust to get the right result
   /* END CONFIG */
-  var titleAttr = $("a.tooltip").attr("title");
-  $("a.tooltip").hover(function (e) {
+  var titleAttr = $('a.tooltip').attr('title');
+  $('a.tooltip').hover(function (e) {
     this.t = this.title;
-    $("body").append("<p id='tooltip'>" + this.t + "</p>");
-    $("#tooltip").css("top", (e.pageY - xOffset) + "px").css("left", (e.pageX + yOffset) + "px").fadeIn("fast");
-    this.title = "";
+    $('body').append('<p id="tooltip">' + this.t + '</p>');
+    $('#tooltip').css('top', (e.pageY - xOffset) + 'px').css('left', (e.pageX + yOffset) + 'px').fadeIn('fast');
+    this.title = '';
   },
 
   function () {
-    $("a.tooltip").attr("title", titleAttr);
-    $("#tooltip").remove();
+    $('a.tooltip').attr('title', titleAttr);
+    $('#tooltip').remove();
   });
-  $("a.tooltip").mousemove(function (e) {
-    $("#tooltip")
-      .css("top", (e.pageY - xOffset) + "px")
-      .css("left", (e.pageX + yOffset) + "px");
+  $('a.tooltip').mousemove(function (e) {
+    $('#tooltip')
+      .css('top', (e.pageY - xOffset) + 'px')
+      .css('left', (e.pageX + yOffset) + 'px');
   });
-};
+}
 
 $(document).ready(function () {
-  $("nav#topnav li.current").prev("nav#topnav li").css("background", "none");
-  $("nav#topnav li").hover(function () {
-    $(this).prev().css("background", "none");
+
+  var nCount = 0, nQ = 0;
+
+  $('nav#topnav li.current').prev('nav#topnav li').css('background', 'none');
+
+  $('nav#topnav li').hover(function () {
+    $(this).prev().css('background', 'none');
   });
+
   // Adds needed classes to survey assets as nth-child selectors don't work in ie.
   $('li.aSurvey:nth-child(4n+1)').addClass('firstOfRow');
   $('li.aSurvey:nth-child(4n)').addClass('endOfRow');
   $('table#devicesListTable tbody tr:nth-child(2n)').addClass('even');
 
-  $(".questionSetContent div.innerContent").hide();
-  var nCount = 0;
-  $(".addQuestion").click(function () {
-    nCount++;
-    $(".questionSetContent div.innerContent").fadeIn().css("box-shadow", "0 0 3px rgba(0,0,0,0.1)");
-    $(this).insertAfter("div.innerContent");
-    $("#numberQuestion").text(
+  $('.questionSetContent div.innerContent').hide();
 
-    function () {
+  $('.addQuestion').click(function () {
+    nCount++;
+    $('.questionSetContent div.innerContent').fadeIn().css('box-shadow', '0 0 3px rgba(0,0,0,0.1)');
+
+    $(this).insertAfter('div.innerContent');
+
+    $('#numberQuestion').text(function () {
       if (nCount < 10) {
-        $(this).text("0" + nCount);
+        $(this).text('0' + nCount);
       } else {
         $(this).text(nCount);
       }
     });
-    var nQ = parseInt($("#numberQuestion").text());
-    $("h1.questionNbr span").text(
 
-    function () {
+    nQ = parseInt($('#numberQuestion').text(), 10);
+
+    $('h1.questionNbr span').text(function () {
       if (nQ < 10) {
-        $(this).text("0" + nQ);
+        $(this).text('0' + nQ);
       } else {
         $(this).text(nQ);
       }
     });
+
   });
 
   // Function displaying the options depending on question type
   $('.formElems').hide();
   // listener for QR type
-  $("#questionType").change(function () {
-    var selected = $("#questionType option:selected").val();
+  $('#questionType').change(function () {
+    var selected = $('#questionType option:selected').val();
     $('.formElems').hide();
-    $("." + selected).show();
+    $('.' + selected).show();
   });
 
   // Function displaying the survey groups.
-  $("#main > section.surveysList").hide();
-  $("#main > section#allSurvey").show();
-  $(".menuGroup li a").click(
+  $('#main > section.surveysList').hide();
+  $('#main > section#allSurvey').show();
 
-  function () {
-    $(".menuGroup li a").removeClass("current");
-    $(this).addClass("current");
+  $('.menuGroup li a').click(function () {
+    $('.menuGroup li a').removeClass('current');
+    $(this).addClass('current');
     var sectionname = this.name;
-    $("#main > section.surveysList").hide();
-    $("#" + sectionname).show();
+    $('#main > section.surveysList').hide();
+    $('#' + sectionname).show();
   });
+
   $('#tabs > section').hide();
   $('#tabs > section:first').show();
   $('#tabs ul li:first').addClass('active');
@@ -96,49 +102,53 @@ $(document).ready(function () {
     $(currentTab).show();
     return false;
   });
-  $("#from").datepicker({
-    defaultDate: "+1w",
-    numberOfMonths: 1,
-    onSelect: function (selectedDate) {
-      $("#to").datepicker("option", "minDate", selectedDate);
-    }
-  });
-  $("#to").datepicker({
-    defaultDate: "+1w",
-    numberOfMonths: 1,
-    onSelect: function (selectedDate) {
-      $("#from").datepicker("option", "maxDate", selectedDate);
-    }
-  });
-  $('.dataTable').dataTable({
-    "aaSorting": [
-      [1, "desc"]
-    ],
-    "sScrollX": "100%",
-    "sScrollXInner": "120%",
-    "bScrollCollapse": true
 
+  $('#from').datepicker({
+    defaultDate: '+1w',
+    numberOfMonths: 1,
+    onSelect: function (selectedDate) {
+      $('#to').datepicker('option', 'minDate', selectedDate);
+    }
   });
-  $(".dataTables_paginate").addClass("floats-in");
-  $(".dataTables_filter label > input").removeAttr("type").attr("type", "search");
+
+  $('#to').datepicker({
+    defaultDate: '+1w',
+    numberOfMonths: 1,
+    onSelect: function (selectedDate) {
+      $('#from').datepicker('option', 'maxDate', selectedDate);
+    }
+  });
+
+  $('.dataTable').dataTable({
+    aaSorting: [[1, 'desc']],
+    sScrollX: '100%',
+    sScrollXInner: '120%',
+    bScrollCollapse: true
+  });
+
+  $('.dataTables_paginate').addClass('floats-in');
+  $('.dataTables_filter label > input').removeAttr('type').attr('type', 'search');
 
   tooltip();
 
+  // hide #back-top first
+  $('#back-top').hide(); // fade in #back-top
 
-     // hide #back-top first
-    $("#back-top").hide();   // fade in #back-top
-    $(function () {    $(window).scroll(function () {      
-      if ($(this).scrollTop() > 100) {        $('#back-top').fadeIn();      
-      } else {        $('#back-top').fadeOut();      
-      }    
-    });
+  $(function () {
+    $(window).scroll(function () {
+      if ($(this).scrollTop() > 100) {
+        $('#back-top').fadeIn();
+      } else {
+        $('#back-top').fadeOut();
+      }
+	});
 
-         // scroll body to 0px on click
-        $('#back-top a').click(function () {      $('body,html').animate({        scrollTop: 0      
-      }, 6000);      
-      return false;    
-    });  
-  });
-
-
+    // scroll body to 0px on click
+    $('#back-top a').click(function () {
+      $('body,html').animate({
+        scrollTop: 0
+        }, 6000);
+        return false;
+      });
+	});
 });
