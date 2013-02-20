@@ -368,7 +368,7 @@ FLOW.notificationControl = Ember.ArrayController.create({
   sortAscending: true,
 
   populate: function() {
-    console.log('populate');
+    Ember.debug('populate');
     var id;
     if(FLOW.selectedControl.get('selectedSurvey')) {
       id = FLOW.selectedControl.selectedSurvey.get('keyId');

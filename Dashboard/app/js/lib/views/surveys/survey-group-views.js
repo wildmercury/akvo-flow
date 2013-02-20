@@ -47,7 +47,7 @@ FLOW.SurveyGroupSurveyView = FLOW.View.extend({
 
 	// fired when 'inspect data' is clicked in the survey item display
 	inspectData: function() {
-		console.log("TODO inspect Data");
+		Ember.debug("TODO inspect Data");
 	},
 
 	copySurvey: function() {

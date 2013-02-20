@@ -74,7 +74,7 @@ FLOW.selectedControl = Ember.Controller.create({
   radioOptions: "",
 
   // OptionQuestions:function (){
-  //   console.log('optionquestions 1');
+  //   Ember.debug('optionquestions 1');
   // }.observes('this.selectedSurveyOPTIONQuestions'),
 
   // when selected survey changes, deselect selected surveys and question groups

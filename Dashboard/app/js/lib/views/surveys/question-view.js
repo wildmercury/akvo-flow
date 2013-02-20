@@ -319,10 +319,10 @@ FLOW.QuestionView = FLOW.View.extend({
 	},
 
 	doAddAttribute: function() {
-		console.log('doing attribute save');
-		console.log(this.get('newAttributeName'));
+		Ember.debug('doing attribute save');
+		Ember.debug(this.get('newAttributeName'));
 		if((this.get('newAttributeName') !== null) && (this.get('newAttributeType') !== null)) {
-			console.log('inside');
+			Ember.debug('inside');
 			FLOW.store.createRecord(FLOW.Metric, {
 				"name": this.get('newAttributeName'),
 				"group": this.get('newAttributeGroup'),
