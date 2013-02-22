@@ -10,13 +10,13 @@
       <thead>
         <tr>
            {{#view FLOW.ColumnView item="userName" type="user"}}
-                  <a {{action "sort" target="this"}} class="userName">{{t _user_name}}</a>
+                  <a {{action "sort" view.item}} class="userName">{{t _user_name}}</a>
            {{/view}}
            {{#view FLOW.ColumnView item="emailAddress" type="user"}}
-                  <a {{action "sort" target="this"}} class="emailAdr">{{t _email}}</a>
+                  <a {{action "sort" view.item}} class="emailAdr">{{t _email}}</a>
            {{/view}}
             {{#view FLOW.ColumnView item="permissionList" type="user"}}
-                  <a {{action "sort" target="this"}} class="emailAdr">{{t _permission_level}}</a>
+                  <a {{action "sort" view.item}} class="emailAdr">{{t _permission_level}}</a>
                   {{tooltip _there_are_three_permission_levels}}
            {{/view}}
           <th class="action noArrows" >{{t _actions}}</th>
@@ -24,7 +24,7 @@
       </thead>
       <!-- TABLE BODY: MAIN CONTENT-->
       <tbody>
-        {{#each user in content}}
+        {{#each user in arrangedContent}}
         
           <tr>
             <td class="userName" style="text-align:left; padding:0 0 0 20px;">{{user.userName}}</td>

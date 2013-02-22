@@ -41,6 +41,15 @@ FLOW.NavUsersController = Ember.ArrayController.extend({
   currentTransaction: null,
 
 
+  sort: function (column) {
+    if (this.get('sortProperties')[0] === column) {
+      this.set('sortAscending', !this.get('sortAscending'));
+    } else {
+      this.set('sortAscending', true);
+      this.set('sortProperties', [column]);
+    }
+  },
+
   showAddUserDialog: function () {
     this.newUser();
     this.set('showAddUserBool', true);
