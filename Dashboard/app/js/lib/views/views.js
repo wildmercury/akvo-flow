@@ -5,6 +5,7 @@
 
 
 require('akvo-flow/core');
+require('akvo-flow/views/common/dialog');
 require('akvo-flow/views/surveys/preview-view');
 require('akvo-flow/views/surveys/notifications-view');
 require('akvo-flow/views/surveys/survey-group-views');

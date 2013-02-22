@@ -3,7 +3,7 @@
 <div class="greyBg">
   <section id="" class="fullWidth usersList"> 
 	<h1>{{t _manage_users_and_user_rights}}</h1>
- <a {{action "showAddUserDialog" target="this"}}class="standardBtn btnAboveTable" >{{t _add_new_user}}</a>
+ <a {{action showAddUserDialog}}class="standardBtn btnAboveTable" >{{t _add_new_user}}</a>
     <!-- userS TABLE-->
     <table id="usersListTable" class="dataTable" >
       <!-- TABLE HEADER-->
@@ -24,7 +24,7 @@
       </thead>
       <!-- TABLE BODY: MAIN CONTENT-->
       <tbody>
-        {{#each user in FLOW.userControl}}
+        {{#each user in content}}
         
           <tr>
             <td class="userName" style="text-align:left; padding:0 0 0 20px;">{{user.userName}}</td>
@@ -32,7 +32,7 @@
             {{#view FLOW.SingleUserView contentBinding="user"}}
               <span {{bindAttr class="view.roleClass"}}>{{view.roleLabel}}</span>
              {{/view}}
-            <td class="action"> <a {{action showEditUserDialog}} class="edit">{{t _edit}}</a> {{#view FLOW.UserView contentBinding="user"}}<a {{action confirm FLOW.dialogControl.delUser target="FLOW.dialogControl"}} class="remove">{{t _remove}}</a>{{/view}}
+            <td class="action"> <a {{action showEditUserDialog user}} class="edit">{{t _edit}}</a> {{#view FLOW.UserView contentBinding="user"}}<a {{action confirmDeleteUser user}} class="remove">{{t _remove}}</a>{{/view}}
         
             </td>
           </tr>
@@ -51,7 +51,7 @@
 </div>
 
    <!-- new user dialog-->
-    <div {{bindAttr class="view.showAddUserBool:display :overlay"}}>
+    <div {{bindAttr class="showAddUserBool:display :overlay"}}>
       <div class="blanket"></div>
           <div class="dialogWrap">
         <!-- the dialog contents -->
@@ -59,21 +59,21 @@
           <h2>{{t _add_new_user}}</h2>
           <p class="dialogMsg">{{t _please_provide_a_user_name_}}.</p>
           
-          <label for="newUserName">{{t _username}}:</label> {{view Ember.TextField valueBinding="FLOW.editControl.newUserName" id="newUserName" size=40}}<br/>
-           <label for="newEmail">{{t _email_address}}:</label> {{view Ember.TextField valueBinding="FLOW.editControl.newEmailAddress" id="newEmail" size=40}}<br/>
+          <label for="newUserName">{{t _username}}:</label> {{view Ember.TextField valueBinding="currentUser.userName" id="newUserName" size=40}}<br/>
+           <label for="newEmail">{{t _email_address}}:</label> {{view Ember.TextField valueBinding="currentUser.emailAddress" id="newEmail" size=40}}<br/>
           
             {{view Ember.Select 
-            contentBinding="FLOW.permissionLevelControl.content" 
-            selectionBinding="FLOW.editControl.newPermissionLevel" 
-            optionLabelPath="content.label" 
+            contentBinding="FLOW.permissionLevelControl"
+            optionLabelPath="content.label"
             optionValuePath="content.value"
+            valueBinding="currentUser.permissionList"
             prompt=""
             promptBinding="Ember.STRINGS._select_permission_level"}}
  
           <div class="buttons menuCentre"> 
             <ul>  
-               <li><a {{action "doAddUser" target="this"}} class="ok smallBtn">{{t _save}}</a></li>
-              <li><a {{action "cancelAddUser" target="this"}}} class="cancel">{{t _cancel}}</a></li>
+               <li><a {{action doAddUser}} class="ok smallBtn">{{t _save}}</a></li>
+              <li><a {{action cancelAddUser}}} class="cancel">{{t _cancel}}</a></li>
             </ul>
           </div>
         </div>
@@ -81,32 +81,38 @@
     </div>
 
       <!-- edit existing user dialog-->
-    <div {{bindAttr class="view.showEditUserBool:display :overlay"}}>
+    <div {{bindAttr class="showEditUserBool:display :overlay"}}>
       <div class="blanket"></div>
           <div class="dialogWrap">
         <!-- the dialog contents -->
         <div class="confirmDialog dialog">
           <h2>{{t _edit_user}}</h2>
           <p class="dialogMsg">{{t _please_edit_the_username_}}.</p>
-          <label for="editUserName">{{t _username}}:</label> {{view Ember.TextField valueBinding="FLOW.editControl.editUserName" id="editUserName" size=40}}<br/>
-           <label for="editEmail">{{t _email_address}}:</label> {{view Ember.TextField valueBinding="FLOW.editControl.editEmailAddress" id="editEmail" size=40}}<br/>
+          <label for="editUserName">{{t _username}}:</label> {{view Ember.TextField valueBinding="currentUser.userName" id="editUserName" size=40}}<br/>
+           <label for="editEmail">{{t _email_address}}:</label> {{view Ember.TextField valueBinding="currentUser.emailAddress" id="editEmail" size=40}}<br/>
           
             {{view Ember.Select 
-            contentBinding="FLOW.permissionLevelControl.content" 
-            selectionBinding="FLOW.editControl.editPermissionLevel" 
-            optionLabelPath="content.label" 
+            contentBinding="FLOW.permissionLevelControl"
             optionValuePath="content.value"
+            optionLabelPath="content.label"
+            valueBinding="currentUser.permissionList"
             prompt=""
             promptBinding="Ember.STRINGS._select_permission_level"}}
  
           <div class="buttons menuCentre"> 
             <ul>  
-               <li><a {{action "doEditUser" target="this"}} class="ok smallBtn">{{t _save}}</a></li>
-              <li><a {{action "cancelEditUser" target="this"}}} class="cancel">{{t _cancel}}</a></li>
+               <li><a {{action doEditUser}} class="ok smallBtn">{{t _save}}</a></li>
+              <li><a {{action cancelEditUser}}} class="cancel">{{t _cancel}}</a></li>
             </ul>
           </div>
         </div>
       </div>
     </div>
+
+    {{view FLOW.Dialog
+           showBinding="controller.showDeleteUserBool"
+           headerBinding="Ember.STRINGS._manage_users_and_user_rights"
+           messageBinding="Ember.STRINGS._are_you_sure_you_want_to_delete_this_user"
+           doOK="doDeleteUser"}}
 
 {{/view}}

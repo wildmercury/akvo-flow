@@ -1,0 +1,17 @@
+<div {{bindAttr class="view.show:display :overlay"}}>
+  <div class="blanket"></div>
+    <div class="dialogWrap">
+      <!-- the dialog contents -->
+      <div class="confirmDialog dialog">
+        <h2>{{view.header}}</h2>
+        <p class="dialogMsg">{{view.message}}</p>
+        <br/><br/>
+      <div class="buttons menuCentre"> 
+        <ul>  
+          {{#if view.showOK}} <li><a {{action _doOK target="view"}} class="ok smallBtn">{{t _ok}}</a></li>{{/if}}
+          {{#if view.showCancel}} <li><a {{action _doCancel target="view"}}} class="cancel">{{t _cancel}}</a></li>{{/if}}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

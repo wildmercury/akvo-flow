@@ -23,10 +23,88 @@ FLOW.NavMessagesRoute = Ember.Route.extend({
 });
 
 FLOW.NavUsersRoute = Ember.Route.extend({
-  setupController: function () {
-    FLOW.userControl.populate();
+  setupController: function (controller) {
+    controller.set('content', FLOW.User.find());
   }
 });
+
+//TODO: Move this controller to the proper file
+FLOW.NavUsersController = Ember.ArrayController.extend({
+  sortProperties: ['userName'],
+  sortAscending: true,
+
+  showAddUserBool: false,
+  showEditUserBool: false,
+  showDeleteUserBool: false,
+
+  currentUser: null,
+  currentTransaction: null,
+
+
+  showAddUserDialog: function () {
+    this.newUser();
+    this.set('showAddUserBool', true);
+  },
+
+  doAddUser: function () {
+    this.commitUser();
+    this.set('showAddUserBool', false);
+  },
+
+  cancelAddUser: function () {
+    this.rollbackUser();
+    this.set('showAddUserBool', false);
+  },
+
+  newUser: function () {
+    var tr = FLOW.store.transaction(),
+        usr = tr.createRecord(FLOW.User, {});
+
+    this.set('currentTransaction', tr);
+    this.set('currentUser', usr);
+  },
+
+  rollbackUser: function () {
+    this.get('currentTransaction').rollback();
+    this.set('currentTransaction', null);
+    this.set('currentUser', null);
+  },
+
+  commitUser: function () {
+    this.get('currentTransaction').commit();
+    this.set('currentTransaction', null);
+    this.set('currentUser', null);
+  },
+
+  showEditUserDialog: function (user) {
+    this.set('currentUser', user);
+    this.set('showEditUserBool', true);
+  },
+
+  doEditUser: function () {
+    FLOW.store.commit();
+    this.set('currentUser', null);
+    this.set('showEditUserBool', false);
+  },
+
+  cancelEditUser: function () {
+    this.set('currentUser', null);
+    this.set('showEditUserBool', false);
+  },
+
+  confirmDeleteUser: function (user) {
+    this.set('currentUser', user);
+    this.set('showDeleteUserBool', true);
+  },
+
+  doDeleteUser: function () {
+    this.get('currentUser').deleteRecord();
+    FLOW.store.commit();
+    this.set('currentUser', null);
+    this.set('showDeleteUserBool', false);
+  }
+});
+
 
 /*
 FLOW.Router = Ember.Router.extend({

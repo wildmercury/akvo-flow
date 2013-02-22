@@ -306,7 +306,7 @@ FLOW.User = FLOW.BaseModel.extend({
   superAdmin: DS.attr('boolean', {
     defaultValue: 0
   }),
-  permissionList: DS.attr('string')
+  permissionList: DS.attr('string', {defaultValue: null})
 });
 
 FLOW.UserConfig = FLOW.BaseModel.extend({
