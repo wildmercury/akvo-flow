@@ -1,0 +1,48 @@
+<header class="floats-in top" id="header" role="banner">
+  <div>
+    <hgroup>
+      <h1>Akvo <abbr title="field level operations watch">Flow</abbr></h1>
+    </hgroup>
+    <nav id="topnav" role="navigation">
+      {{!view FLOW.NavigationView controllerBinding="controller.controllers.navigationController"}}
+    </nav>
+    {{!view FLOW.LanguageView}}
+    {{!view FLOW.LanguageView controllerBinding="FLOW.LanguageController"}}
+  </div>
+</header>
+
+<div id="pageWrap">
+  {{outlet}}
+</div>
+
+<footer class="floats-in bottomPage" role="contentinfo">
+  <div>
+    <nav id="footerNav" class="floats-in">
+      <ul>
+        <li>
+          <a href="http://www.akvo.org/blog/?cat=30" title="Go to News and Software Updates" 
+            target="_blank"> {{t _news_and_software_updates}}</a>
+        </li>
+        <li>
+          <a href="http://flowhelp.akvo.org" title="Support"
+            target="_blank" > {{t _support}}</a>
+        </li>
+        <li>
+          <a href="http://flow.readthedocs.org/en/latest/index.html" title="Documentation and User Guides"
+            target="_blank" >{{t _documentation_and_user_guides}}</a>
+        </li>
+        <li>
+          <a href="http://www.akvo.org/web/terms_of_use " title="Terms of Service" 
+            target="_blank" >{{t _terms_of_service}}</a>
+        </li>
+        <li>
+          <a href="http://www.akvo.org" title="akvo.org" target="_blank" 
+            class="akvoDotOrg">akvo.org</a>
+          </li>
+        </ul>
+      </nav>  
+    </div>
+  <div>
+    <small>{{t _copyright}} &copy; 2013 akvo.org</small>
+  </div>
+</footer>

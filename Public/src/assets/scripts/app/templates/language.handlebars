@@ -1,0 +1,17 @@
+<form>
+  <label class="languageSelector">
+    <span class="labelText">{{t _dashboard_language}}:</span>
+    {{view Ember.Select
+      contentBinding="controller.content" 
+      optionLabelPath="controller.content.label" 
+      optionValuePath="controller.content.value" 
+      selectionBinding="controller.language"
+    }}
+    {{!view Ember.Select
+      contentBinding="FLOW.LanguageController.content" 
+      optionLabelPath="content.label" 
+      optionValuePath="content.value" 
+      selectionBinding="FLOW.LanguageController.language"
+    }}
+   </label>
+</form>

@@ -1,7 +1,7 @@
 /*jshint browser:true, jquery:true, laxbreak:true */
 /*global Ember, mxn, FLOW*/
 /**
-  View that handles map page.
+  View that handles map page.  mmmmmc
   Definition:
     "placemark" is an FLOW object that represents a single survey point.
     "marker" is a map object that is rendered as a pin. Each marker have
