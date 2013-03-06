@@ -6,13 +6,14 @@
     <nav id="topnav" role="navigation">
       {{!view FLOW.NavigationView controllerBinding="controller.controllers.navigationController"}}
     </nav>
+    {{outlet language}}
     {{!view FLOW.LanguageView}}
     {{!view FLOW.LanguageView controllerBinding="FLOW.LanguageController"}}
   </div>
 </header>
 
 <div id="pageWrap">
-  {{outlet}}
+  {{outlet main}}
 </div>
 
 <footer class="floats-in bottomPage" role="contentinfo">

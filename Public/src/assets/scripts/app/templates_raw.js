@@ -1,15 +1,20 @@
 Ember.TEMPLATES["application"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [2,'>= 1.0.0-rc.3'];
 helpers = helpers || Ember.Handlebars.helpers; data = data || {};
-  var buffer = '', stack1, hashTypes, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+  var buffer = '', stack1, hashTypes, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
   data.buffer.push("<header class=\"floats-in top\" id=\"header\" role=\"banner\">\n  <div>\n    <hgroup>\n      <h1>Akvo <abbr title=\"field level operations watch\">Flow</abbr></h1>\n    </hgroup>\n    <nav id=\"topnav\" role=\"navigation\">\n      ");
   data.buffer.push("\n    </nav>\n    ");
+  hashTypes = {};
+  options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.outlet),stack1 ? stack1.call(depth0, "language", options) : helperMissing.call(depth0, "outlet", "language", options))));
+  data.buffer.push("\n    ");
   data.buffer.push("\n    ");
   data.buffer.push("\n  </div>\n</header>\n\n<div id=\"pageWrap\">\n  ");
   hashTypes = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "outlet", {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
+  options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.outlet),stack1 ? stack1.call(depth0, "main", options) : helperMissing.call(depth0, "outlet", "main", options))));
   data.buffer.push("\n</div>\n\n<footer class=\"floats-in bottomPage\" role=\"contentinfo\">\n  <div>\n    <nav id=\"footerNav\" class=\"floats-in\">\n      <ul>\n        <li>\n          <a href=\"http://www.akvo.org/blog/?cat=30\" title=\"Go to News and Software Updates\" \n            target=\"_blank\"> ");
   hashTypes = {};
   options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
@@ -41,7 +46,7 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
   var buffer = '', hashTypes, escapeExpression=this.escapeExpression;
 
 
-  data.buffer.push("<p>\n  In ");
+  data.buffer.push("<p>\n  I'm in ");
   hashTypes = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "variable", {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
   data.buffer.push(".<br>\n</p>");
@@ -62,12 +67,11 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
   data.buffer.push(":</span>\n    ");
   hashTypes = {'contentBinding': "STRING",'optionLabelPath': "STRING",'optionValuePath': "STRING",'selectionBinding': "STRING"};
   data.buffer.push(escapeExpression(helpers.view.call(depth0, "Ember.Select", {hash:{
-    'contentBinding': ("controller.content"),
-    'optionLabelPath': ("controller.content.label"),
-    'optionValuePath': ("controller.content.value"),
-    'selectionBinding': ("controller.language")
+    'contentBinding': ("content"),
+    'optionLabelPath': ("content.label"),
+    'optionValuePath': ("content.value"),
+    'selectionBinding': ("language")
   },contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
-  data.buffer.push("\n    ");
   data.buffer.push("\n   </label>\n</form>");
   return buffer;
   

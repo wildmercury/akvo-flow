@@ -15,11 +15,16 @@
         this.route('index', {path: '/'});
       });
 
-      // FLOW.IndexRoute = Ember.Route.extend({
-      //   // setupController: function (controller) {
-      //   //   controller.set('name', "In the IndexRoute");
-      //   // }
-      // });
+      FLOW.IndexRoute = Ember.Route.extend({
+        setupController: function (controller) {
+          controller.set('variable', 'index template');
+        },
+
+        renderTemplate: function(controller, model) {
+          this.render('language', {outlet: 'language'});
+          this.render('index', {outlet: 'main'});
+        }
+      });
     }
   );
 })();

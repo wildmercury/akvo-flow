@@ -29114,11 +29114,68 @@ define("ember", function(){});
 (function() {
   
 
+  define('app/controllers/controllers', [
+    'app/controllers/index'
+    // 'app/controllers/language'
+    ],
+    function() {
+      console.log('Loading controllers');
+    }
+  );
+})();
+/*jshint browser:true, jquery:true */
+/*global Ember, define */
+
+(function() {
+  
+
+  define('app/views/application', [
+    'app',
+    'app/views/views'
+    // 'ember'
+    ],
+    function(FLOW) {
+
+      // FLOW.ApplicationView = FLOW.View.extend({
+      FLOW.ApplicationView = Ember.View.extend({
+
+        init: function() {
+          var locale;
+
+          this._super();
+
+          // If available set language from local storage
+          locale = localStorage.locale;
+          if(typeof locale === 'undefined') {
+            locale = 'en';
+          }
+          switch(locale) {
+          case 'fr':
+            Ember.STRINGS = Ember.STRINGS_FR;
+            break;
+          case 'es':
+            Ember.STRINGS = Ember.STRINGS_ES;
+            break;
+          default:
+            Ember.STRINGS = Ember.STRINGS_EN;
+            break;
+          }
+        }
+
+      });
+    }
+  );
+})();
+/*jshint browser:true, jquery:true */
+/*global Ember, define */
+
+(function() {
+  
+
   define('app/controllers/language', [
     'app'
     ],
     function(FLOW) {
-      console.log('Loading LanguageController');
 
       FLOW.LanguageController = Ember.ObjectController.extend({
         language: null,
@@ -29126,9 +29183,8 @@ define("ember", function(){});
         init: function () {
           var locale;
 
-          console.log('Loading LanguageController 2a');
+          console.log('Loading LanguageController');
           this._super();
-          console.log('Loading LanguageController 2b');
           locale = localStorage.locale;
           if(typeof locale === 'undefined') {
             this.set('language', this.content.findProperty('value', 'en'));
@@ -29155,6 +29211,8 @@ define("ember", function(){});
           locale = this.language.get("value");
           localStorage.locale = this.get('language.value');
 
+          console.log('language swap');
+
           if (locale === 'fr') {
             Ember.set('Ember.STRINGS', Ember.STRINGS_FR);
           } else if (locale === 'es') {
@@ -29162,63 +29220,10 @@ define("ember", function(){});
           } else {
             Ember.set('Ember.STRINGS', Ember.STRINGS_EN);
           }
+
         }.observes('this.language')
       });
-
-    }
-  );
-})();
-/*jshint browser:true, jquery:true */
-/*global Ember, define */
-
-(function() {
-  
-
-  define('app/controllers/controllers', [
-    'app/controllers/index',
-    'app/controllers/language'
-    ],
-    function() {
-      console.log('Loading controllers');
-    }
-  );
-})();
-/*jshint browser:true, jquery:true */
-/*global Ember, define */
-
-(function() {
-  
-
-  define('app/views/application', [
-    'app'
-    // 'ember'
-    ],
-    function(FLOW) {
-      FLOW.ApplicationView = Ember.View.extend({
-
-        init: function() {
-          var locale;
-
-          this._super();
-
-          // If available set language from local storage
-          locale = localStorage.locale;
-          if(typeof locale === 'undefined') {
-            locale = 'en';
-          }
-          switch(locale) {
-          case 'fr':
-            Ember.STRINGS = Ember.STRINGS_FR;
-            break;
-          case 'es':
-            Ember.STRINGS = Ember.STRINGS_ES;
-            break;
-          default:
-            Ember.STRINGS = Ember.STRINGS_EN;
-            break;
-          }
-        }
-      });
+      // return FLOW.LanguageController;
     }
   );
 })();
@@ -29231,22 +29236,21 @@ define("ember", function(){});
   define('app/views/language', [
     'app',
     'ember',
+    'app/controllers/language',
     'app/hbs_helpers'
     ],
     function(FLOW) {
-      FLOW.LanguageView = Ember.View.extend({
-        templateName: 'language',
 
-        init: function () {
-          this._super();
-          console.log('Loading LanguageView');
-        },
+      // FLOW.LanguageView = Ember.View.extend({
+      //   templateName: 'language',
 
-        onLanguageChange: function() {
-          console.log('Time to rerender');
-          // this.rerender();
-        }.observes('FLOW.LanguageController.language')
-      });
+      //   init: function () {
+      //     this._super();
+      //     console.log('Loading LanguageView');
+      //   }
+
+      // });
+      // return FLOW.LanguageView;
     }
   );
 })();
@@ -29282,11 +29286,16 @@ define("ember", function(){});
         this.route('index', {path: '/'});
       });
 
-      // FLOW.IndexRoute = Ember.Route.extend({
-      //   // setupController: function (controller) {
-      //   //   controller.set('name', "In the IndexRoute");
-      //   // }
-      // });
+      FLOW.IndexRoute = Ember.Route.extend({
+        setupController: function (controller) {
+          controller.set('variable', 'index template');
+        },
+
+        renderTemplate: function(controller, model) {
+          this.render('language', {outlet: 'language'});
+          this.render('index', {outlet: 'main'});
+        }
+      });
     }
   );
 })();
@@ -29294,15 +29303,20 @@ define('app/templates', ['jquery', 'handlebars', 'ember'], function() {
 Ember.TEMPLATES["application"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [2,'>= 1.0.0-rc.3'];
 helpers = helpers || Ember.Handlebars.helpers; data = data || {};
-  var buffer = '', stack1, hashTypes, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing;
+  var buffer = '', stack1, hashTypes, options, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression;
 
 
   data.buffer.push("<header class=\"floats-in top\" id=\"header\" role=\"banner\">\n  <div>\n    <hgroup>\n      <h1>Akvo <abbr title=\"field level operations watch\">Flow</abbr></h1>\n    </hgroup>\n    <nav id=\"topnav\" role=\"navigation\">\n      ");
   data.buffer.push("\n    </nav>\n    ");
+  hashTypes = {};
+  options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.outlet),stack1 ? stack1.call(depth0, "language", options) : helperMissing.call(depth0, "outlet", "language", options))));
+  data.buffer.push("\n    ");
   data.buffer.push("\n    ");
   data.buffer.push("\n  </div>\n</header>\n\n<div id=\"pageWrap\">\n  ");
   hashTypes = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "outlet", {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
+  options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.outlet),stack1 ? stack1.call(depth0, "main", options) : helperMissing.call(depth0, "outlet", "main", options))));
   data.buffer.push("\n</div>\n\n<footer class=\"floats-in bottomPage\" role=\"contentinfo\">\n  <div>\n    <nav id=\"footerNav\" class=\"floats-in\">\n      <ul>\n        <li>\n          <a href=\"http://www.akvo.org/blog/?cat=30\" title=\"Go to News and Software Updates\" \n            target=\"_blank\"> ");
   hashTypes = {};
   options = {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data};
@@ -29334,7 +29348,7 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
   var buffer = '', hashTypes, escapeExpression=this.escapeExpression;
 
 
-  data.buffer.push("<p>\n  In ");
+  data.buffer.push("<p>\n  I'm in ");
   hashTypes = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "variable", {hash:{},contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
   data.buffer.push(".<br>\n</p>");
@@ -29355,12 +29369,11 @@ helpers = helpers || Ember.Handlebars.helpers; data = data || {};
   data.buffer.push(":</span>\n    ");
   hashTypes = {'contentBinding': "STRING",'optionLabelPath': "STRING",'optionValuePath': "STRING",'selectionBinding': "STRING"};
   data.buffer.push(escapeExpression(helpers.view.call(depth0, "Ember.Select", {hash:{
-    'contentBinding': ("controller.content"),
-    'optionLabelPath': ("controller.content.label"),
-    'optionValuePath': ("controller.content.value"),
-    'selectionBinding': ("controller.language")
+    'contentBinding': ("content"),
+    'optionLabelPath': ("content.label"),
+    'optionValuePath': ("content.value"),
+    'selectionBinding': ("language")
   },contexts:[depth0],types:["ID"],hashTypes:hashTypes,data:data})));
-  data.buffer.push("\n    ");
   data.buffer.push("\n   </label>\n</form>");
   return buffer;
   

@@ -5,10 +5,13 @@
   'use strict';
 
   define('app/views/application', [
-    'app'
+    'app',
+    'app/views/views'
     // 'ember'
     ],
     function(FLOW) {
+
+      // FLOW.ApplicationView = FLOW.View.extend({
       FLOW.ApplicationView = Ember.View.extend({
 
         init: function() {
@@ -33,6 +36,7 @@
             break;
           }
         }
+
       });
     }
   );

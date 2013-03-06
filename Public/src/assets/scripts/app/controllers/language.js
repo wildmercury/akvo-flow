@@ -8,7 +8,6 @@
     'app'
     ],
     function(FLOW) {
-      console.log('Loading LanguageController');
 
       FLOW.LanguageController = Ember.ObjectController.extend({
         language: null,
@@ -16,9 +15,8 @@
         init: function () {
           var locale;
 
-          console.log('Loading LanguageController 2a');
+          console.log('Loading LanguageController');
           this._super();
-          console.log('Loading LanguageController 2b');
           locale = localStorage.locale;
           if(typeof locale === 'undefined') {
             this.set('language', this.content.findProperty('value', 'en'));
@@ -45,6 +43,8 @@
           locale = this.language.get("value");
           localStorage.locale = this.get('language.value');
 
+          console.log('language swap');
+
           if (locale === 'fr') {
             Ember.set('Ember.STRINGS', Ember.STRINGS_FR);
           } else if (locale === 'es') {
@@ -52,9 +52,10 @@
           } else {
             Ember.set('Ember.STRINGS', Ember.STRINGS_EN);
           }
+
         }.observes('this.language')
       });
-
+      // return FLOW.LanguageController;
     }
   );
 })();

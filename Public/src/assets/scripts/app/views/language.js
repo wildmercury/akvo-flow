@@ -7,22 +7,21 @@
   define('app/views/language', [
     'app',
     'ember',
+    'app/controllers/language',
     'app/hbs_helpers'
     ],
     function(FLOW) {
-      FLOW.LanguageView = Ember.View.extend({
-        templateName: 'language',
 
-        init: function () {
-          this._super();
-          console.log('Loading LanguageView');
-        },
+      // FLOW.LanguageView = Ember.View.extend({
+      //   templateName: 'language',
 
-        onLanguageChange: function() {
-          console.log('Time to rerender');
-          // this.rerender();
-        }.observes('FLOW.LanguageController.language')
-      });
+      //   init: function () {
+      //     this._super();
+      //     console.log('Loading LanguageView');
+      //   }
+
+      // });
+      // return FLOW.LanguageView;
     }
   );
 })();

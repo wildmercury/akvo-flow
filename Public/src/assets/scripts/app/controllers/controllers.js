@@ -5,8 +5,8 @@
   'use strict';
 
   define('app/controllers/controllers', [
-    'app/controllers/index',
-    'app/controllers/language'
+    'app/controllers/index'
+    // 'app/controllers/language'
     ],
     function() {
       console.log('Loading controllers');

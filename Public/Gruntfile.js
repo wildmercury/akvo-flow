@@ -31,15 +31,6 @@ module.exports = function( grunt ) {
     copy: {
       main: {
         files: [
-          {expand: true, cwd: 'src/', src: ['*.html'], dest: 'dist/'},
-          {expand: true, cwd: 'src/scripts/libs', src: ['require.js'], dest: 'dist/assets/scripts/libs'},
-          // {expand: true, cwd: '../Dashboard/app/css/', src: ['**'], dest: 'dist/assets/css'},
-          {expand: true, cwd: '../Dashboard/app/static/', src: ['**'], dest: 'dist/assets/static'}
-        ]
-      },
-
-      public: {
-        files: [
           {expand: true, cwd: 'src/', src: ['index.html'], dest: '../GAE/war'},
           {expand: true, cwd: 'src/assets/scripts', src: ['require.js', 'loader.js'], dest: '../GAE/war/assets/scripts'},
           {expand: true, cwd: '../Dashboard/app/static/', src: ['**'], dest: '../GAE/war/assets'},
@@ -72,9 +63,7 @@ module.exports = function( grunt ) {
         },
         files: {
           'src/assets/scripts/app/templates_raw.js' : [
-            // 'src/assets/scripts/app/templates/pre.hbs',
             'src/assets/scripts/app/templates/**/*.handlebars'
-            // 'src/assets/scripts/app/templates/post.hbs'
           ]
         }
       }
@@ -90,7 +79,7 @@ module.exports = function( grunt ) {
         '!src/assets/scripts/require.js'
       ],
       options: {
-        // strict: true,
+        strict: true,
         browser: true,
         jquery: true,
         globals: {
@@ -106,9 +95,10 @@ module.exports = function( grunt ) {
           baseUrl: 'src/assets/scripts',
           name: "main",
           mainConfigFile: 'src/assets/scripts/main.js',
-          optimize: 'none',
+          optimize: 'none', // Only for dev
           out: '../GAE/war/assets/scripts/main.js',
           paths: {
+            // When Useing CDN libs
             // jquery: 'empty:',
             // handlebars: 'empty:',
             // ember: 'empty:'
@@ -117,32 +107,13 @@ module.exports = function( grunt ) {
       }
     },
 
-    // uglify: {
-    //   options: {
-    //     // the banner is inserted at the top of the output
-    //     banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n',
-    //     mangle: false,
-    //     beautify: {
-    //       width: 80,
-    //       beautify: true
-    //     }
-    //   },
-    //   dist: {
-    //     files: {
-    //       'dist/assets/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
-    //     }
-    //   }
-    // },
-
     watch: {
-      // files: ['<%= jshint.files %>', 'src/*.html'],
       files: [
         'src/assets/**/*.js',
         'src/assets/**/*.handlebars',
         '!src/assets/scripts/app/templates.js',
         '!src/assets/scripts/app/templates_raw.js'
       ],
-      // files: ['<%= jshint.files %>', 'src/*.html'],
       tasks: ['livereload']
     }
 
@@ -154,18 +125,14 @@ module.exports = function( grunt ) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
-  // grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-ember-templates');
 
   grunt.registerTask('handlebars', ['ember_templates']);
 
-  // grunt.registerTask('default', ['clean', 'jshint', 'concat', 'uglify', 'copy']);
-  // grunt.registerTask('public', ['requirejs', 'copy', 'cssmin']);
-  // grunt.registerTask('public', ['jshint:public', 'handlebars', 'requirejs', 'copy:public', 'cssmin']);
-
-  grunt.registerTask('default', ['clean', 'jshint', 'requirejs', 'copy']);
-  grunt.registerTask('public', ['handlebars', 'concat', 'requirejs', 'copy:public', 'cssmin']);
-  grunt.registerTask('livereload', ['handlebars', 'concat', 'requirejs']);
+  grunt.registerTask('test', ['jshint']);
+  grunt.registerTask('buildjs', ['handlebars', 'concat', 'requirejs']);
+  grunt.registerTask('livereload', ['buildjs']);
+  grunt.registerTask('default', ['clean', 'test', 'copy', 'buildjs', 'cssmin']);
 
 };
