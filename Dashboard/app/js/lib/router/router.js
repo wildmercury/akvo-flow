@@ -4,29 +4,103 @@
 require('akvo-flow/core');
 
 FLOW.Router.map(function () {
-  this.route('navUsers');
-  this.route('navMessages');
+  this.route('surveys');
+  this.route('devices');
+  this.route('data');
+  this.route('reports');
+  this.route('maps');
+  this.route('users');
+  this.route('messages');
 });
 
 FLOW.IndexRoute = Ember.Route.extend({
   redirect: function () {
-    this.transitionTo('navUsers');
+    this.transitionTo('users');
   }
 });
 
-FLOW.NavMessagesRoute = Ember.Route.extend({
-  setupController: function () {
-    FLOW.messageControl.populate();
-    FLOW.selectedControl.set('selectedSurveyGroup', null);
-    FLOW.selectedControl.set('selectedSurvey', null);
-  }
-});
-
-FLOW.NavUsersRoute = Ember.Route.extend({
+FLOW.SurveysRoute = Ember.Route.extend({
   setupController: function (controller) {
-    controller.set('content', FLOW.User.find());
+   // controller.set('content', FLOW.User.find());
   }
 });
+
+FLOW.SurveysView = Ember.View.extend({
+  templateName: 'navSurveys/nav-surveys'
+});
+
+
+FLOW.DevicesRoute = Ember.Route.extend({
+  setupController: function (controller) {
+   // controller.set('content', FLOW.User.find());
+  }
+});
+
+FLOW.DevicesView = Ember.View.extend({
+  templateName: 'navDevices/nav-devices'
+});
+
+FLOW.DataRoute = Ember.Route.extend({
+  setupController: function (controller) {
+   // controller.set('content', FLOW.User.find());
+  }
+});
+
+FLOW.DataView = Ember.View.extend({
+  templateName: 'navData/nav-data'
+});
+
+FLOW.ReportsRoute = Ember.Route.extend({
+  setupController: function (controller) {
+   // controller.set('content', FLOW.User.find());
+  }
+});
+
+FLOW.ReportsView = Ember.View.extend({
+  templateName: 'navReports/nav-reports'
+});
+
+FLOW.MapsRoute = Ember.Route.extend({
+  setupController: function (controller) {
+   // controller.set('content', FLOW.User.find());
+  }
+});
+
+FLOW.MessagesRoute = Ember.Route.extend({
+  setupController: function () {
+  //  FLOW.messageControl.populate();
+  //  FLOW.selectedControl.set('selectedSurveyGroup', null);
+  //  FLOW.selectedControl.set('selectedSurvey', null);
+  }
+});
+
+FLOW.MessagesView = Ember.View.extend({
+  templateName: 'navMessages/nav-messages'
+});
+
+FLOW.UsersRoute = Ember.Route.extend({
+  setupController: function (controller) {
+  //  controller.set('content', FLOW.User.find());
+  }
+
+  // renderTemplate: function() {
+  //   this.render('akvo-flow/templates/navUsers/nav-users');
+  // }
+});
+
+FLOW.UsersView = Ember.View.extend({
+   templateName: 'navUsers/nav-users'
+});
+
+
+
+
+
+
+
+
+
+
 
 //TODO: Move this controller to the proper file
 FLOW.NavUsersController = Ember.ArrayController.extend({

@@ -273,35 +273,6 @@ FLOW.registerViewHelper('date2', Ember.View.extend({
   }).property('content')
 }));
 
-
-
-
-
-// ********************************************************//
-//                      main navigation
-// ********************************************************//
-FLOW.NavigationView = Em.View.extend({
-  templateName: 'application/navigation',
-  selectedBinding: 'controller.selected',
-
-  onLanguageChange: function() {
-    this.rerender();
-  }.observes('FLOW.dashboardLanguageControl.dashboardLanguage'),
-
-  NavItemView: Ember.View.extend({
-    tagName: 'li',
-    classNameBindings: 'isActive:current navItem'.w(),
-
-    navItem: function() {
-      return this.get('item');
-    }.property('item').cacheable(),
-
-    isActive: function() {
-      return this.get('item') === this.get('parentView.selected');
-    }.property('item', 'parentView.selected').cacheable()
-  })
-});
-
 // ********************************************************//
 //                      standard views
 // ********************************************************//
@@ -363,84 +334,66 @@ FLOW.DateField2 = Ember.TextField.extend({
   }
 });
 
-// home screen view
-FLOW.NavHomeView = Ember.View.extend({
-  templateName: 'navHome/nav-home'
-});
 
-// surveys views
-FLOW.NavSurveysView = Ember.View.extend({
-  templateName: 'navSurveys/nav-surveys'
-});
-FLOW.NavSurveysMainView = Ember.View.extend({
-  templateName: 'navSurveys/nav-surveys-main'
-});
+// FLOW.NavSurveysMainView = Ember.View.extend({
+//   templateName: 'navSurveys/nav-surveys-main'
+// });
 
-FLOW.NavSurveysEditView = Ember.View.extend({
-  templateName: 'navSurveys/nav-surveys-edit'
-});
+// FLOW.NavSurveysEditView = Ember.View.extend({
+//   templateName: 'navSurveys/nav-surveys-edit'
+// });
 
-FLOW.ManageNotificationsView = Ember.View.extend({
-  templateName: 'navSurveys/manage-notifications'
-});
+// FLOW.ManageNotificationsView = Ember.View.extend({
+//   templateName: 'navSurveys/manage-notifications'
+// });
 
-FLOW.EditQuestionsView = Ember.View.extend({
-  templateName: 'navSurveys/edit-questions'
-});
+// FLOW.EditQuestionsView = Ember.View.extend({
+//   templateName: 'navSurveys/edit-questions'
+// });
 
-// devices views
-FLOW.NavDevicesView = Ember.View.extend({
-  templateName: 'navDevices/nav-devices'
-});
 
-FLOW.CurrentDevicesView = FLOW.View.extend({
-  templateName: 'navDevices/devices-list-tab/devices-list'
-});
 
-FLOW.AssignSurveysOverviewView = FLOW.View.extend({
-  templateName: 'navDevices/assignment-list-tab/assignment-list'
-});
+// FLOW.CurrentDevicesView = FLOW.View.extend({
+//   templateName: 'navDevices/devices-list-tab/devices-list'
+// });
 
-FLOW.EditSurveyAssignmentView = Ember.View.extend({
-  templateName: 'navDevices/assignment-edit-tab/assignment-edit'
-});
+// FLOW.AssignSurveysOverviewView = FLOW.View.extend({
+//   templateName: 'navDevices/assignment-list-tab/assignment-list'
+// });
 
-FLOW.SurveyBootstrapView = FLOW.View.extend({
-  templateName: 'navDevices/bootstrap-tab/survey-bootstrap'
-});
+// FLOW.EditSurveyAssignmentView = Ember.View.extend({
+//   templateName: 'navDevices/assignment-edit-tab/assignment-edit'
+// });
 
-// data views
-FLOW.NavDataView = Ember.View.extend({
-  templateName: 'navData/nav-data'
-});
+// FLOW.SurveyBootstrapView = FLOW.View.extend({
+//   templateName: 'navDevices/bootstrap-tab/survey-bootstrap'
+// });
 
-FLOW.InspectDataView = Ember.View.extend({
-  templateName: 'navData/inspect-data'
-});
 
-FLOW.ManageAttributesView = Ember.View.extend({
-  templateName: 'navData/manage-attributes'
-});
+// FLOW.InspectDataView = Ember.View.extend({
+//   templateName: 'navData/inspect-data'
+// });
 
-FLOW.BulkUploadView = Ember.View.extend({
-  templateName: 'navData/bulk-upload'
-});
-FLOW.DataCleaningView = Ember.View.extend({
-  templateName: 'navData/data-cleaning'
-});
+// FLOW.ManageAttributesView = Ember.View.extend({
+//   templateName: 'navData/manage-attributes'
+// });
 
-// reports views
-FLOW.NavReportsView = Ember.View.extend({
-  templateName: 'navReports/nav-reports'
-});
+// FLOW.BulkUploadView = Ember.View.extend({
+//   templateName: 'navData/bulk-upload'
+// });
+// FLOW.DataCleaningView = Ember.View.extend({
+//   templateName: 'navData/data-cleaning'
+// });
 
-FLOW.ExportReportsView = Ember.View.extend({
-  templateName: 'navReports/export-reports'
-});
+// // reports views
 
-FLOW.ChartReportsView = Ember.View.extend({
-  templateName: 'navReports/chart-reports'
-});
+// FLOW.ExportReportsView = Ember.View.extend({
+//   templateName: 'navReports/export-reports'
+// });
+
+// FLOW.ChartReportsView = Ember.View.extend({
+//   templateName: 'navReports/chart-reports'
+// });
 
 
 // applets
@@ -472,20 +425,9 @@ FLOW.rawDataImportApplet = Ember.View.extend({
   templateName: 'navData/applets/raw-data-import-applet'
 });
 
-// users views
-FLOW.NavUsersView = Ember.View.extend({
-  templateName: 'navUsers/nav-users'
-});
 
-// Messages views
-FLOW.NavMessagesView = Ember.View.extend({
-  templateName: 'navMessages/nav-messages'
-});
 
 // admin views
-FLOW.NavAdminView = FLOW.View.extend({
-  templateName: 'navAdmin/nav-admin'
-});
 
 FLOW.HeaderView = FLOW.View.extend({
   templateName: 'application/header'
