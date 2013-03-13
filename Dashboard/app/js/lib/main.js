@@ -15,4 +15,6 @@ require('akvo-flow/controllers/controllers');
 require('akvo-flow/views/views');
 require('akvo-flow/router/router');
 
+require("tempaltes");
+
 FLOW.initialize();
