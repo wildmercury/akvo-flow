@@ -1,15 +1,23 @@
-var host = "http://" + window.location.host;
-FLOW.store = DS.Store.create({
-	revision: 11,
-	adapter: DS.FLOWRESTAdapter.create({bulkCommit:false, namespace:"rest", url:host})
-});
+require(
+  [
+    'app',
+    'emberData'
+  ], function (FLOW, DS) {
 
-DS.JSONTransforms.array = {
-  deserialize: function(serialized) {
-    return Ember.isNone(serialized) ? null : serialized;
-  },
+    var host = "http://" + window.location.host;
+    FLOW.store = DS.Store.create({
+      revision: 11,
+      adapter: DS.FLOWRESTAdapter.create({bulkCommit:false, namespace:"rest", url:host})
+    });
 
-  serialize: function(deserialized) {
-    return Ember.isNone(deserialized) ? null : deserialized;
+    DS.JSONTransforms.array = {
+      deserialize: function(serialized) {
+        return Ember.isNone(serialized) ? null : serialized;
+      },
+
+      serialize: function(deserialized) {
+        return Ember.isNone(deserialized) ? null : deserialized;
+      }
+    };
   }
-};
+);
