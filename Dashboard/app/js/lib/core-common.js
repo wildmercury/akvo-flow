@@ -1,13 +1,24 @@
-require('akvo-flow/templ-common');
-// Ember.LOG_BINDINGS = true;
-// Create the application
-window.FLOW = Ember.Application.create({
-  VERSION: '0.0.1'
+define('core-common', [
+  'app'
+], function(FLOW) {
+  FLOW.View = Ember.View.extend({
+    onLanguageChange: function() {
+      this.rerender();
+    }.observes('FLOW.dashboardLanguageControl.dashboardLanguage')
+  });
 });
 
-/* Generic FLOW view that also handles lanague rerenders*/
-FLOW.View = Ember.View.extend({
-  onLanguageChange: function() {
-    this.rerender();
-  }.observes('FLOW.dashboardLanguageControl.dashboardLanguage')
-});
+
+// // require('akvo-flow/templ-common');
+// // Ember.LOG_BINDINGS = true;
+// // Create the application
+// window.FLOW = Ember.Application.create({
+//   VERSION: '0.0.1'
+// });
+
+//  Generic FLOW view that also handles lanague rerenders
+// FLOW.View = Ember.View.extend({
+//   onLanguageChange: function() {
+//     this.rerender();
+//   }.observes('FLOW.dashboardLanguageControl.dashboardLanguage')
+// });

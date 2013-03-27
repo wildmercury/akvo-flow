@@ -1,5 +1,5 @@
-loader.register('akvo-flow/all_locales', function(require) {
-  Ember.STRINGS_EN = $en;
-  Ember.STRINGS_FR = $fr;
-  Ember.STRINGS_ES = $es;
-});
+FLOW_STRINGS = {
+  STRINGS_EN: $en,
+  STRINGS_FR: $fr,
+  STRINGS_ES: $es  
+};
