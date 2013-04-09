@@ -1,15 +1,30 @@
 module.exports = function(grunt) {
 
   grunt.registerTask('default', [
-    // 'ember_templates:admin',
-    // 'concat',
-    // 'requirejs',
-    // 'copy:requirejs',
-    // 'copy:static',
-    // 'copy:vendor',
+    'clean',
+    'assets',
+    'build'
+  ]);
+
+  grunt.registerTask('assets', [
+    'copy:plugins',
+    'copy:requirejs',
+    'copy:static',
+    'copy:vendor'
+  ]);
+
+  grunt.registerTask('build', [
+    'ember_templates:admin',
+    'concat',
+    'requirejs',
     'htmlmin:dev',
     'cssmin'
   ]);
+
+  grunt.registerTask('livereload', [
+    'build'
+  ]);
+
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -62,7 +77,7 @@ module.exports = function(grunt) {
           dest: '../GAE/war/assets/js/plugins'
         }]
       },
-      require: {
+      requirejs: {
         files: [{
           src: 'app/js/lib/require.js',
           dest: '../GAE/war/assets/js/require.js'
@@ -150,6 +165,17 @@ module.exports = function(grunt) {
           }
         }
       }
+    },
+
+    watch: {
+      files: [
+        'app/**/*.js',
+        'app/**/*.css',
+        'app/**/*.handlebars',
+        '!app/js/lib/templates.js',
+        '!app/js/lib/templates_raw.js'
+      ],
+      tasks: ['livereload']
     }
 
   });
@@ -161,6 +187,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-ember-templates');
   
 };

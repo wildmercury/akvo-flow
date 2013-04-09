@@ -2292,8 +2292,6 @@ define('controllers/controllers', [
   FLOW.ApplicationController = Ember.Controller.extend({
     init: function() {
       this._super();
-      // Ember.STRINGS = Ember.STRINGS_EN;
-      // Ember.STRINGS = FLOW_STRINGS.STRINGS_EN;
     }
   });
 
