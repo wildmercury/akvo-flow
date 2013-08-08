@@ -3,7 +3,7 @@
 {{#view FLOW.ExportReportsAppletView}}
   <h1>{{t _export_data}}</h1>
  {{view Ember.Select 
-      contentBinding="FLOW.surveyGroupControl.content" 
+      contentBinding="FLOW.surveyGroupControl.arrangedContent"
       selectionBinding="FLOW.selectedControl.selectedSurveyGroup" 
       optionLabelPath="content.code" 
       optionValuePath="content.keyId"
@@ -11,7 +11,7 @@
       promptBinding="Ember.STRINGS._select_survey_group"}}
 
       {{view Ember.Select 
-        contentBinding="FLOW.surveyControl.content" 
+        contentBinding="FLOW.surveyControl.arrangedContent"
         selectionBinding="FLOW.selectedControl.selectedSurvey" 
         optionLabelPath="content.code" 
         optionValuePath="content.keyId" 
@@ -35,6 +35,7 @@
     {{view FLOW.comprehensiveReportApplet}}
   {{/if}}
 
+{{#if view.showGoogleEarthButton }}
 <div class="googleEarthExport block">
   <h3>{{t _export_google_earth_file}}</h3>
  <p>{{t _google_earth_applet_text_}}</p>
@@ -45,6 +46,14 @@
   {{#if view.showGoogleEarthFileApplet }}
     {{view FLOW.googleEarthFileApplet}}
   {{/if}}
+{{/if}}
+
+<div class="rawTextFile block">
+  <h3>{{t _raw_text_file}}</h3>
+  <p>{{t _raw_text_file_text}}</p>
+  <a {{action showRawTextFileExport target="this"}} class="standardBtn"> {{t _raw_text_file}} </a>
+</div>
+
 <div class="surveyFormExport block">
   <h3>{{t _export_survey_form}}</h3>
   <p>{{t _survey_form_applet_text_}}</p>

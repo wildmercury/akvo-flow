@@ -1,14 +1,14 @@
 FLOW.PermControl = Ember.Controller.extend({
   perms: [],
 
-  init: function() {
+  init: function () {
     this._super();
     this.initPermissions();
     this.setUserPermissions();
     this.setCurrentPermissions();
   },
 
-  initPermissions: function() {
+  initPermissions: function () {
     this.perms.push(Ember.Object.create({
       perm: 'createSurvey',
       value: false
@@ -83,9 +83,9 @@ FLOW.PermControl = Ember.Controller.extend({
     }));
   },
 
-  setUserPermissions: function() {
+  setUserPermissions: function () {
     var user = true;
-    if(user === true) {
+    if (user === true) {
       this.perms.findProperty('perm', 'createSurvey').value = true;
       this.perms.findProperty('perm', 'editSurvey').value = true;
       this.perms.findProperty('perm', 'uploadSurveyZipData').value = true;
@@ -96,7 +96,7 @@ FLOW.PermControl = Ember.Controller.extend({
       this.perms.findProperty('perm', 'runReport').value = true;
     }
 
-    if(user === true) {
+    if (user === true) {
       this.perms.findProperty('perm', 'createSurvey').value = true;
       this.perms.findProperty('perm', 'editSurvey').value = true;
       this.perms.findProperty('perm', 'uploadSurveyZipData').value = true;
@@ -111,7 +111,7 @@ FLOW.PermControl = Ember.Controller.extend({
       this.perms.findProperty('perm', 'approveSurvey').value = true;
     }
 
-    if(user === true) {
+    if (user === true) {
       this.perms.findProperty('perm', 'createSurvey').value = true;
       this.perms.findProperty('perm', 'editSurvey').value = true;
       this.perms.findProperty('perm', 'uploadSurveyZipData').value = true;
@@ -133,8 +133,8 @@ FLOW.PermControl = Ember.Controller.extend({
 
   },
 
-  setCurrentPermissions: function() {
-    this.perms.forEach(function(item) {
+  setCurrentPermissions: function () {
+    this.perms.forEach(function (item) {
       //this.set(item.perm,item.value);
     });
   }
@@ -151,6 +151,8 @@ FLOW.dialogControl = Ember.Object.create({
   delAttr: "delAttr",
   delAssignment: "delAssignment",
   delDeviceGroup: "delDeviceGroup",
+  delSI: "delSI",
+  delSI2: "delSI2",
   showDialog: false,
   message: null,
   header: null,
@@ -159,25 +161,17 @@ FLOW.dialogControl = Ember.Object.create({
   showOK: true,
   showCANCEL: true,
 
-  confirm: function(event) {
+  confirm: function (event) {
     this.set('activeView', event.view);
     this.set('activeAction', event.context);
     this.set('showOK', true);
     this.set('showCANCEL', true);
 
-    switch(this.get('activeAction')) {
+    switch (this.get('activeAction')) {
     case "delSG":
-      if(FLOW.surveyGroupControl.containsSurveys()) {
-        this.set('activeAction', "ignore");
-        this.set('header', Ember.String.loc('_sg_delete_not_possible_header'));
-        this.set('message', Ember.String.loc('_sg_delete_not_possible_message'));
-        this.set('showCANCEL', false);
-        this.set('showDialog', true);
-      } else {
-        this.set('header', Ember.String.loc('_sg_delete_header'));
-        this.set('message', Ember.String.loc('_this_cant_be_undo'));
-        this.set('showDialog', true);
-      }
+      this.set('header', Ember.String.loc('_sg_delete_header'));
+      this.set('message', Ember.String.loc('_this_cant_be_undo'));
+      this.set('showDialog', true);
       break;
 
     case "delS":
@@ -222,17 +216,29 @@ FLOW.dialogControl = Ember.Object.create({
       this.set('showDialog', true);
       break;
 
+    case "delSI":
+      this.set('header', Ember.String.loc('_delete_record_header'));
+      this.set('message', Ember.String.loc('_are_you_sure_delete_this_data_record'));
+      this.set('showDialog', true);
+      break;
+
+    case "delSI2":
+      this.set('header', Ember.String.loc('_delete_record_header'));
+      this.set('message', Ember.String.loc('_are_you_sure_delete_this_data_record'));
+      this.set('showDialog', true);
+      break;
+
     default:
     }
   },
 
-  doOK: function(event) {
+  doOK: function (event) {
     this.set('header', null);
     this.set('message', null);
     this.set('showCANCEL', true);
     this.set('showDialog', false);
     var view = this.get('activeView');
-    switch(this.get('activeAction')) {
+    switch (this.get('activeAction')) {
     case "delSG":
       view.deleteSurveyGroup.apply(view, arguments);
       break;
@@ -270,11 +276,21 @@ FLOW.dialogControl = Ember.Object.create({
       view.deleteDeviceGroup.apply(view, arguments);
       break;
 
+    case "delSI":
+      this.set('showDialog', false);
+      view.deleteSI.apply(view, arguments);
+      break;
+
+    case "delSI2":
+      this.set('showDialog', false);
+      view.deleteSI.apply(view, arguments);
+      break;
+
     default:
     }
   },
 
-  doCANCEL: function(event) {
+  doCANCEL: function (event) {
     this.set('showDialog', false);
   }
 });

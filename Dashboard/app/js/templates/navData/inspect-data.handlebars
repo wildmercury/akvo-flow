@@ -4,7 +4,7 @@
       <h1>{{t _choose_survey_data_to_display}}:</h1>
       <div class="chooseSurveyData">
         {{view Ember.Select 
-          contentBinding="FLOW.surveyGroupControl.content" 
+          contentBinding="FLOW.surveyGroupControl.arrangedContent"
           selectionBinding="FLOW.selectedControl.selectedSurveyGroup" 
           optionLabelPath="content.code" 
           optionValuePath="content.keyId"
@@ -12,7 +12,7 @@
           promptBinding="Ember.STRINGS._select_survey_group"}}
 
         {{view Ember.Select 
-          contentBinding="FLOW.surveyControl.content" 
+          contentBinding="FLOW.surveyControl.arrangedContent"
           selectionBinding="FLOW.selectedControl.selectedSurvey" 
           optionLabelPath="content.code" 
           optionValuePath="content.keyId"
@@ -22,6 +22,7 @@
 			<div class="dataCollectedDate">
         <label class="collectedFrom"> {{t _collected_from}}:
           {{view FLOW.DateField
+            minDate=false
             valueBinding="FLOW.dateControl.fromDate"
             elementId="from_date"
             placeholder="Collected from"
@@ -31,6 +32,7 @@
 
         <label class="collectedTo"> {{t _to}}:
           {{view FLOW.DateField
+            minDate=false
             valueBinding="FLOW.dateControl.toDate"
             elementId="to_date"
             placeholder="To"
@@ -58,6 +60,7 @@
       <table class="dataTable" id="surveyDataTable">
         <thead>
           <tr>
+              <th class="noArrows"></th>
               <th class="noArrows">{{t _id}}</th>
               <th class="noArrows">{{t _survey}}</th>
               <th class="noArrows">{{t _submitter}}</th>
@@ -67,8 +70,9 @@
           </tr>
         </thead>
         <tbody>
-          {{#each SI in FLOW.surveyInstanceControl}}
+          {{#each SI in FLOW.surveyInstanceControl.currentContents}}
             <tr>
+              <td class="device">{{#view FLOW.DataNumView contentBinding="this"}}{{view.rownum}}{{/view}}</td>
               <td class="device">{{SI.keyId}}</td>
               <td class="survey" style="text-align:left;">{{SI.surveyCode}}</td>
               <td class="submitter" style="text-align:left;">{{SI.submitterName}}</td>
@@ -78,6 +82,11 @@
                 <a {{action showEditSurveyInstanceWindow SI target="this" }}>
                   {{t _edit}}
                 </a>
+                {{#if FLOW.role.ADMIN }}
+                {{#view FLOW.DataItemView contentBinding="SI"}}<a {{action confirm FLOW.dialogControl.delSI2 target="FLOW.dialogControl"}} >
+                  {{t _delete}}
+                </a>{{/view}}
+                {{/if}}
               </td>
             </tr>
             {{/each}}
@@ -110,8 +119,10 @@
             <nav class="editAnswerMenu"> 
             <ul>  
               <li class="prevBtn"><a {{action "doPreviousSI" target="this"}}>&lsaquo; {{t _previous_record}}</a></li>
-              <li class="deleteBtn"><a {{action "doDeleteSI" target="this"}} class="smallBtn">{{t _delete}}</a></li>
-              <li class="saveBtn"><a {{action "doSaveSI" target="this"}} class="smallBtn">{{t _save}}</a></li>
+              {{#if FLOW.role.ADMIN }}
+                <li class="deleteBtn"><a {{action confirm FLOW.dialogControl.delSI target="FLOW.dialogControl"}} class="smallBtn">{{t _delete}}</a></li>
+              {{/if}}
+             <!--  <li class="saveBtn"><a {{action "doSaveSI" target="this"}} class="smallBtn">{{t _save}}</a></li> -->
               <li class="nextBtn"><a {{action "doNextSI" target="this"}}>{{t _next_record}} &rsaquo;</a></li>
             </ul>
           </nav>
@@ -163,12 +174,16 @@
                       <a {{action doSave target="this"}} class="smallBtn">{{t _save}}</a> <a {{action doCancel target="this"}}>{{t _cancel}}</a>
                     {{else}}
                       {{#if view.isNotEditable}}
-                        {{QA.value}}
+                        {{#if view.isPhotoType}}
+                          {{QA.value}}  <a {{bindAttr href="view.photoUrl"}} target="_blank">Open photo</a> 
+                        {{else}}
+                          {{QA.value}}
+                        {{/if}}
                       {{else}}
                         {{#if view.isDateType}}
                         <a {{action doEdit target="this"}}>{{#with QA}}{{date3 value}}{{/with}}</a>
                         {{else}}
-                          <a {{action doEdit target="this"}}>{{QA.value}}</a>
+                          <a {{action doEdit target="this"}}>{{QA.value}} {{#with QA}}{{if_blank value}}{{/with}}</a>
                         {{/if}}
                       {{/if}}
                     {{/if}}

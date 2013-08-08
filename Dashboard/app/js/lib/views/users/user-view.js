@@ -113,11 +113,17 @@ FLOW.UserView = FLOW.View.extend({
 FLOW.SingleUserView = FLOW.View.extend({
   tagName: 'td',
 
-  roleLabel: function () {
-    return this.content.get('permissionList') && FLOW.RoleLabel.get(this.content.get('permissionList'));
-  }.property('content.permissionList'),
+  init: function() {
+    var role = null;
+    this._super();
 
-  roleClass: function () {
-    return this.content.get('permissionList') && Ember.String.camelize(FLOW.RoleLabel.get(this.content.get('permissionList')));
-  }.property('content.permissionList')
+    role = FLOW.permissionLevelControl.find(function (item) {
+      return item.value == this.content.get('permissionList');
+    }, this);
+
+    if(!Ember.none(role)) {
+      this.set('roleLabel', role.label);
+      this.set('roleClass', Ember.String.camelize(role.label));
+    }
+  }
 });

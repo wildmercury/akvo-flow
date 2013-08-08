@@ -292,7 +292,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 					LOADING_QUESTIONS.get(locale)));
 			Map<QuestionGroupDto, List<QuestionDto>> questionMap = loadAllQuestions(
 					criteria.get(SurveyRestRequest.SURVEY_ID_PARAM),
-					performGeoRollup, serverBase);
+					performGeoRollup, serverBase, criteria.get("apiKey"));
 			if (questionMap != null) {
 				for (List<QuestionDto> qList : questionMap.values()) {
 					for (QuestionDto q : qList) {
@@ -305,7 +305,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 				// translations
 				SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
 						LOADING_DETAILS.get(locale)));
-				loadFullQuestions(questionMap);
+				loadFullQuestions(questionMap, criteria.get("apiKey"));
 			} else {
 				currentStep++;
 			}
@@ -325,7 +325,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 
 				SummaryModel model = fetchAndWriteRawData(
 						criteria.get(SurveyRestRequest.SURVEY_ID_PARAM),
-						serverBase, questionMap, wb, isFullReport, fileName);
+						serverBase, questionMap, wb, isFullReport, fileName, criteria.get("apiKey"));
 				if (isFullReport) {
 					SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
 							WRITING_SUMMARY.get(locale)));
@@ -377,8 +377,9 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 	protected SummaryModel fetchAndWriteRawData(String surveyId,
 			final String serverBase,
 			Map<QuestionGroupDto, List<QuestionDto>> questionMap, Workbook wb,
-			final boolean generateSummary, File outputFile) throws Exception {
+			final boolean generateSummary, File outputFile, String apiKey) throws Exception {
 		final SummaryModel model = new SummaryModel();
+		final String key = apiKey;
 
 		final Sheet sheet = wb.createSheet(RAW_DATA_LABEL.get(locale));
 		int curRow = 1;
@@ -404,7 +405,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 		SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
 				LOADING_INSTANCES.get(locale)));
 		Map<String, String> instanceMap = BulkDataServiceClient
-				.fetchInstanceIds(surveyId, serverBase);
+				.fetchInstanceIds(surveyId, serverBase, key);
 		SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
 				LOADING_INSTANCE_DETAILS.get(locale)));
 
@@ -424,12 +425,12 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 
 							Map<String, String> responseMap = BulkDataServiceClient
 									.fetchQuestionResponses(instanceId,
-											serverBase);
+											serverBase, key);
 
 							SurveyInstanceDto dto = BulkDataServiceClient
 									.findSurveyInstance(
 											Long.parseLong(instanceId.trim()),
-											serverBase);
+											serverBase, key);
 							if (dto != null) {
 								done = true;
 							}
@@ -536,6 +537,10 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 					for (int j = count; j < 4; j++) {
 						createCell(row, col++, "", null);
 					}
+				} else if (qdto != null && QuestionType.NUMBER.equals(qdto.getType())) {
+					String cellVal = val.trim();
+					createCell(row, col++, cellVal, null, Cell.CELL_TYPE_NUMERIC);
+					digest.update(cellVal.getBytes());
 				} else {
 					String cellVal = val.replaceAll("\n", " ").trim();
 					createCell(row, col++, cellVal, null);
@@ -902,13 +907,24 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 	 * non-null)
 	 * 
 	 */
+
 	protected Cell createCell(Row row, int col, String value, CellStyle style) {
+		return createCell(row, col, value, style, -1);
+	}
+
+	protected Cell createCell(Row row, int col, String value, CellStyle style, int type) {
 		Cell cell = row.createCell(col);
+
 		if (style != null) {
 			cell.setCellStyle(style);
 		}
 		if (value != null) {
-			cell.setCellValue(value);
+			if (type == Cell.CELL_TYPE_NUMERIC) {
+				cell.setCellType(type);
+				cell.setCellValue(Double.valueOf(value));
+			} else {
+				cell.setCellValue(value);
+			}
 		}
 
 		return cell;
@@ -999,13 +1015,13 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 	 * @param questionMap
 	 */
 	private void loadFullQuestions(
-			Map<QuestionGroupDto, List<QuestionDto>> questionMap) {
+			Map<QuestionGroupDto, List<QuestionDto>> questionMap, String apiKey) {
 		for (List<QuestionDto> questionList : questionMap.values()) {
 			for (int i = 0; i < questionList.size(); i++) {
 				try {
 					QuestionDto newQ = BulkDataServiceClient
 							.loadQuestionDetails(serverBase, questionList
-									.get(i).getKeyId());
+									.get(i).getKeyId(), apiKey);
 					if (newQ != null) {
 						questionList.set(i, newQ);
 					}
@@ -1047,8 +1063,10 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 	public static void main(String[] args) {
 		GraphicalSurveySummaryExporter exporter = new GraphicalSurveySummaryExporter();
 		Map<String, String> criteria = new HashMap<String, String>();
+		Map<String, String> options = new HashMap<String, String>();
 		criteria.put(SurveyRestRequest.SURVEY_ID_PARAM, args[2]);
-		exporter.export(criteria, new File(args[0]), args[1], null);
+		criteria.put("apiKey", args[3]);
+		exporter.export(criteria, new File(args[0]), args[1], options);
 	}
 
 	/**

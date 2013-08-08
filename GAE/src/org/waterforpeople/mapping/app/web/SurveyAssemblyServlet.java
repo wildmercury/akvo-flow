@@ -47,7 +47,9 @@ import com.gallatinsystems.survey.dao.QuestionDao;
 import com.gallatinsystems.survey.dao.QuestionGroupDao;
 import com.gallatinsystems.survey.dao.SurveyDAO;
 import com.gallatinsystems.survey.dao.SurveyGroupDAO;
+import com.gallatinsystems.survey.dao.SurveyUtils;
 import com.gallatinsystems.survey.dao.SurveyXMLFragmentDao;
+import com.gallatinsystems.survey.dao.TranslationDao;
 import com.gallatinsystems.survey.domain.Question;
 import com.gallatinsystems.survey.domain.QuestionGroup;
 import com.gallatinsystems.survey.domain.QuestionHelpMedia;
@@ -151,6 +153,11 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 				// assembleSurvey(importReq.getSurveyId());
 				assembleSurveyOnePass(importReq.getSurveyId());
 			}
+
+			List<Long> ids = new ArrayList<Long>();
+			ids.add(importReq.getSurveyId());
+			SurveyUtils.notifyReportService(ids, "invalidate");
+
 		} else if (SurveyAssemblyRequest.DISPATCH_ASSEMBLE_QUESTION_GROUP
 				.equalsIgnoreCase(importReq.getAction())) {
 			this.dispatchAssembleQuestionGroup(importReq.getSurveyId(),
@@ -272,7 +279,9 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		if (s != null && s.getDefaultLanguageCode() != null) {
 			lang = s.getDefaultLanguageCode();
 		}
-		surveyHeader += " defaultLanguageCode='" + lang + "'>";
+		final String version = s.getVersion() == null ? "" : "version='"
+				+ s.getVersion() + "'";
+		surveyHeader += " defaultLanguageCode='" + lang + "' " + version + ">";
 		String surveyFooter = "</survey>";
 		QuestionGroupDao qgDao = new QuestionGroupDao();
 		TreeMap<Integer, QuestionGroup> qgList = qgDao
@@ -490,6 +499,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		}
 		List<Help> helpList = new ArrayList<Help>();
 		// this is here for backward compatibility
+		// however, we don't use the helpMedia at the moment
 		if (q.getTip() != null) {
 			Help tip = new Help();
 			com.gallatinsystems.survey.domain.xml.Text t = new com.gallatinsystems.survey.domain.xml.Text();
@@ -498,6 +508,23 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 			tip.setType("tip");
 			if (q.getTip() != null && q.getTip().trim().length() > 0
 					&& !"null".equalsIgnoreCase(q.getTip().trim())) {
+				
+				TranslationDao tDao = new TranslationDao();
+				Map<String, Translation> tipTrans = tDao.findTranslations(Translation.ParentType.QUESTION_TIP,q.getKey().getId());
+				// any translations for question tooltip?
+
+				List<AltText> translationList = new ArrayList<AltText>();
+				for (Translation trans : tipTrans
+						.values()) {
+					AltText aText = new AltText();
+					aText.setContent(trans.getText());
+					aText.setLanguage(trans.getLanguageCode());
+					aText.setType("translation");
+					translationList.add(aText);
+				}
+				if (translationList.size() > 0) {
+					tip.setAltText(translationList);
+				}
 				helpList.add(tip);
 			}
 		}

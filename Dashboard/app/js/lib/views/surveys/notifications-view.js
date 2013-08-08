@@ -8,20 +8,20 @@ FLOW.NotificationsView = FLOW.View.extend({
   destinationEmpty: false,
   dateEmpty: false,
 
-  addNotification: function() {
+  addNotification: function () {
     var date;
 
-    this.set('optionEmpty', Ember.isNone(this.get('notificationOption')));
-    this.set('typeEmpty', Ember.isNone(this.get('notificationType')));
-    this.set('destinationEmpty', Ember.isNone(this.get('notificationDestination')));
-    this.set('dateEmpty', Ember.isNone(this.get('expiryDate')));
+    this.set('optionEmpty', Ember.none(this.get('notificationOption')));
+    this.set('typeEmpty', Ember.none(this.get('notificationType')));
+    this.set('destinationEmpty', Ember.none(this.get('notificationDestination')));
+    this.set('dateEmpty', Ember.none(this.get('expiryDate')));
 
-    if(Ember.isNone(this.get('expiryDate'))) {
+    if(Ember.none(this.get('expiryDate'))) {
       date = null;
     } else {
       date = Date.parse(this.get('expiryDate'));
     }
-    if(this.get('optionEmpty') || this.get('typeEmpty') || this.get('destinationEmpty') || this.get('dateEmpty')) {
+    if (this.get('optionEmpty') || this.get('typeEmpty') || this.get('destinationEmpty') || this.get('dateEmpty')) {
       // do nothing
     } else {
       FLOW.store.createRecord(FLOW.NotificationSubscription, {
@@ -40,18 +40,18 @@ FLOW.NotificationsView = FLOW.View.extend({
     }
   },
 
-  cancelNotification: function() {
+  cancelNotification: function () {
     this.set('notificationEvent', null);
     this.set('notificationType', null);
     this.set('notificationDestination', null);
     this.set('expiryDate', null);
   },
 
-  closeNotifications: function(router, event) {
+  closeNotifications: function (router, event) {
     FLOW.router.transitionTo('navSurveys.navSurveysEdit.editQuestions');
   },
 
-  removeNotification: function(event) {
+  removeNotification: function (event) {
     var nDeleteId, notification;
     nDeleteId = event.context.get('keyId');
 

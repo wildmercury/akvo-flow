@@ -57,6 +57,19 @@ input 'app' do
     concat 'js/app.js'
   end
 
+  # match 'js/vendor/**/*.js' do
+  #   filter LoaderFilter,
+  #     :module_id_generator => proc { |input|
+  #       input.path.sub(/^js\/vendor\//, "vendor/").sub(/\.js$/, '')
+  #     }
+
+  #   if ENV['RAKEP_MODE'] == 'production'
+  #     filter EmberAssertFilter
+  #     uglify {|input| input}
+  #   end
+  #   concat 'js/app.js'
+  # end
+
   match 'js/plugins/**/*.js' do
     if ENV['RAKEP_MODE'] == 'production'
       uglify {|input| input}
@@ -91,13 +104,21 @@ input 'app' do
     end
   end
 
+ # match "js/vendor/**/*.js" do
+ #   concat do |input|
+ #     input
+ #   end
+ # end
+
+end
+
+output '../GAE/war/vendorjs'
+input 'app' do
   match "js/vendor/**/*.js" do
     concat do |input|
       input
     end
   end
-
-
 end
 
 output 'test_assets'

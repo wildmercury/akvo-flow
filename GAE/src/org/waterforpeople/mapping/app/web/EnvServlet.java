@@ -53,6 +53,8 @@ public class EnvServlet extends HttpServlet {
 	static {
 		properties.add("photo_url_root");
 		properties.add("imageroot");
+		properties.add("flowServices");
+		properties.add("surveyuploadurl");
 	}
 
 	@Override
@@ -83,24 +85,28 @@ public class EnvServlet extends HttpServlet {
 		final BaseDAO<Country> countryDAO = new BaseDAO<Country>(Country.class);
 		final JSONArray jsonArray = new JSONArray();
 		for (Country c : countryDAO.list(Constants.ALL_RESULTS)) {
-			if (c.getCentroidLat() == null || c.getCentroidLon() == null) {
-				log.log(Level.WARNING,
-						"Skipping " + c.getName()
-								+ " from country list - Lat/Lon values: "
-								+ c.getCentroidLat() + "/" + c.getCentroidLon());
+			if (c.getIncludeInExternal() != null
+					&& c.getIncludeInExternal()
+					&& (c.getCentroidLat().equals(0d) || c.getCentroidLon()
+							.equals(0d))) {
+				log.log(Level.SEVERE,
+						"Country "
+								+ c.getIsoAlpha2Code()
+								+ " was configured to show in the map, but doesn't have proper centroids");
 				continue;
 			}
-			jsonArray.put(new JSONObject(c));
+			if (c.getIncludeInExternal() != null && c.getIncludeInExternal()) {
+				jsonArray.put(new JSONObject(c));
+			}
 		}
 		props.put("countries", jsonArray.toString());
 
 		context.put("env", props);
 
-		
 		final List<Map<String, String>> roles = new ArrayList<Map<String, String>>();
 		for (AppRole r : AppRole.values()) {
-			if (r.getLevel() < 0) {
-				continue; // don't expose NEW_USER
+			if (r.getLevel() < 10) {
+				continue; // don't expose NEW_USER, nor SUPER_USER
 			}
 			Map<String, String> role = new HashMap<String, String>();
 			role.put("value", String.valueOf(r.getLevel()));
@@ -118,5 +124,4 @@ public class EnvServlet extends HttpServlet {
 		pw.println(writer.toString());
 		pw.close();
 	}
-
 }

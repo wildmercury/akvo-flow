@@ -206,12 +206,12 @@ public class SurveyRestServlet extends AbstractRestApiServlet {
 	 * @param graphType
 	 * @return
 	 */
-	private String constructChartUrl(Integer questionId, String graphType) {
+	private String constructChartUrl(Long questionId, String graphType) {
 		StringBuilder url = new StringBuilder(CHART_API_URL);
 		SurveyQuestionSummaryDao summaryDao = new SurveyQuestionSummaryDao();
 		List<SurveyQuestionSummary> summaries = summaryDao
 				.listByQuestion(questionId.toString());
-		Question q = qDao.getByKey(new Long(questionId));
+		Question q = qDao.getByKey(questionId);
 		if (q != null && summaries != null) {
 			url.append(q.getText()).append(CHART_API_LEGEND_PARAM);
 			StringBuilder legend = new StringBuilder();
@@ -270,8 +270,7 @@ public class SurveyRestServlet extends AbstractRestApiServlet {
 	@Override
 	protected void writeOkResponse(RestResponse resp) throws Exception {
 		getResponse().setStatus(200);
-		JSONObject obj = new JSONObject(resp, true);
-		getResponse().getWriter().println(obj.toString());
+		getResponse().getWriter().println(new JSONObject(resp, true).toString());
 	}
 
 	/**

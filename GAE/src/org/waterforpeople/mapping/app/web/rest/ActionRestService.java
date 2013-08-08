@@ -29,12 +29,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.waterforpeople.mapping.analytics.dao.SurveyInstanceSummaryDao;
 import org.waterforpeople.mapping.analytics.domain.SurveyInstanceSummary;
 import org.waterforpeople.mapping.app.web.dto.BootstrapGeneratorRequest;
+import org.waterforpeople.mapping.app.web.dto.DataProcessorRequest;
 import org.waterforpeople.mapping.app.web.rest.dto.RestStatusDto;
 import org.waterforpeople.mapping.dao.SurveyInstanceDAO;
 import org.waterforpeople.mapping.app.gwt.server.survey.SurveyServiceImpl;
 
 import com.gallatinsystems.common.Constants;
+import com.gallatinsystems.survey.dao.QuestionDao;
 import com.gallatinsystems.survey.dao.SurveyDAO;
+import com.gallatinsystems.survey.domain.Question;
 import com.gallatinsystems.survey.domain.Survey;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.taskqueue.Queue;
@@ -47,6 +50,9 @@ public class ActionRestService {
 
 	@Inject
 	private SurveyDAO surveyDao;
+
+	@Inject
+	private QuestionDao questionDao;
 
 	@RequestMapping(method = RequestMethod.GET, value = "")
 	@ResponseBody
@@ -71,12 +77,38 @@ public class ActionRestService {
 			message = generateBootstrapFile(surveyIds, dbInstructions, email);
 			status = "ok";
 			statusDto.setMessage(message);
+		} else if ("removeZeroValues".equals(action)) {
+			status = removeZeroMinMaxValues();
+		} else if ("fixOptions2Values".equals(action)){
+			status = fixOptions2Values();
 		}
 
 		statusDto.setStatus(status);
 		response.put("actions", "[]");
 		response.put("meta", statusDto);
 		return response;
+	}
+
+	// remove zero minVal and maxVal values
+	// that were the result of a previous bug
+	private String removeZeroMinMaxValues() {
+		List<Question> questions = questionDao.list(Constants.ALL_RESULTS);
+		int counter = 0;
+		if (questions != null) {
+			Double epsilon = 0.000001;
+			for (Question q : questions) {
+				if (q.getMinVal() != null && q.getMaxVal() != null) {
+					if (Math.abs(q.getMinVal()) < epsilon
+							&& Math.abs(q.getMaxVal()) < epsilon) {
+						q.setMinVal(null);
+						q.setMaxVal(null);
+						questionDao.save(q);
+						counter +=1;
+					}
+				}
+			}
+		}
+		return "updated " + counter + " questions";
 	}
 
 	@SuppressWarnings("unused")
@@ -121,6 +153,18 @@ public class ActionRestService {
 		return "publishing requested";
 	}
 
+	private String fixOptions2Values() {
+		Queue queue = QueueFactory.getDefaultQueue();
+		TaskOptions options = TaskOptions.Builder
+				.withUrl("/app_worker/dataprocessor")
+				.param(DataProcessorRequest.ACTION_PARAM,
+						DataProcessorRequest.FIX_OPTIONS2VALUES_ACTION);
+		queue.add(options);
+		
+		return "fixing opions to values in surveyInstances requested";
+	}
+	
+	
 	private String generateBootstrapFile(Long[] surveyIdList,
 			String dbInstructions, String notificationEmail) {
 

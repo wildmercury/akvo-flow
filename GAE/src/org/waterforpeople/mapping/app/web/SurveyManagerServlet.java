@@ -17,6 +17,7 @@
 package org.waterforpeople.mapping.app.web;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,13 +63,13 @@ public class SurveyManagerServlet extends AbstractRestApiServlet {
 	}
 
 	//Return a list all the surveys the device needs
-	//TODO use the imei for lookup if given
+	//use imei or phone number for lookup
 	private String getSurveyForPhone(String devicePhoneNumber, String imei) {
 		DeviceSurveyJobQueueDAO dsjqDAO = new DeviceSurveyJobQueueDAO();
 		SurveyDAO surveyDao = new SurveyDAO();
 		Map<Long, Double> versionMap = new HashMap<Long, Double>();
 		StringBuilder sb = new StringBuilder();
-		for (DeviceSurveyJobQueue dsjq : dsjqDAO.get(devicePhoneNumber)) {
+		for (DeviceSurveyJobQueue dsjq : dsjqDAO.get(devicePhoneNumber, imei)) {
 			Double ver = versionMap.get(dsjq.getSurveyID());
 			if (ver == null) {
 				Survey s = surveyDao.getById(dsjq.getSurveyID());
@@ -138,7 +139,7 @@ public class SurveyManagerServlet extends AbstractRestApiServlet {
 			//Report which surveys the device should have
 			Device dev = null;
 			if (mgrReq.getPhoneNumber() != null || mgrReq.getImei() != null) {
-				resp.setMessage(getSurveyForPhone(mgrReq.getPhoneNumber(),mgrReq.getImei()));
+				resp.setMessage(getSurveyForPhone(mgrReq.getPhoneNumber(), mgrReq.getImei()));
 				// now check to see if we need to update the device
 				if (mgrReq.getImei() != null){ 
 					dev = deviceDao.getByImei(mgrReq.getImei());
@@ -159,6 +160,8 @@ public class SurveyManagerServlet extends AbstractRestApiServlet {
 					dev.setPhoneNumber(mgrReq.getPhoneNumber());
 					dev.setDeviceType(DeviceType.CELL_PHONE_ANDROID);
 					dev.setDeviceIdentifier(mgrReq.getDeviceId());
+					dev.setLastLocationBeaconTime(new Date());
+					dev.setGallatinSoftwareManifest(mgrReq.getVersion());
 					deviceDao.save(dev);
 				}
 			}
@@ -191,6 +194,8 @@ public class SurveyManagerServlet extends AbstractRestApiServlet {
 					device.setDeviceType(DeviceType.CELL_PHONE_ANDROID);
 					device.setDeviceIdentifier(mgrReq.getDeviceId());
 					device.setPhoneNumber(mgrReq.getPhoneNumber());
+					device.setLastLocationBeaconTime(new Date());
+					device.setGallatinSoftwareManifest(mgrReq.getVersion());
 					deviceDao.save(device);
 				}
 			}

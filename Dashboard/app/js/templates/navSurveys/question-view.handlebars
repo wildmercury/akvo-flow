@@ -7,6 +7,8 @@
     <label>{{t _question_help_tooltip}}: <span class="fadedText">({{t _optional}})</span> {{view Ember.TextField valueBinding="view.tip" size=100 }} </label>
  
     <label class="labelcheckbox">{{view Ember.Checkbox checkedBinding="view.mandatoryFlag"}}{{t _mandatory}}</label>
+
+    {{#if view.undef }}
     <label class="selectinLabel"><span>{{t _tag}} {{tooltip _what_is_tag}}:</span> {{view Ember.Select 
       contentBinding="FLOW.attributeControl.content" 
       optionLabelPath="content.name" 
@@ -16,6 +18,7 @@
       promptBinding="Ember.STRINGS._select_tag"}}
 	   <a {{action "showAddAttributeDialog" target="this"}} class="addAttribute"><span>+</span>{{t _add_tag}} </a> </label>
       {{#if view.attribute}}<label class="labelcheckbox">{{view Ember.Checkbox checkedBinding="view.includeInMap"}}{{t _include_in_map}}</label>{{/if}}
+    {{/if}}
 
     <label class="selectinLabel"><span>{{t _question_type}}:</span> {{view Ember.Select 
       contentBinding="FLOW.questionTypeControl.content" 
@@ -38,7 +41,7 @@
     {{#if view.amNumberType}}
 	  <h1 class="answerNbr">{{t _number_details}}: </h1>
       <label class="labelcheckbox"> {{view Ember.Checkbox checkedBinding="view.allowSign"}}{{t _allow_sign}} </label>
-      <label class="labelcheckbox"> {{view Ember.Checkbox checkedBinding="view.allowDecimalPoint"}}{{t _allow_decimal_point}} </label>
+      <label class="labelcheckbox"> {{view Ember.Checkbox checkedBinding="view.allowDecimal"}}{{t _allow_decimal_point}} </label>
 
       <label class="minValNumb">{{t _min_val}}: {{view Ember.TextField valueBinding="view.minVal" size=10 }}</label>
       <label class="maxValNumb">{{t _max_val}}: {{view Ember.TextField valueBinding="view.maxVal" size=10 }}</label>
@@ -56,7 +59,7 @@
     </label>
 
      {{#if view.dependentFlag}}
-    <label class="selectinLabel dependencySelect"> Dependent question:
+    <label class="selectinLabel dependencySelect"> {{t _dependent_question}}:
         {{view Ember.Select 
         contentBinding="FLOW.questionControl.earlierOptionQuestions" 
         selectionBinding="FLOW.selectedControl.dependentQuestion" 
@@ -66,9 +69,9 @@
     {{/if}} 
      {{#if view.dependentFlag}}
     {{#if FLOW.selectedControl.dependentQuestion}}
-     <div class="qDependency">Answer of dependent question (select one):</div>
-      {{#each FLOW.optionListControl.content}}
-        {{view Em.RadioButton title=this.value option=this.value group="options" checked=this.isSelected valueBinding="FLOW.selectedControl.radioOptions"}} 
+     <div class="qDependency">{{t _answer_of_dependent_question}}:</div>
+      {{#each item in FLOW.optionListControl.content}}
+        <label>{{view Ember.Checkbox checkedBinding="item.isSelected"}}{{item.value}}</label>
       {{/each}}
       {{/if}}
   {{/if}}

@@ -173,6 +173,12 @@
 		source="manual">
 		<property name="__key__" direction="desc" />
 	</datastore-index>
+	<datastore-index kind="QuestionAnswerStore" ancestor="false"
+	    source="manual">
+		<property name="questionID" direction="asc"/>
+		<property name="surveyInstanceId" direction="asc"/>
+		<property name="createdDateTime" direction="desc"/>
+	</datastore-index>
 	<datastore-index kind="AccessPoint" ancestor="false"
 		source="manual">
 		<property name="pointStatus" direction="asc" />
@@ -359,15 +365,7 @@
 		source="manual">
 		<property name="coordinates_INTEGER_IDX" direction="asc" />
 	</datastore-index>
-	<datastore-index kind="SurveyInstance" ancestor="false"
-		source="manual">
-		<property name="approvedFlag" direction="asc" />
-		<property name="collectionDate" direction="desc" />
-	</datastore-index>
-	<datastore-index kind="SurveyInstance" ancestor="false"
-		source="manual">
-		<property name="__key__" direction="desc" />
-	</datastore-index>
+	
 	<datastore-index kind="AccessPointScoreDetail"
 		ancestor="false" source="manual">
 		<property name="accessPointId" direction="asc" />
@@ -402,11 +400,7 @@
 		<property name="waterForPeopleProjectFlag" direction="asc" />
 		<property name="collectionDate" direction="asc" />
 	</datastore-index>
-	<datastore-index kind="SurveyInstance" ancestor="false"
-		source="auto">
-		<property name="surveyedLocaleId" direction="asc" />
-		<property name="collectionDate" direction="desc" />
-	</datastore-index>
+
 	<datastore-index kind="AccessPointScoreComputationItem"
 		ancestor="true" source="manual">
 		<property name="scoreComputationItems_INTEGER_IDX" direction="asc" />
@@ -427,25 +421,48 @@
 		<property name="localeType" direction="asc" />
 		<property name="latitude" direction="asc" />
 	</datastore-index>
-	  <datastore-index kind="SurveyInstance" ancestor="false" >
+	
+	 <datastore-index kind="SurveyedLocale" ancestor="false" source="manual">
+        <property name="countryCode" direction="asc"/>
+        <property name="localeType" direction="asc"/>
+    </datastore-index>
+	
+	 <datastore-index kind="SurveyedLocale" ancestor="false" source="manual">
+        <property name="countryCode" direction="asc"/>
+        <property name="localeType" direction="asc"/>
+        <property name="createdDateTime" direction="desc"/>
+    </datastore-index>
+    
+   <datastore-index kind="SurveyInstance" ancestor="false"
+		source="manual">
+		<property name="__key__" direction="desc" />
+	</datastore-index> 
+	
+	
+	<datastore-index kind="SurveyInstance" ancestor="false" >
         <property name="surveyId" direction="asc"/>
         <property name="collectionDate" direction="desc"/>
     </datastore-index>
-    <datastore-index kind="SurveyInstance" ancestor="false">
+    <datastore-index kind="SurveyInstance" ancestor="false"
+		source="auto">
+		<property name="surveyedLocaleId" direction="asc" />
+		<property name="collectionDate" direction="desc" />
+	</datastore-index>
+	<datastore-index kind="SurveyInstance" ancestor="false"
+		source="manual">
+		<property name="approvedFlag" direction="asc" />
+		<property name="collectionDate" direction="desc" />
+	</datastore-index>
+	 <datastore-index kind="SurveyInstance" ancestor="false">
         <property name="deviceIdentifier" direction="asc"/>
         <property name="collectionDate" direction="desc"/>
     </datastore-index>
-    <datastore-index kind="SurveyInstance" ancestor="false">
-        <property name="deviceIdentifier" direction="asc"/>
-        <property name="surveyId" direction="asc"/>
+     <datastore-index kind="SurveyInstance" ancestor="false">
+        <property name="submitterName" direction="asc"/>
         <property name="collectionDate" direction="desc"/>
     </datastore-index>
-    <datastore-index kind="SurveyInstance" ancestor="false">
-        <property name="approvedFlag" direction="asc"/>
-        <property name="deviceIdentifier" direction="asc"/>
-        <property name="surveyId" direction="asc"/>
-        <property name="collectionDate" direction="desc"/>
-    </datastore-index>
+    
+    
  	<datastore-index kind="SurveyedLocale" ancestor="false">
         <property name="localeType" direction="asc"/>
         <property name="lastSurveyedDate" direction="asc"/>
@@ -479,4 +496,5 @@
         <property name="organization" direction="asc"/>
         <property name="name" direction="asc"/>
     </datastore-index>
+
 </datastore-indexes>

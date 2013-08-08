@@ -16,7 +16,9 @@
 
 package com.gallatinsystems.survey.dao;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,29 +27,39 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
+import org.waterforpeople.mapping.app.gwt.client.survey.SurveyDto;
 
 import com.gallatinsystems.common.Constants;
+import com.gallatinsystems.common.util.HttpUtil;
+import com.gallatinsystems.common.util.PropertyUtil;
 import com.gallatinsystems.survey.domain.Question;
 import com.gallatinsystems.survey.domain.QuestionGroup;
 import com.gallatinsystems.survey.domain.QuestionOption;
 import com.gallatinsystems.survey.domain.Survey;
+import com.gallatinsystems.survey.domain.SurveyGroup;
 
 public class SurveyUtils {
 
 	private static final Logger log = Logger.getLogger(SurveyUtils.class
 			.getName());
 
-	public static Survey copySurvey(Survey source) {
+	public static Survey copySurvey(Survey source, SurveyDto dto) {
 
 		final SurveyDAO sDao = new SurveyDAO();
 		final Survey tmp = new Survey();
 		final QuestionGroupDao qgDao = new QuestionGroupDao();
+		final Map<Long, Long> qMap = new HashMap<Long, Long>();
 
 		BeanUtils.copyProperties(source, tmp, Constants.EXCLUDED_PROPERTIES);
-		tmp.setCode(tmp.getCode() + " <Copy>"); // FIXME: I18N
-		tmp.setName(tmp.getName() + " <Copy>"); // FIXME: I18N
+		// set name and surveyGroupId to values we got from the dashboard
+		tmp.setCode(dto.getCode()); 
+		tmp.setName(dto.getName()); 
+		tmp.setSurveyGroupId(dto.getSurveyGroupId());
+		
 		tmp.setStatus(Survey.Status.NOT_PUBLISHED);
+		tmp.setPath(getPath(tmp));
 
 		log.log(Level.INFO, "Copying `Survey` " + source.getKey().getId());
 		final Survey newSurvey = sDao.save(tmp);
@@ -65,14 +77,14 @@ public class SurveyUtils {
 		int qgOrder = 1;
 		for (final QuestionGroup sourceQG : qgList) {
 			SurveyUtils.copyQuestionGroup(sourceQG, newSurvey.getKey().getId(),
-					qgOrder++);
+					qgOrder++, qMap);
 		}
 
 		return newSurvey;
 	}
 
 	public static QuestionGroup copyQuestionGroup(QuestionGroup source,
-			Long newSurveyId, Integer order) {
+			Long newSurveyId, Integer order, Map<Long, Long> qMap) {
 
 		final QuestionGroupDao qgDao = new QuestionGroupDao();
 		final QuestionDao qDao = new QuestionDao();
@@ -100,29 +112,28 @@ public class SurveyUtils {
 
 		log.log(Level.INFO, "Copying " + qList.size() + " `Question`");
 
-		final Map<Long, Long> qMap = new HashMap<Long, Long>();
-		final List<Question> newQuestionList = new ArrayList<Question>();
+		final List<Question> dependentQuestionList = new ArrayList<Question>();
 
 		int qCount = 1;
 		for (Question q : qList) {
 			final Question qTmp = SurveyUtils.copyQuestion(q, newQuestionGroup
 					.getKey().getId(), qCount++);
-			if (qTmp.getDependentFlag()) {
-				qMap.put(q.getKey().getId(), qTmp.getKey().getId());
-				newQuestionList.add(qTmp);
+			qMap.put(q.getKey().getId(), qTmp.getKey().getId());
+			if (qTmp.getDependentFlag() != null && qTmp.getDependentFlag()) {
+				dependentQuestionList.add(qTmp);
 			}
 		}
 
 		// fixing dependencies
 
-		log.log(Level.INFO, "Fixing dependencies for " + newQuestionList.size()
+		log.log(Level.INFO, "Fixing dependencies for " + dependentQuestionList.size()
 				+ " `Question`");
 
-		for (Question nQ : newQuestionList) {
+		for (Question nQ : dependentQuestionList) {
 			nQ.setDependentQuestionId(qMap.get(nQ.getDependentQuestionId()));
 		}
 
-		qDao.save(newQuestionList);
+		qDao.save(dependentQuestionList);
 
 		return newQuestionGroup;
 	}
@@ -192,4 +203,74 @@ public class SurveyUtils {
 		return newQuestionOption;
 	}
 
+	private static String getPath(Survey s) {
+		if (s == null) {
+			return null;
+		}
+
+		final SurveyGroupDAO dao = new SurveyGroupDAO();
+		final SurveyGroup sg = dao.getByKey(s.getSurveyGroupId());
+
+		if (sg == null) {
+			return null;
+		}
+
+		return sg.getName() + "/" + s.getName();
+	}
+
+	/**
+	 * Sends a POST request of a collection of surveyIds to a server defined by
+	 * the `flowServices` property
+	 * 
+	 * The property `alias` define the baseURL property that is sent in the
+	 * request
+	 * 
+	 * @param surveyIds
+	 *            Collection of ids (Long) that requires processing
+	 * @param action
+	 *            A string indicating the action that will be used, this string
+	 *            is used for building the URL, with the `flowServices`
+	 *            property + / + action
+	 * @return The response from the server or null when `flowServices` is not
+	 *         defined, or an error in the request happens
+	 */
+	public static String notifyReportService(Collection<Long> surveyIds,
+			String action) {
+		final String flowServiceURL = PropertyUtil
+				.getProperty("flowServices");
+		final String baseURL = PropertyUtil.getProperty("alias");
+
+		if (flowServiceURL == null || "".equals(flowServiceURL)) {
+			log.log(Level.SEVERE,
+					"Error trying to notify server. It's not configured, check `flowServices` property");
+			return null;
+		}
+
+		try {
+
+			final JSONObject payload = new JSONObject();
+			payload.put("surveyIds", surveyIds);
+			payload.put("baseURL", (baseURL.startsWith("http") ? baseURL
+					: "http://" + baseURL));
+
+			log.log(Level.INFO, "Sending notification (" + action
+					+ ") for surveys: " + surveyIds);
+
+			final String postString = "criteria="
+					+ URLEncoder.encode(payload.toString(), "UTF-8");
+
+			log.log(Level.FINE, "POST string: " + postString);
+
+			final String response = new String(HttpUtil.doPost(flowServiceURL
+					+ "/" + action, postString), "UTF-8");
+
+			log.log(Level.INFO, "Response from server: " + response);
+
+			return response;
+		} catch (Exception e) {
+			log.log(Level.SEVERE,
+					"Error notifying the report service: " + e.getMessage(), e);
+		}
+		return null;
+	}
 }

@@ -7,7 +7,7 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
-    
+
 
     <servlet>
         <servlet-name>rest</servlet-name>
@@ -253,6 +253,14 @@
 	<servlet-mapping>
 		<servlet-name>TestHarness</servlet-name>
 		<url-pattern>/webapp/testharness</url-pattern>
+	</servlet-mapping>
+	<servlet>
+	<servlet-name>PublishSurvey</servlet-name>
+		<servlet-class>org.waterforpeople.mapping.app.web.PublishSurveyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PublishSurvey</servlet-name>
+		<url-pattern>/publishsurvey</url-pattern>
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>AccessPointServlet</servlet-name>
@@ -737,33 +745,6 @@
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
-<!-- <servlet>
-  <servlet-name>SystemServiceServlet</servlet-name>
-  <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
-  <init-param>
-   <param-name>services</param-name>
-   <param-value/>
-  </init-param>
- </servlet>
- <servlet-mapping>
-  <servlet-name>SystemServiceServlet</servlet-name>
-  <url-pattern>/_ah/spi/*</url-pattern>
- </servlet-mapping> -->
-  <!-- <servlet>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
-    <init-param>
-      <param-name>services</param-name>
-      <param-value/>
-    </init-param>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <url-pattern>/_ah/spi/*</url-pattern>
-  </servlet-mapping> -->
-
-  <!--
   <servlet>
     <servlet-name>SystemServiceServlet</servlet-name>
     <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
@@ -777,5 +758,5 @@
     <servlet-name>SystemServiceServlet</servlet-name>
     <url-pattern>/_ah/spi/*</url-pattern>
   </servlet-mapping>
-	-->
+
 </web-app>

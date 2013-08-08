@@ -21,6 +21,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.text.DateFormat;
@@ -61,7 +62,10 @@ import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
 import com.gallatinsystems.framework.rest.RestRequest;
 import com.gallatinsystems.framework.rest.RestResponse;
 import com.gallatinsystems.image.GAEImageAdapter;
+import com.gallatinsystems.messaging.dao.MessageDao;
+import com.gallatinsystems.messaging.domain.Message;
 import com.gallatinsystems.survey.dao.SurveyDAO;
+import com.gallatinsystems.survey.dao.SurveyUtils;
 import com.gallatinsystems.survey.domain.Survey;
 import com.gallatinsystems.surveyal.app.web.SurveyalRestRequest;
 import com.google.appengine.api.taskqueue.Queue;
@@ -83,6 +87,7 @@ public class TaskServlet extends AbstractRestApiServlet {
 	private SurveyInstanceDAO siDao;
 	private final static String EMAIL_FROM_ADDRESS_KEY = "emailFromAddress";
 	private TreeMap<String, String> recepientList = null;
+	private static final int CONNECTION_TIMEOUT = 5 * 60 * 1000; // 5min
 
 	public TaskServlet() {
 		DEVICE_FILE_PATH = com.gallatinsystems.common.util.PropertyUtil
@@ -92,37 +97,62 @@ public class TaskServlet extends AbstractRestApiServlet {
 		aph = new AccessPointHelper();
 		siDao = new SurveyInstanceDAO();
 		recepientList = MailUtil.loadRecipientList();
-
 	}
 
-	private ArrayList<SurveyInstance> processFile(String fileName,
-			String phoneNumber, String checksum, Integer offset) {
+	/**
+	 * Retrieve the file from S3 storage and persist the data to the data store
+	 * 
+	 * @param fileName
+	 * @param phoneNumber
+	 * @param imei
+	 * @param checksum
+	 * @param offset
+	 */
+	private ArrayList<SurveyInstance> processFile(
+			String fileName,
+			String phoneNumber,
+			String imei,
+			String checksum,
+			Integer offset) {
 		ArrayList<SurveyInstance> surveyInstances = new ArrayList<SurveyInstance>();
 
 		try {
 			DeviceFilesDao dfDao = new DeviceFilesDao();
+
 			URL url = new URL(DEVICE_FILE_PATH + fileName);
-			BufferedInputStream bis = new BufferedInputStream(url.openStream());
+			URLConnection conn = url.openConnection();
+			conn.setConnectTimeout(CONNECTION_TIMEOUT);
+			conn.setReadTimeout(CONNECTION_TIMEOUT);
+
+			BufferedInputStream bis = new BufferedInputStream(conn.getInputStream());
 			ZipInputStream zis = new ZipInputStream(bis);
 			List<DeviceFiles> dfList = null;
 			DeviceFiles deviceFile = null;
 			dfList = dfDao.listByUri(url.toURI().toString());
-			if (dfList != null && dfList.size()>0)
+			if (dfList != null && dfList.size()>0) {
 				deviceFile = dfList.get(0);
+			}
 			if (deviceFile == null) {
 				deviceFile = new DeviceFiles();
 			}
 			deviceFile.setProcessDate(getNowDateTimeFormatted());
 			deviceFile.setProcessedStatus(StatusCode.IN_PROGRESS);
 			deviceFile.setURI(url.toURI().toString());
-			if (phoneNumber == null || phoneNumber.equals("null"))
+			if (phoneNumber == null || phoneNumber.equals("null")) {
 				deviceFile.setPhoneNumber(null);
-			else
+			} else {
 				deviceFile.setPhoneNumber(phoneNumber);
-			if (checksum == null || checksum.equals("null"))
+			}
+			if (imei == null || imei.equals("null")) {
+				deviceFile.setImei(null);
+			} else {
+				deviceFile.setImei(imei);
+			}
+			if (checksum == null || checksum.equals("null")) {
 				deviceFile.setChecksum(null);
-			else
+			} else {
 				deviceFile.setChecksum(checksum);
+			}
 			deviceFile.setUploadDateTime(new Date());
 			Date collectionDate = new Date();
 
@@ -419,11 +449,13 @@ public class TaskServlet extends AbstractRestApiServlet {
 		if (req.getFileName() != null) {
 			log.info("	Task->processFile");
 			ArrayList<SurveyInstance> surveyInstances = processFile(
-					req.getFileName(), req.getPhoneNumber(), req.getChecksum(),
+					req.getFileName(),
+					req.getPhoneNumber(),
+					req.getImei(),
+					req.getChecksum(),
 					req.getOffset());
 			Map<Long, Survey> surveyMap = new HashMap<Long, Survey>();
 			SurveyDAO surveyDao = new SurveyDAO();
-			Queue summQueue = QueueFactory.getQueue("dataSummarization");
 			Queue defaultQueue = QueueFactory.getDefaultQueue();
 			for (SurveyInstance instance : surveyInstances) {
 				Survey s = surveyMap.get(instance.getSurveyId());
@@ -447,10 +479,6 @@ public class TaskServlet extends AbstractRestApiServlet {
 					log.info("Received Task Queue calls for surveyInstanceKey: "
 							+ instance.getKey().getId() + "");
 					aph.processSurveyInstance(instance.getKey().getId() + "");
-					summQueue.add(TaskOptions.Builder.withUrl("/app_worker/datasummarization").param(
-							"objectKey", instance.getKey().getId() + "").param(
-							"type", "SurveyInstance"));
-					// process the "new" domain structure
 
 					defaultQueue.add(TaskOptions.Builder.withUrl("/app_worker/surveyalservlet").param(
 							SurveyalRestRequest.ACTION_PARAM,
@@ -459,6 +487,26 @@ public class TaskServlet extends AbstractRestApiServlet {
 							instance.getKey().getId() + ""));
 				}
 			}
+			SurveyUtils.notifyReportService(surveyMap.keySet(), "invalidate");
+
+			MessageDao msgDao = new MessageDao();
+			Message message = new Message();
+			message.setShortMessage(req.getFileName() + " processed - Surveys: " + surveyMap.keySet());
+
+			if(req.getFileName().startsWith("wfpGenerated")) {
+				message.setActionAbout("bulkProcessed");
+			} else {
+				message.setActionAbout("fileProcessed");
+			}
+
+			if (surveyMap.keySet().size() == 1) {
+				Survey s = surveyMap.values().iterator().next();
+				if (s != null) {
+					message.setObjectId(s.getKey().getId());
+					message.setObjectTitle(s.getPath() + "/" + s.getName());
+				}
+			}
+			msgDao.save(message);
 		}
 	}
 

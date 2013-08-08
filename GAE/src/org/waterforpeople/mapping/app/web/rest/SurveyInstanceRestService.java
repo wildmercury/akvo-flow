@@ -39,6 +39,7 @@ import org.waterforpeople.mapping.dao.SurveyInstanceDAO;
 import org.waterforpeople.mapping.domain.SurveyInstance;
 
 import com.gallatinsystems.survey.dao.SurveyDAO;
+import com.gallatinsystems.survey.dao.SurveyUtils;
 import com.gallatinsystems.survey.domain.Survey;
 
 @Controller
@@ -57,11 +58,15 @@ public class SurveyInstanceRestService {
 			@RequestParam(value = "surveyId", defaultValue = "") Long surveyId,
 			@RequestParam(value = "since", defaultValue = "") String since,
 			@RequestParam(value = "unapprovedOnlyFlag",defaultValue = "") Boolean unapprovedOnlyFlag,
-			@RequestParam(value = "deviceId", defaultValue = "") String deviceId) {
+			@RequestParam(value = "deviceId", defaultValue = "") String deviceId,
+			@RequestParam(value = "submitterName", defaultValue = "") String submitterName) {
 		
-		// we don't want to search for empty deviceId's
+		// we don't want to search for empty deviceId's and submitter names
 		if ("".equals(deviceId)) {
 			deviceId = null;
+		}
+		if ("".equals(submitterName)) {
+			submitterName = null;
 		}
 		
 		final Map<String, Object> response = new HashMap<String, Object>();
@@ -97,8 +102,8 @@ public class SurveyInstanceRestService {
 		// get survey Instances
 		List<SurveyInstance> siList = null;
 		SurveyInstanceDAO dao = new SurveyInstanceDAO();
-		siList = dao.listByDateRange(beginDate, endDate, false,
-				surveyId, deviceId, since);
+		siList = dao.listByDateRangeAndSubmitter(beginDate, endDate, false,
+				surveyId, deviceId, submitterName, since);
 		Integer num = siList.size();
 		String newSince = SurveyInstanceDAO.getCursor(siList);
 		
@@ -148,15 +153,20 @@ public class SurveyInstanceRestService {
 
 		// check if surveyInstance exists in the datastore
 		if (s != null) {
-			surveyInstanceDao.delete(s);
+			surveyInstanceDao.deleteSurveyInstance(s);
 			statusDto.setStatus("ok");
 		}
 		response.put("meta", statusDto);
+
+		List<Long> ids = new ArrayList<Long>();
+		ids.add(id);
+		SurveyUtils.notifyReportService(ids, "invalidate");
+
 		return response;
 	}
 
 	// Update survey instance
-	// TODO update counts
+	// TODO: question - when is this used?
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	public Map<String, Object> saveExistingSurveyInstance(

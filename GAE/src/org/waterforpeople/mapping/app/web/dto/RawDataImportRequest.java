@@ -16,6 +16,7 @@
 
 package org.waterforpeople.mapping.app.web.dto;
 
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class RawDataImportRequest extends RestRequest {
 	public static final String RESET_SURVEY_INSTANCE_ACTION = "resetSurveyInstance";
 	public static final String SAVE_FIXED_FIELD_SURVEY_INSTANCE_ACTION = "ingestFixedFormat";
 	public static final String UPDATE_SUMMARIES_ACTION = "updateSummaries";
+	public static final String SAVE_MESSAGE_ACTION = "saveMessage";
 
 	public static final String FIELD_VAL_DELIMITER = ";;";
 
@@ -145,7 +147,7 @@ public class RawDataImportRequest extends RestRequest {
 		}
 		if (req.getParameter(FIXED_FIELD_VALUE_PARAM) != null) {
 			fixedFieldValues = new ArrayList<String>();
-			String[] vals = req.getParameter(FIXED_FIELD_VALUE_PARAM).split(
+			String[] vals = URLDecoder.decode(req.getParameter(FIXED_FIELD_VALUE_PARAM), "UTF-8").split(
 					FIELD_VAL_DELIMITER);
 			for (int i = 0; i < vals.length; i++) {
 				fixedFieldValues.add(vals[i]);
@@ -155,7 +157,7 @@ public class RawDataImportRequest extends RestRequest {
 			String[] answers = req.getParameterValues(QUESTION_ID_PARAM);
 			if (answers != null) {
 				for (int i = 0; i < answers.length; i++) {
-					String[] parts = answers[i].split("\\|");
+					String[] parts = URLDecoder.decode(answers[i], "UTF-8").split("\\|");
 					String qId = null;
 					String val = null;
 					String type = null;
@@ -198,8 +200,11 @@ public class RawDataImportRequest extends RestRequest {
 		}
 		if (req.getParameter(COLLECTION_DATE_PARAM) != null
 				&& req.getParameter(COLLECTION_DATE_PARAM).trim().length() > 0	) {
-			collectionDate = IN_FMT.get().parse(req.getParameter(
-					COLLECTION_DATE_PARAM).trim());
+			String colDate = req.getParameter(COLLECTION_DATE_PARAM).trim();
+			if (colDate.contains("%") || colDate.contains("+")) {
+				colDate = URLDecoder.decode(colDate, "UTF-8");
+			}
+			collectionDate = IN_FMT.get().parse(colDate);
 		}
 		if (req.getParameter(SUBMITTER_PARAM) != null) {
 			setSubmitter(req.getParameter(SUBMITTER_PARAM));

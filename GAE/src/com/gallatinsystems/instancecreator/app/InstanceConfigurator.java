@@ -25,6 +25,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,7 +60,6 @@ import com.gallatinsystems.instancecreator.util.S3PolicySigner;
  * keypass - password for the certificate key in the keystore for signing the applet jar
  * alias - certificate alias in the keystore for signing the applet jar
  * reportsEmailAddress - email address the system should use as the "from" address when sending notifications. NOTE: this address must be a gmail account that has been set up as an instance developer in the appengine console)
- * defaultPhotoCaption - text to use if no photo caption exists on public maps
  * scoreAPFlag - either true or false (depending on whether the instance should use the scoring module or not)
  * organization - name to use for the organization (this will be auto populated on some fields and can show up on the public map)
  * localLocation - directory on the local file system that will store the output of running this utililty
@@ -97,6 +97,7 @@ public class InstanceConfigurator {
 		s3policyFileTemplateName = args[4];
 		ic.addAttribute("s3Id", args[1]);
 		ic.addAttribute("signingKey", args[5]);
+		ic.addAttribute("instanceName", instanceName);
 		ic.addAttribute("dataUploadUrl", "http://" + instanceName + ".s3.amazonaws.com");
 		ic.addAttribute("serverBase", "http://" + instanceName + ".appspot.com");
 		ic.addAttribute("surveyS3Url", "http://" + instanceName + ".s3.amazonaws.com/surveys");
@@ -106,15 +107,14 @@ public class InstanceConfigurator {
 		ic.addAttribute("alias", args[8]);
 		ic.addAttribute("alais", args[8]);
 		ic.addAttribute("reportsEmailAddress", args[9]);
-		ic.addAttribute("defaultPhotoCaption", args[10]);
-		ic.addAttribute("scoreAPFlag", args[11]);
-		ic.addAttribute("organization", args[12]);
+		ic.addAttribute("scoreAPFlag", args[10]);
+		ic.addAttribute("organization", args[11]);
 		 ic.addAttribute("s3Url", "http://" + instanceName + ".s3.amazonaws.com");
 		 ic.addAttribute("s3url", "http://" + instanceName + ".s3.amazonaws.com");
-		String localLocation = args[13];
-		ic.addAttribute("keystore", args[14]);
-		ic.addAttribute("mapsApiKey", args[15]);
-		ic.addAttribute("restApiKey",args[16]);		
+		String localLocation = args[12];
+		ic.addAttribute("keystore", args[13]);
+		ic.addAttribute("mapsApiKey", args[14]);
+		ic.addAttribute("restApiKey", args[15].equals("test") || args[15].equals("") ? UUID.randomUUID().toString() : args[15]);
 
 		localLocation = ic.createLocalDeployDir(localLocation, args[2]);
 
@@ -172,29 +172,32 @@ public class InstanceConfigurator {
 	}
 
 	private static void checkUsage(String[] args) {
-		if (args.length != 17) {
-			System.out
-					.println("Bad command line arguments. Usage:\n\t java com.gallatinsystems.instancecreator.app.InstanceConfigurator <awsSecretKey> <awsIdentifier> <instanceName> <s3Bucket> <directories> <s3policyFileTemplateName> <signingKey> <dataUploadUrl> <serverBase> <storepass> <keypass> <alias> <reportsEmailAddress> <defaultPhotoCaption> <scoreAPFlag> <organization> <localLocation> <keystore> <mapsApiKey> <restApiKey>");
+		if (args.length != 16) {
+			System.out.println("Invalid command line arguments.\n\t" +
+				               "Usage:\n\t java com.gallatinsystems.instancecreator.app.InstanceConfigurator " +
+							   "<awsSecretKey> <awsIdentifier> <instanceName> <directories> <s3policyFileTemplateName> " +
+							   "<signingKey> <storepass> <keypass> <alias> <reportsEmailAddress> <scoreAPFlag> " +
+							   "<organization> <localLocation> <keystore> <mapsApiKey> <restApiKey>");
 			System.exit(1);
 		}
 	}
 
 	private void writeFile(String location, String name, String contents)
 			throws IOException {
-		File file = new File(location + System.getProperty("file.separator")
-				+ name);
+		File file = new File(location + '/' + name);
+
 		if (file.exists()) {
 			if (file.delete()) {
 				file.createNewFile();
 			}
 		}
+
 		Writer output = new BufferedWriter(new FileWriter(file));
 		try {
 			output.write(contents);
 		} finally {
 			output.close();
 		}
-
 	}
 
 	private String createLocalDeployDir(String dir, String instanceName) {

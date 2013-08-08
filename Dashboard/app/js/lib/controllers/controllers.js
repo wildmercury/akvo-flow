@@ -3,23 +3,39 @@
 // ***********************************************//
 // Define the main application controller. This is automatically picked up by
 // the application and initialized.
-require('akvo-flow/core');
+require('akvo-flow/core-common');
 require('akvo-flow/flowenv');
+require('akvo-flow/controllers/languages');
+require('akvo-flow/currentuser');
 require('akvo-flow/controllers/permissions');
-require('akvo-flow/controllers/general-controllers');
+require('akvo-flow/controllers/general-controllers-common');
 require('akvo-flow/controllers/survey-controllers');
 require('akvo-flow/controllers/device-controllers');
 require('akvo-flow/controllers/data-controllers');
 require('akvo-flow/controllers/reports-controllers');
-require('akvo-flow/controllers/maps-controllers');
+require('akvo-flow/controllers/maps-controllers-common');
 require('akvo-flow/controllers/messages-controllers');
 require('akvo-flow/controllers/user-controllers');
 
 FLOW.ApplicationController = Ember.Controller.extend({
-  init: function() {
+  init: function () {
     this._super();
     Ember.STRINGS = Ember.STRINGS_EN;
   }
+});
+
+FLOW.role = Ember.Object.create({
+	SUPER_ADMIN: function () {
+		return FLOW.currentUser && FLOW.currentUser.permissionList === 0;
+	}.property(),
+
+	ADMIN: function () {
+		return FLOW.currentUser && FLOW.currentUser.permissionList <= 10;
+	}.property(),
+
+	USER: function () {
+		return FLOW.currentUser && FLOW.currentUser.permissionList <= 20;
+	}.property()
 });
 
 //require('akvo-flow/currentuser');
