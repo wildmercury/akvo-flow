@@ -87,6 +87,7 @@ input 'app' do
       vendor/jquery.js
       vendor/handlebars.js
       vendor/ember.js
+      vendor/ember-testing.js
       vendor/ember-data.js
     ], 'app.js'
   end
