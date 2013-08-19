@@ -1,11 +1,10 @@
 require('akvo-flow/core');
 
-FLOW.Router = Ember.Router.extend({
-    enableLogging: true,
 
-    root: Ember.Route.extend({
-        index: Ember.Route.extend({
-            route: '/'
-        })
-    })
+FLOW.Router.map(function () {
+    this.resource('survey_groups', function () {
+        this.route('preview');
+    });
 });
+
+FLOW.LoadingRoute = Ember.Route.extend({});

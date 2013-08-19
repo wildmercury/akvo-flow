@@ -30,15 +30,6 @@ class EmberAssertFilter < Filter
   end
 end
 
-class HandlebarsFilter < Filter
-  def generate_output(inputs, output)
-    inputs.each do |input|
-      code = input.read.to_json
-      output.write "\nreturn Ember.Handlebars.compile(#{code});\n"
-    end
-  end
-end
-
 class VersionFilter < Filter
   def generate_output(inputs, output)
     inputs.each do |input|
@@ -74,22 +65,7 @@ input 'app' do
   end
 
   match 'vendor/**/*.js' do
-    filter LoaderFilter,
-      :module_id_generator => proc { |input|
-        input.path.sub(/^vendor\//, '').sub(/\.js$/, '')
-      }
-
-    if ENV['RAKEP_ENV'] == 'production'
-      filter EmberAssertFilter
-      uglify {|input| input}
-    end
-    concat %w[
-      vendor/jquery.js
-      vendor/handlebars.js
-      vendor/ember.js
-      vendor/ember-testing.js
-      vendor/ember-data.js
-    ], 'app.js'
+    copy
   end
 
   match 'modules/**/*.js' do
@@ -110,14 +86,24 @@ input 'app' do
   end
 
   match 'templates/**/*.handlebars' do
-    filter HandlebarsFilter
-    filter LoaderFilter,
-      :module_id_generator => proc { |input|
-        input.path.sub(/^templates\//, "#{APPNAME}/~templates/").sub(/\.handlebars$/, '')
+
+    filter WebFilters::HandlebarsFilter,
+      :key_name_proc => proc { |input|
+
+        base = input.path.split('/')[1]
+        name = File.basename(input.path, File.extname(input.path))
+
+        if base.start_with?(name)
+          name
+        else
+          base + '/' + name
+        end
       }
+
     if ENV['RAKEP_ENV'] == 'production'
       uglify {|input| input}
     end
+
     concat 'app.js'
   end
 
