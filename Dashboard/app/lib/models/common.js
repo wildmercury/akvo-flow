@@ -21,6 +21,11 @@ FLOW.RESTAdapter = RESTAdapter.extend(Evented, {
 
     // Triggering events on certain adapter actions
 
+    ajax: function (url, type, hash) {
+        this.trigger('ajax', type);
+        return this._super(url, type, hash);
+    },
+
     didCreateRecord: function (store, type, record, payload) {
         this._super(store, type, record, payload);
         this.trigger('didCreateRecord');

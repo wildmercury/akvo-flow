@@ -1,0 +1,11 @@
+<h2>Survey Groups</h2>
+<div style="float:left; width: 30%;">
+<ul>
+{{#each model}}
+  <li>{{#linkTo 'survey_group' this}}{{code}}{{/linkTo}}</li>
+{{/each}}
+</ul>
+</div>
+<div style="float:left; width:60%">
+{{outlet}}
+</div>
