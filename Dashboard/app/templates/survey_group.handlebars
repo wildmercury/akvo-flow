@@ -1,9 +1,11 @@
 <h2>{{code}}</h2>
-
+<button {{action 'edit'}}>Edit name</button>
+<button {{action 'delete'}}>Delete this group</button>
+<button {{action 'new'}}>Create new survey</button>
 <div>
 <ul>
 {{#each surveys.arrangedContent}}
-  <li>{{name}} {{version}}</li>
+  {{survey-detail code=code}}
 {{/each}}
 </ul>
 </div>
