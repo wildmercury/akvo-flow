@@ -1,10 +1,10 @@
 <h2>{{code}}</h2>
 
-{{log model}}
-
 <div>
-{{#each surveys}}
-  {{log this}}
-  <p>{{name}} {{version}}</p>
+<ul>
+{{log surveys}}
+{{#each surveys.arrangedContent}}
+  <li>{{name}} {{version}}</li>
 {{/each}}
+</ul>
 </div>

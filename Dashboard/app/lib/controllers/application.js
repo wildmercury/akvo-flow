@@ -9,3 +9,9 @@ FLOW.ApplicationController = Ember.Controller.extend({
         console.log('>>> ajax', type);
     }
 });
+
+
+FLOW.SurveyGroupsController = Ember.ArrayController.extend({
+    sortAscending: true,
+    sortProperties: ['code']
+});

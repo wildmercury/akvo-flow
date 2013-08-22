@@ -52,10 +52,17 @@ FLOW.SurveyGroupsRoute = Ember.Route.extend({
 
 FLOW.SurveyGroupRoute = Ember.Route.extend({
     setupController: function (controller, model) {
-        controller.set('model', model); // default action
-        controller.set('surveys', FLOW.Survey.find({
+        var surveys = Ember.ArrayController.create({
+            sortAscending: true,
+            sortProperties: ['code']
+        });
+
+        surveys.set('content', FLOW.Survey.find({
             surveyGroupId: model.get('id')
         }));
+
+        controller.set('model', model); // default action
+        controller.set('surveys', surveys);
     }
 });
 
