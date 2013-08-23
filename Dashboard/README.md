@@ -7,7 +7,6 @@ Running
 -------
 
     $ bundle install
-    $ bundle exec rackup
 
 App Structure
 -------------
