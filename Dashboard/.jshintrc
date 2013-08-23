@@ -9,6 +9,8 @@
     "trailing": true,
     "eqeqeq": true,
     "globals": {
+        "$": false,
+        "jQuery": false,
         "Ember": false,
         "Em": false,
         "DS": false,
@@ -17,6 +19,9 @@
         "FLOW": true,
         "module": false,
         "ok": false,
-        "test": false
+        "test": false,
+        "visit": false,
+        "equal": false,
+        "find": false
     }
 }

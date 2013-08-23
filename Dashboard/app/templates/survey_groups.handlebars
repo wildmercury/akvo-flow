@@ -1,8 +1,8 @@
 <h2>Survey Groups</h2>
 <div style="float:left; width: 30%;">
-<ul>
+<ul data-flow-id="survey_groups">
 {{#each arrangedContent}}
-  <li>{{#linkTo 'survey_group' this}}{{code}}{{/linkTo}}</li>
+  <li data-flow-id="survey_group_{{unbound this.id}}">{{#linkTo 'survey_group' this}}{{code}}{{/linkTo}}</li>
 {{/each}}
 </ul>
 </div>

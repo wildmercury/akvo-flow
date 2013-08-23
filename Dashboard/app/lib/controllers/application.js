@@ -8,12 +8,7 @@ FLOW.ApplicationController = Ember.Controller.extend({
         this.get('store').get('adapter').on('didFindAll', this, 'status');
         this.get('store').get('adapter').on('didFindQuery', this, 'status');
     },
-    status: function (type) {
-        this.set('_ldng', type === 'GET');
-    },
-    loading: function () {
-        return this.get('_ldng');
-    }.property('_ldng'),
+    status: function (type) {}
 });
 
 

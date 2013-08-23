@@ -64,7 +64,7 @@ input 'app' do
     concat 'app.js'
   end
 
-  match 'vendor/**/*.js' do
+  match 'vendor/**/*.*' do
     copy
   end
 
@@ -108,10 +108,6 @@ input 'app' do
   end
 
   match 'tests/**/*.js' do
-    filter LoaderFilter,
-      :module_id_generator => proc { |input|
-        input.path.sub(/^lib\//, "#{APPNAME}/").sub(/\.js$/, '')
-      }
     concat 'app-tests.js'
   end
 
