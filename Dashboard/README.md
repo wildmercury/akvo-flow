@@ -25,11 +25,7 @@ App Structure
     │   ├── static - Static files, never touched, copied over during build
     │   ├── templates - Handlebars templates, *modularized during build*
     │   ├── tests - QUnit application tests
-    │   └── vendor - Vendor code, *modularized during build*
-    ├── assets - Built out asset files, minified in production
-    │   ├── app.css - Built out app CSS/SCSS
-    │   ├── app.js - Built out app JS
-    │   └── loader.js - Built out JS module loader
+    │   └── vendor - Vendor code, jquery, ember, ember-data, etc
     ├── config.ru - Rack development web server configuration
     ├── index.html - The app entry point
     ├── tests - QUnit testing files
@@ -53,6 +49,6 @@ Or you can run the tests via:
     $ bundle exec rackup -p 9293 tests/config.ru
     $ open http://localhost:9293/tests/index.html
 
-If you want to continuously run the tests every time a file changes, invoke:
+If you want to continuously build the app every time a file changes, invoke:
 
     $ bundle exec guard
