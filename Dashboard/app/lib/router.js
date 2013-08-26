@@ -12,6 +12,17 @@ FLOW.Router.map(function () {
         });
     });
 
+    this.resource('surveys', function () {
+
+        this.route('new');
+
+        this.resource('survey', {
+            path: '/survey/:survey_id'
+        }, function () {
+
+        });
+    });
+
     this.resource('devices', {
         path: '/devices'
     }, function () {
