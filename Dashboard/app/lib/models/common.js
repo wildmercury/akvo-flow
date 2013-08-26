@@ -27,27 +27,27 @@ FLOW.RESTAdapter = RESTAdapter.extend(Evented, {
     },
 
     didCreateRecord: function (store, type, record, payload) {
-        this._super(store, type, record, payload);
+        this._super.apply(this, arguments);
         this.trigger('didCreateRecord');
     },
 
     didCreateRecords: function (store, type, records, payload) {
-        this._super(store, type, records, payload);
+        this._super.apply(this, arguments);
         this.trigger('didCreateRecords');
     },
 
     didSaveRecord: function (store, type, record, payload) {
-        this._super(store, type, record, payload);
+        this._super.apply(this, arguments);
         this.trigger('didSaveRecord');
     },
 
     didUpdateRecord: function () {
-        this._super(arguments);
+        this._super.apply(this, arguments);
         this.trigger('didUpdateRecord');
     },
 
     didDeleteRecord: function () {
-        this._super(arguments);
+        this._super.apply(this, arguments);
         this.trigger('didDeleteRecord');
     },
 
@@ -57,37 +57,37 @@ FLOW.RESTAdapter = RESTAdapter.extend(Evented, {
     },
 
     didUpdateRecords: function () {
-        this._super(arguments);
+        this._super.apply(this, arguments);
         this.trigger('didUpdateRecords');
     },
 
     didDeleteRecords: function () {
-        this._super(arguments);
+        this._super.apply(this, arguments);
         this.trigger('didDeleteRecords');
     },
 
     didFindRecord: function (store, type, payload, id) {
-        this._super(store, type, payload, id);
+        this._super.apply(this, arguments);
         this.trigger('didFindRecord');
     },
 
     didFindAll: function (store, type, payload) {
-        this._super(store, type, payload);
+        this._super.apply(this, arguments);
         this.trigger('didFindAll');
     },
 
     didFindQuery: function (store, type, payload, recordArray) {
-        this._super(store, type, payload, recordArray);
+        this._super.apply(this, arguments);
         this.trigger('didFindQuery');
     },
 
     didFindMany: function (store, type, payload) {
-        this._super(store, type, payload);
+        this._super.apply(this, arguments);
         this.trigger('didFindMany');
     },
 
     didError: function (store, type, record) {
-        this._super(store, type, record);
+        this._super.apply(this, arguments);
         this.trigger('didError');
     }
 
