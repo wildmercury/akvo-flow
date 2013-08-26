@@ -31,6 +31,12 @@ FLOW.Router.map(function () {
     });
 
     this.resource('maps', {
+        path: '/maps'
+    }, function () {
+
+    });
+
+    this.resource('users', {
         path: '/users'
     }, function () {
 
