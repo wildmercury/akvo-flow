@@ -10,9 +10,3 @@ FLOW.ApplicationController = Ember.Controller.extend({
     },
     status: function (type) {}
 });
-
-
-FLOW.SurveyGroupsController = Ember.ArrayController.extend({
-    sortAscending: true,
-    sortProperties: ['code']
-});

@@ -1,5 +1,15 @@
 <h2>Survey Groups</h2>
 <div style="float:left; width: 30%;">
+{{#if creatingNew }}
+  {{view Ember.TextField data-flow-id="new_survey_group" 
+         placeholder="Survey Group name"
+         valueBinding="newSurveyGroup"
+         action="createSurveyGroup"}}
+  <button {{action 'createSurveyGroup'}}>Save</button>
+  <button {{action 'cancelNewGroup'}}>Cancel</button>
+{{else}}
+  <button {{action 'addNewGroup'}}>Add New Group</button>
+{{/if}}
 <ul data-flow-id="survey_groups">
 {{#each arrangedContent}}
   <li data-flow-id="survey_group_{{unbound this.id}}">{{#linkTo 'survey_group' this}}{{code}}{{/linkTo}}</li>
