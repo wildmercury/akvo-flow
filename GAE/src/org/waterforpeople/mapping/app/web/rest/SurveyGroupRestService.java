@@ -178,6 +178,8 @@ public class SurveyGroupRestService {
 
 					dto = new SurveyGroupDto();
 					DtoMarshaller.copyToDto(s, dto);
+					dto.setSurveyCount(surveyDao.listSurveysByGroup(
+							s.getKey().getId()).size());
 					statusDto.setStatus("ok");
 				}
 			}
