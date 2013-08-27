@@ -10,14 +10,14 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
     },
 
     saveEdit: function () {
-        var name = this.get('name') && this.get('name').capitalize();
+        var code = this.get('code') && this.get('code').capitalize();
 
-        if (!name) {
+        if (!code) {
             return;
         }
 
-        this.set('name', name);
-        this.set('code', name);
+        this.set('name', code);
+        this.set('code', code);
 
         this.get('store').commit();
 

@@ -1,7 +1,7 @@
 <h3>{{code}}</h3>
 {{#if isEditing}}
   {{view Ember.TextField
-    valueBinding = "name"
+    valueBinding = "code"
     placeholder = "Group name"
     action="saveSurveyGroup"}}
   <button {{action 'saveEdit'}}>Save</button>
