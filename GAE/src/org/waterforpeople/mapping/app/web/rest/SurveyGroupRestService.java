@@ -23,20 +23,22 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.waterforpeople.mapping.app.gwt.client.survey.SurveyGroupDto;
 import org.waterforpeople.mapping.app.util.DtoMarshaller;
 import org.waterforpeople.mapping.app.web.rest.dto.RestStatusDto;
 import org.waterforpeople.mapping.app.web.rest.dto.SurveyGroupPayload;
 
 import com.gallatinsystems.common.Constants;
-import com.gallatinsystems.survey.dao.QuestionDao;
 import com.gallatinsystems.survey.dao.SurveyDAO;
 import com.gallatinsystems.survey.dao.SurveyGroupDAO;
 import com.gallatinsystems.survey.domain.Survey;
@@ -66,7 +68,8 @@ public class SurveyGroupRestService {
 		statusDto.setMessage("");
 
 		// if this is a pre-flight delete check, handle that
-		if (preflight != null && preflight.equals("delete") && surveyGroupId != null) {
+		if (preflight != null && preflight.equals("delete")
+				&& surveyGroupId != null) {
 			SurveyDAO sDao = new SurveyDAO();
 			statusDto.setStatus("preflight-delete-surveygroup");
 			statusDto.setMessage("cannot_delete");
@@ -87,6 +90,8 @@ public class SurveyGroupRestService {
 			for (SurveyGroup s : surveys) {
 				SurveyGroupDto dto = new SurveyGroupDto();
 				DtoMarshaller.copyToDto(s, dto);
+				dto.setSurveyCount(surveyDao.listSurveysByGroup(
+						s.getKey().getId()).size());
 				results.add(dto);
 			}
 		}
@@ -105,6 +110,8 @@ public class SurveyGroupRestService {
 		if (s != null) {
 			dto = new SurveyGroupDto();
 			DtoMarshaller.copyToDto(s, dto);
+			dto.setSurveyCount(surveyDao.listSurveysByGroup(s.getKey().getId())
+					.size());
 		}
 		response.put("survey_group", dto);
 		return response;
@@ -128,7 +135,11 @@ public class SurveyGroupRestService {
 				// delete survey group
 				surveyGroupDao.delete(s);
 				statusDto.setStatus("ok");
+			} else {
+				throw new UnprocessableEntityException(
+						"_cant_delete_survey_group");
 			}
+
 		}
 		response.put("meta", statusDto);
 		return response;
@@ -208,6 +219,20 @@ public class SurveyGroupRestService {
 		response.put("meta", statusDto);
 		response.put("survey_group", dto);
 		return response;
+	}
+
+	@ExceptionHandler(UnprocessableEntityException.class)
+	@ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
+	@ResponseBody
+	public Map<String, Object> handleException(UnprocessableEntityException ex) {
+		final Map<String, Object> resp = new HashMap<String, Object>();
+		final RestStatusDto status = new RestStatusDto();
+
+		status.setStatus("failed");
+		status.setMessage(ex.getMessage());
+		resp.put("meta", status);
+
+		return resp;
 	}
 
 }

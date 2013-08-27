@@ -31,6 +31,7 @@ public class SurveyGroupDto extends BaseDto implements NamedObject {
 	private String code;
 	private Date createdDateTime;
 	private Date lastUpdateDateTime;
+	private Integer surveyCount = 0;
 
 	private ArrayList<SurveyDto> surveyList = null;
 
@@ -92,6 +93,14 @@ public class SurveyGroupDto extends BaseDto implements NamedObject {
 
 	public String getName() {
 		return name;
+	}
+
+	public Integer getSurveyCount() {
+		return surveyCount;
+	}
+
+	public void setSurveyCount(Integer surveyCount) {
+		this.surveyCount = surveyCount;
 	}
 
 }
