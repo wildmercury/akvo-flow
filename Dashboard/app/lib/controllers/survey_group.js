@@ -24,6 +24,10 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
         this.cancelEdit();
     },
 
+    disableDelete: function () {
+        return this.get('surveyCount') !== 0;
+    }.property('surveyCount'),
+
     deleteSurveyGroup: function () {
         var sg = this.get('model');
 

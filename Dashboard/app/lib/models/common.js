@@ -116,6 +116,9 @@ FLOW.SurveyGroup = FLOW.BaseModel.extend({
     // the code field is used as name
     code: DS.attr('string', {
         defaultValue: ''
+    }),
+    surveyCount: DS.attr('number', {
+        deaultValue: 0
     })
 });
 

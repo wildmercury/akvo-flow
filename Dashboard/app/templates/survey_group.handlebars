@@ -8,7 +8,7 @@
   <button {{action 'cancelEdit'}}>Cancel</button>
 {{else}}
   <button {{action 'edit'}}>Edit name</button>
-  <button {{action 'deleteSurveyGroup'}}>Delete this group</button>
+  <button {{action 'deleteSurveyGroup'}} {{bindAttr disabled=disableDelete}}>Delete this group</button>
   {{#linkTo 'surveys.new'}}Create new survey{{/linkTo}}
 {{/if}}
 <div>
