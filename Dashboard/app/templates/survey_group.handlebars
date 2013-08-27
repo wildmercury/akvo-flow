@@ -9,7 +9,7 @@
 {{else}}
   <button {{action 'edit'}}>Edit name</button>
   <button {{action 'deleteSurveyGroup'}} {{bindAttr disabled=disableDelete}}>Delete this group</button>
-  {{#linkTo 'surveys.new'}}Create new survey{{/linkTo}}
+  {{#linkTo 'surveys.new' this.id}}Create new survey{{/linkTo}}
 {{/if}}
 <div>
 <ul>

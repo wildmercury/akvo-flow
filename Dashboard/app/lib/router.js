@@ -14,12 +14,14 @@ FLOW.Router.map(function () {
 
     this.resource('surveys', function () {
 
-        this.route('new');
+        this.route('new', {
+            path: '/:survey_group_id/new'
+        });
 
         this.resource('survey', {
             path: '/survey/:survey_id'
         }, function () {
-
+            this.route('edit');
         });
     });
 
@@ -80,6 +82,24 @@ FLOW.SurveyGroupRoute = Ember.Route.extend({
 
         controller.set('model', model); // default action
         controller.set('surveys', surveys);
+    }
+});
+
+FLOW.SurveysNewRoute = Ember.Route.extend({
+    getSurveyGroupId: function () {
+        return parseInt(this.get('router').location.get('location').hash.split('/')[2], 10);
+    },
+    setupController: function (controller, model) {
+
+        model.set('surveyGroupId', this.getSurveyGroupId());
+        model.set('defaultLanguageCode', 'en');
+
+        controller.set('model', model);
+        controller.set('languages', FLOW.LanguagesController.create());
+        controller.set('pointTypes', FLOW.SurveyPointTypeController.create());
+    },
+    model: function () {
+        return FLOW.Survey.createRecord();
     }
 });
 

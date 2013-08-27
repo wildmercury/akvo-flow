@@ -1,0 +1,33 @@
+<h2>New Survey</h2>
+
+{{view Ember.TextField valueBinding="code"
+  placeholder="Type the name of your suvey"}}
+
+<br>
+
+{{view Ember.TextArea valueBinding="description"
+  placeholder="Type in the description of your survey"}}
+  
+<br>
+
+{{view Ember.Select 
+      contentBinding="pointTypes" 
+      optionLabelPath="content.label" 
+      optionValuePath="content.value" 
+      valueBinding="pointType" 
+      prompt=""
+      promptBinding="Ember.STRINGS._select_survey_type"}}
+<br>
+{{view Ember.Select
+      contentBinding="languages"
+      optionLabelPath="content.labelShort"
+      optionValuePath="content.value"
+      valueBinding="defaultLanguageCode"
+      prompt=""
+      promptBinding="Ember.STRINGS._select_language"}}
+<br>
+         
+
+<button {{action 'save'}} {{bindAttr disabled=disableSave}}>Save</button>
+<button {{action 'preview'}} disabled>Preview</button>
+<button {{action 'publish'}} disabled>Publish</button>

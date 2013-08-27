@@ -11,6 +11,17 @@ FLOW = Ember.Application.create({
 });
 
 
+FLOW._surveyPointType = [{
+    label: 'Point',
+    value: 'Point'
+}, {
+    label: 'Household',
+    value: 'Household'
+}, {
+    label: 'Public Institution',
+    value: 'PublicInstitution'
+}];
+
 if (window.location.search.indexOf('test=true') !== -1) {
     document.write(
         '<div id="qunit"></div>' +
