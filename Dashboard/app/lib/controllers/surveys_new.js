@@ -2,8 +2,6 @@ FLOW.LanguagesController = Ember.ArrayController.extend({
     init: function () {
         var tmp = [];
 
-        this._super();
-
         Ember.keys(FLOW._isoLanguages).forEach(function (k) {
             tmp.push(Ember.Object.create({
                 value: k,
@@ -13,6 +11,7 @@ FLOW.LanguagesController = Ember.ArrayController.extend({
         });
 
         this.set('content', tmp);
+        this._super();
     }
 });
 
@@ -20,13 +19,12 @@ FLOW.SurveyPointTypeController = Ember.ArrayController.extend({
     init: function () {
         var tmp = [];
 
-        this._super();
-
         FLOW._surveyPointType.forEach(function (e) {
             tmp.push(Ember.Object.create(e));
         });
 
         this.set('content', tmp);
+        this._super();
     }
 });
 
