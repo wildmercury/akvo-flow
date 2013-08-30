@@ -4,8 +4,8 @@
     valueBinding = "code"
     placeholder = "Group name"
     action="saveSurveyGroup"}}
-  <button {{action 'saveEdit'}}>Save</button>
-  <button {{action 'cancelEdit'}}>Cancel</button>
+  <button {{action 'saveEdit'}} {{bindAttr disabled=disableSave}}>Save</button>
+  <button {{action 'cancelEdit'}} {{bindAttr disabled=disableCancel}}>Cancel</button>
 {{else}}
   <button {{action 'edit'}}>Edit name</button>
   <button {{action 'deleteSurveyGroup'}} {{bindAttr disabled=disableDelete}}>Delete this group</button>

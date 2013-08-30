@@ -5,6 +5,14 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
         return this.get('surveyCount') !== 0;
     }.property('surveyCount'),
 
+    disableSave: function () {
+        return !this.get('code') || this.get('isSaving');
+    }.property('code', 'isSaving'),
+
+    disableCancel: function () {
+        return this.get('isSaving');
+    }.property('isSaving'),
+
     actions: {
         edit: function () {
             this.set('isEditing', true);
@@ -27,9 +35,9 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
             this.set('name', code);
             this.set('code', code);
 
+            this.get('model').one('didCommit', this, 'afterSave');
             this.get('store').commit();
 
-            this.send('cancelEdit');
         },
 
         deleteSurveyGroup: function () {
@@ -41,5 +49,9 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
 
             this.transitionToRoute('survey_groups');
         }
+    },
+
+    afterSave: function () {
+        this.set('isEditing', false);
     }
 });
