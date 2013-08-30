@@ -11,7 +11,9 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
         },
 
         cancelEdit: function () {
-            this.get('model').rollback();
+            if (this.get('model').get('isDirty')) {
+                this.get('model').rollback();
+            }
             this.set('isEditing', false);
         },
 

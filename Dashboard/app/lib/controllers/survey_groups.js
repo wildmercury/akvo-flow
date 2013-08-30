@@ -27,8 +27,7 @@ FLOW.SurveyGroupsController = Ember.ArrayController.extend({
             });
 
             this.get('store').commit();
-
-            this._actions.cancelNewGroup();
+            this.send('cancelNewGroup');
         }
     }
 });

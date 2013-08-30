@@ -17,12 +17,12 @@ FLOW.Router.map(function () {
         this.route('new', {
             path: '/:survey_group_id/new'
         });
+    });
 
-        this.resource('survey', {
-            path: '/survey/:survey_id'
-        }, function () {
-            this.route('edit');
-        });
+    this.resource('survey', {
+        path: '/survey/:survey_id'
+    }, function () {
+        this.resource('edit');
     });
 
     this.resource('devices', {
