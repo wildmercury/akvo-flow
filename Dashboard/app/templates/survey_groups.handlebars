@@ -12,7 +12,7 @@
 {{/if}}
 <ul data-flow-id="survey_groups">
 {{#each arrangedContent}}
-  <li data-flow-id="survey_group_{{unbound this.id}}">{{#linkTo 'survey_group' this}}{{code}}{{/linkTo}}</li>
+  <li data-flow-id="survey_group_{{unbound this.id}}">{{#link-to 'survey_group' this}}{{code}}{{/link-to}}</li>
 {{/each}}
 </ul>
 </div>
