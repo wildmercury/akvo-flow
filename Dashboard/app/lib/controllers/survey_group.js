@@ -29,7 +29,7 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
 
             this.get('store').commit();
 
-            this._actions.cancelEdit();
+            this.send('cancelEdit');
         },
 
         deleteSurveyGroup: function () {
