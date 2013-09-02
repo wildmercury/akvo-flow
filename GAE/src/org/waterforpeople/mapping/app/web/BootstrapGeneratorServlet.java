@@ -29,7 +29,7 @@ import org.waterforpeople.mapping.app.web.dto.BootstrapGeneratorRequest;
 
 import com.gallatinsystems.common.util.MailUtil;
 import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.UploadUtil;
+import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
 import com.gallatinsystems.framework.rest.RestRequest;
@@ -47,17 +47,18 @@ import com.gallatinsystems.survey.domain.Survey;
 public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 
 	private static final long serialVersionUID = -6645180848307957119L;
-	private static final String AWS_IDENTIFIER = "aws_identifier";
 	private static final String DB_INST_ENTRY = "dbinstructions.sql";
 	private static final String SURVEY_UPLOAD_URL = "surveyuploadurl";
 	private static final String SURVEY_UPLOAD_DIR = "surveyuploaddir";
 	private static final String BOOTSTRAP_UPLOAD_DIR = "bootstrapdir";
-	private static final String BOOTSTRAP_UPLOAD_POLICY = "bootstraps3policy";
-	private static final String BOOTSTRAP_UPLOAD_SIG = "bootstraps3sig";
 	private static final String EMAIL_FROM_ADDRESS_KEY = "emailFromAddress";
 	private static final String EMAIL_SUB = "FLOW Bootstrap File";
 	private static final String EMAIL_BODY = "Click the link to download the bootstrap file";
 	private static final String ERROR_BODY = "There were errors while attempting to generate the bootstrap file:";
+    
+	private static final String SWIFT_URL = "swift_url";
+	private static final String SWIFT_USER = "swift_user";
+	private static final String SWIFT_KEY = "swift_key";
 
 	private SurveyDAO surveyDao;
 
@@ -125,12 +126,18 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 		}
 		ByteArrayOutputStream os = ZipUtil.generateZip(contentMap);
 		String filename = System.currentTimeMillis() + "-bs.zip";
-		UploadUtil.upload(os, filename, PropertyUtil
-				.getProperty(BOOTSTRAP_UPLOAD_DIR), PropertyUtil
-				.getProperty(SURVEY_UPLOAD_URL), PropertyUtil
-				.getProperty(AWS_IDENTIFIER), PropertyUtil
-				.getProperty(BOOTSTRAP_UPLOAD_POLICY), PropertyUtil
-				.getProperty(BOOTSTRAP_UPLOAD_SIG), "application/zip",null);
+		
+		// Swift upload
+		Swift swift = new Swift(PropertyUtil.getProperty(SWIFT_URL),
+				PropertyUtil.getProperty(SWIFT_USER),
+				PropertyUtil.getProperty(SWIFT_KEY));
+
+		boolean uploadedFile = swift.uploadFile(PropertyUtil.getProperty(BOOTSTRAP_UPLOAD_DIR),
+				filename, os.toByteArray());
+		
+		if (!uploadedFile) {
+			errors.append("Could not upload file to Swift");
+		}
 
 		String body = EMAIL_BODY;
 		if (errors.toString().trim().length() > 0) {

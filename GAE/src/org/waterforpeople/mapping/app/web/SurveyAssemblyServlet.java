@@ -36,6 +36,7 @@ import org.waterforpeople.mapping.dao.SurveyContainerDao;
 
 import com.gallatinsystems.common.domain.UploadStatusContainer;
 import com.gallatinsystems.common.util.PropertyUtil;
+import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.common.util.UploadUtil;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
@@ -99,6 +100,10 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	private static final String SURVEY_UPLOAD_SIG = "surveyuploadsig";
 	private static final String SURVEY_UPLOAD_POLICY = "surveyuploadpolicy";
 	private static final String S3_ID = "aws_identifier";
+    
+	private static final String SWIFT_URL = "swift_url";
+	private static final String SWIFT_USER = "swift_user";
+	private static final String SWIFT_KEY = "swift_key";
 
 	private Random randomNumber = new Random();
 
@@ -341,20 +346,22 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	public UploadStatusContainer uploadSurveyXML(Long surveyId, String surveyXML) {
 		Properties props = System.getProperties();
 		String document = surveyXML;
-		Boolean uploadedFile = UploadUtil.sendStringAsFile(surveyId + ".xml",
-				document, props.getProperty(SURVEY_UPLOAD_DIR),
-				props.getProperty(SURVEY_UPLOAD_URL), props.getProperty(S3_ID),
-				props.getProperty(SURVEY_UPLOAD_POLICY),
-				props.getProperty(SURVEY_UPLOAD_SIG), "text/xml");
+
+		// Swift upload
+		Swift swift = new Swift(PropertyUtil.getProperty(SWIFT_URL),
+				PropertyUtil.getProperty(SWIFT_USER),
+				PropertyUtil.getProperty(SWIFT_KEY));
+
+		boolean uploadedFile = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+				surveyId + ".xml", surveyXML.getBytes());
 
 		ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
 				+ ".xml");
 		UploadStatusContainer uc = new UploadStatusContainer();
-		Boolean uploadedZip = UploadUtil.upload(os, surveyId + ".zip",
-				props.getProperty(SURVEY_UPLOAD_DIR),
-				props.getProperty(SURVEY_UPLOAD_URL), props.getProperty(S3_ID),
-				props.getProperty(SURVEY_UPLOAD_POLICY),
-				props.getProperty(SURVEY_UPLOAD_SIG), "application/zip", uc);
+		
+		boolean uploadedZip = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+				surveyId + ".zip", os.toByteArray());
+
 		uc.setUploadedFile(uploadedFile);
 		uc.setUploadedZip(uploadedZip);
 		uc.setUrl(props.getProperty(SURVEY_UPLOAD_URL)
