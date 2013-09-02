@@ -141,21 +141,21 @@ public class Swift {
 		URL url = new URL(mApiUrl + "/" + Api.AUTH);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-        try {
-    		conn.setRequestProperty(Header.AUTH_USER, mUsername);
-    		conn.setRequestProperty(Header.AUTH_KEY, mApiKey);
-    
-    		final int statusCode = conn.getResponseCode();
-    		if (statusCode == 200) {
-    			mToken = conn.getHeaderField(Header.AUTH_TOKEN);
-    			mStorageUrl = conn.getHeaderField(Header.STORAGE_URL);
-    		} else {
-    			throw new ApiException(
-    					"Could not authenticate with Swift. Status Code: " + statusCode);
-    		}
-        } finally {
-        	conn.disconnect();
-        }
+		try {
+			conn.setRequestProperty(Header.AUTH_USER, mUsername);
+			conn.setRequestProperty(Header.AUTH_KEY, mApiKey);
+	
+			final int statusCode = conn.getResponseCode();
+			if (statusCode == 200) {
+				mToken = conn.getHeaderField(Header.AUTH_TOKEN);
+				mStorageUrl = conn.getHeaderField(Header.STORAGE_URL);
+			} else {
+				throw new ApiException(
+						"Could not authenticate with Swift. Status Code: " + statusCode);
+			}
+		} finally {
+			conn.disconnect();
+		}
 	}
 
 	@SuppressWarnings("serial")
