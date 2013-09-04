@@ -31,8 +31,8 @@ public class RestStatusDto implements Serializable {
 	private String status = "";
 	private String message = "";
 	private String since = "";
-	private Integer num;
-	private Long keyId;
+	private Integer num = 0;
+	private Long keyId = 0L;
 
 	public void setStatus(String status) {
 		this.status = status;
@@ -41,7 +41,7 @@ public class RestStatusDto implements Serializable {
 	public String getStatus() {
 		return status;
 	}
-	
+
 	public void setMessage(String message) {
 		this.message = message;
 	}
@@ -49,7 +49,7 @@ public class RestStatusDto implements Serializable {
 	public String getMessage() {
 		return message;
 	}
-	
+
 	public void setSince(String since) {
 		this.since = since;
 	}
@@ -57,7 +57,7 @@ public class RestStatusDto implements Serializable {
 	public String getSince() {
 		return since;
 	}
-	
+
 	public void setNum(Integer num) {
 		this.num = num;
 	}
@@ -65,7 +65,7 @@ public class RestStatusDto implements Serializable {
 	public Integer getnum() {
 		return num;
 	}
-	
+
 	public void setKeyId(Long keyId) {
 		this.keyId = keyId;
 	}

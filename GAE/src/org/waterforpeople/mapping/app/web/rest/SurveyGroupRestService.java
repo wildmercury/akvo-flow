@@ -149,7 +149,7 @@ public class SurveyGroupRestService {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	public Map<String, Object> saveExistingSurveyGroup(
-			@RequestBody SurveyGroupPayload payLoad) {
+			@RequestBody SurveyGroupPayload payLoad, @PathVariable Long id) {
 
 		final SurveyGroupDto surveyGroupDto = payLoad.getSurvey_group();
 		final Map<String, Object> response = new HashMap<String, Object>();
@@ -161,12 +161,11 @@ public class SurveyGroupRestService {
 		// if the POST data contains a valid surveyGroupDto, continue.
 		// Otherwise, server 400 Bad Request
 		if (surveyGroupDto != null) {
-			Long keyId = surveyGroupDto.getKeyId();
 			SurveyGroup s;
 
 			// if the surveyGroupDto has a key, try to get the surveyGroup.
-			if (keyId != null) {
-				s = surveyGroupDao.getByKey(keyId);
+			if (id != null) {
+				s = surveyGroupDao.getByKey(id);
 				// if we find the surveyGroup, update it's properties
 				if (s != null) {
 					// copy the properties, except the properties that are set
