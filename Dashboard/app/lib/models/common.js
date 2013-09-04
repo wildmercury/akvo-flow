@@ -1,46 +1,43 @@
 // Models
+var attr = DS.attr,
+    Base;
 
-FLOW.BaseModel = DS.Model.extend({
-    keyId: DS.attr('number')
+Base = FLOW.BaseModel = DS.Model.extend({
+    createdDateTime: attr('date'),
+    lastUpdateDateTime: attr('date')
 });
 
-FLOW.SurveyGroup = FLOW.BaseModel.extend({
-    description: DS.attr('string', {
+FLOW.SurveyGroup = Base.extend({
+    description: attr('string', {
         defaultValue: ''
     }),
-    name: DS.attr('string', {
-        defaultValue: ''
-    }),
-    createdDateTime: DS.attr('string', {
-        defaultValue: ''
-    }),
-    lastUpdateDateTime: DS.attr('string', {
+    name: attr('string', {
         defaultValue: ''
     }),
     // the code field is used as name
-    code: DS.attr('string', {
+    code: attr('string', {
         defaultValue: ''
     }),
-    surveyCount: DS.attr('number', {
+    surveyCount: attr('number', {
         deaultValue: 0
     })
 });
 
 
-FLOW.PlacemarkDetail = FLOW.BaseModel.extend({
-    placemarkId: DS.attr('number'),
-    collectionDate: DS.attr('number'),
-    questionText: DS.attr('string'),
-    metricName: DS.attr('string'),
-    stringValue: DS.attr('string'),
-    questionType: DS.attr('string')
+FLOW.PlacemarkDetail = Base.extend({
+    placemarkId: attr('number'),
+    collectionDate: attr('number'),
+    questionText: attr('string'),
+    metricName: attr('string'),
+    stringValue: attr('string'),
+    questionType: attr('string')
 });
 
-FLOW.Placemark = FLOW.BaseModel.extend({
-    latitude: DS.attr('number'),
-    longitude: DS.attr('number'),
-    collectionDate: DS.attr('number'),
-    markType: DS.attr('string', {
+FLOW.Placemark = Base.extend({
+    latitude: attr('number'),
+    longitude: attr('number'),
+    collectionDate: attr('number'),
+    markType: attr('string', {
         defaultValue: 'WATER_POINT'
     })
 });

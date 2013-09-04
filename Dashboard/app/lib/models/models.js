@@ -1,24 +1,26 @@
 require('akvo-flow/models/common');
 
-FLOW.Survey = FLOW.BaseModel.extend({
-    defaultLanguageCode: DS.attr('string'),
-    status: DS.attr('string'),
-    sector: DS.attr('string'),
-    code: DS.attr('string'),
-    requireApproval: DS.attr('string'),
-    version: DS.attr('string'),
-    description: DS.attr('string'),
-    name: DS.attr('string'),
-    path: DS.attr('string'),
-    pointType: DS.attr('string'),
-    surveyGroupId: DS.attr('number'),
-    createdDateTime: DS.attr('number'),
-    lastUpdateDateTime: DS.attr('number'),
-    instanceCount: DS.attr('number'),
+var attr = DS.attr,
+    hasMany = DS.hasMany,
+    Base = FLOW.BaseModel;
+
+FLOW.Survey = Base.extend({
+    defaultLanguageCode: attr('string'),
+    status: attr('string'),
+    sector: attr('string'),
+    code: attr('string'),
+    requireApproval: attr('string'),
+    version: attr('string'),
+    description: attr('string'),
+    name: attr('string'),
+    path: attr('string'),
+    pointType: attr('string'),
+    surveyGroupId: attr('number'),
+    instanceCount: attr('number'),
 
     // This attribute is used for the 'Copy Survey' functionality
     // Most of the times is `null`
-    sourceId: DS.attr('number', {
+    sourceId: attr('number', {
         defaultValue: null
     }),
     // used in the assignment edit page, not saved to backend
@@ -26,226 +28,214 @@ FLOW.Survey = FLOW.BaseModel.extend({
 });
 
 
-FLOW.QuestionGroup = FLOW.BaseModel.extend({
-    order: DS.attr('number'),
-    description: DS.attr('string'),
-    name: DS.attr('string'),
-    path: DS.attr('string'),
-    code: DS.attr('string'),
-    surveyId: DS.attr('number')
+FLOW.QuestionGroup = Base.extend({
+    order: attr('number'),
+    description: attr('string'),
+    name: attr('string'),
+    path: attr('string'),
+    code: attr('string'),
+    surveyId: attr('number')
 });
 
 
-FLOW.Question = FLOW.BaseModel.extend({
-    questionOptions: DS.hasMany('FLOW.QuestionOption'),
+FLOW.Question = Base.extend({
+    questionOptions: hasMany('question_option'),
     questionOptionList: null,
-    allowDecimal: DS.attr('boolean', {
+    allowDecimal: attr('boolean', {
         defaultValue: false
     }),
-    allowMultipleFlag: DS.attr('boolean', {
+    allowMultipleFlag: attr('boolean', {
         defaultValue: false
     }),
-    allowOtherFlag: DS.attr('boolean', {
+    allowOtherFlag: attr('boolean', {
         defaultValue: false
     }),
-    allowSign: DS.attr('boolean', {
+    allowSign: attr('boolean', {
         defaultValue: false
     }),
-    collapseable: DS.attr('boolean', {
+    collapseable: attr('boolean', {
         defaultValue: false
     }),
-    immutable: DS.attr('boolean', {
+    immutable: attr('boolean', {
         defaultValue: false
     }),
-    isName: DS.attr('boolean', {
+    isName: attr('boolean', {
         defaultValue: false
     }),
-    mandatoryFlag: DS.attr('boolean', {
+    mandatoryFlag: attr('boolean', {
         defaultValue: false
     }),
-    dependentFlag: DS.attr('boolean', {
+    dependentFlag: attr('boolean', {
         defaultValue: false
     }),
-    dependentQuestionAnswer: DS.attr('string'),
-    dependentQuestionId: DS.attr('number'),
-    maxVal: DS.attr('number', {
+    dependentQuestionAnswer: attr('string'),
+    dependentQuestionId: attr('number'),
+    maxVal: attr('number', {
         defaultValue: null
     }),
-    minVal: DS.attr('number', {
+    minVal: attr('number', {
         defaultValue: null
     }),
-    order: DS.attr('number'),
-    path: DS.attr('string'),
-    questionGroupId: DS.attr('number'),
-    surveyId: DS.attr('number'),
-    metricId: DS.attr('number'),
-    text: DS.attr('string'),
-    tip: DS.attr('string'),
-    type: DS.attr('string', {
+    order: attr('number'),
+    path: attr('string'),
+    questionGroupId: attr('number'),
+    surveyId: attr('number'),
+    metricId: attr('number'),
+    text: attr('string'),
+    tip: attr('string'),
+    type: attr('string', {
         defaultValue: 'FREE_TEXT'
     })
 });
 
 
-FLOW.QuestionOption = FLOW.BaseModel.extend({
-    question: DS.belongsTo('FLOW.Question'),
-    order: DS.attr('number'),
-    questionId: DS.attr('number'),
-    text: DS.attr('string')
+FLOW.QuestionOption = Base.extend({
+    question: DS.belongsTo('question'),
+    order: attr('number'),
+    questionId: attr('number'),
+    text: attr('string')
 });
 
 
-FLOW.DeviceGroup = FLOW.BaseModel.extend({
-    code: DS.attr('string', {
+FLOW.DeviceGroup = Base.extend({
+    code: attr('string', {
         defaultValue: ''
     })
 });
 
-FLOW.Device = FLOW.BaseModel.extend({
-    didLoad: function () {
-        var combinedName;
-        if (Ember.empty(this.get('deviceIdentifier'))) {
-            combinedName = 'no identifer';
-        } else {
-            combinedName = this.get('deviceIdentifier');
-        }
-        this.set('combinedName', combinedName + ' ' + this.get('phoneNumber'));
-    },
-    esn: DS.attr('string', {
+FLOW.Device = Base.extend({
+    esn: attr('string', {
         defaultValue: ''
     }),
-    phoneNumber: DS.attr('string', {
+    phoneNumber: attr('string', {
         defaultValue: ''
     }),
-    deviceIdentifier: DS.attr('string', {
+    deviceIdentifier: attr('string', {
         defaultValue: ''
     }),
-    gallatinSoftwareManifest: DS.attr('string'),
-    lastKnownLat: DS.attr('number', {
+    gallatinSoftwareManifest: attr('string'),
+    lastKnownLat: attr('number', {
         defaultValue: 0
     }),
-    lastKnownLon: DS.attr('number', {
+    lastKnownLon: attr('number', {
         defaultValue: 0
     }),
-    lastKnownAccuracy: DS.attr('number', {
+    lastKnownAccuracy: attr('number', {
         defaultValue: 0
     }),
-    lastPositionDate: DS.attr('number', {
+    lastPositionDate: attr('number', {
         defaultValue: ''
     }),
-    deviceGroup: DS.attr('string', {
+    deviceGroup: attr('string', {
         defaultValue: ''
     }),
-    deviceGroupName: DS.attr('string', {
+    deviceGroupName: attr('string', {
         defaultValue: ''
     }),
     isSelected: false,
     combinedName: null
 });
 
-FLOW.SurveyAssignment = FLOW.BaseModel.extend({
-    name: DS.attr('string'),
-    startDate: DS.attr('number'),
-    endDate: DS.attr('number'),
-    devices: DS.attr('array'),
-    surveys: DS.attr('array'),
-    language: DS.attr('string')
+FLOW.SurveyAssignment = Base.extend({
+    name: attr('string'),
+    startDate: attr('number'),
+    endDate: attr('number'),
+    devices: attr('array'),
+    surveys: attr('array'),
+    language: attr('string')
 });
 
-FLOW.SurveyedLocale = DS.Model.extend({
-    description: DS.attr('string', {
+FLOW.SurveyedLocale = Base.extend({
+    description: attr('string', {
         defaultValue: ''
     }),
-    keyId: DS.attr('number'),
-    latitude: DS.attr('number'),
-    longitude: DS.attr('number'),
-    primaryKey: 'keyId',
-    typeMark: DS.attr('string', {
+    latitude: attr('number'),
+    longitude: attr('number'),
+    typeMark: attr('string', {
         defaultValue: 'WATER_POINT'
     })
 });
 
-FLOW.SurveyInstance = FLOW.BaseModel.extend({
-    approvedFlag: DS.attr('string'),
-    approximateLocationFlag: DS.attr('string'),
-    surveyId: DS.attr('number'),
-    collectionDate: DS.attr('number'),
-    surveyCode: DS.attr('string'),
-    submitterName: DS.attr('string'),
-    deviceIdentifier: DS.attr('string')
+FLOW.SurveyInstance = Base.extend({
+    approvedFlag: attr('string'),
+    approximateLocationFlag: attr('string'),
+    surveyId: attr('number'),
+    collectionDate: attr('number'),
+    surveyCode: attr('string'),
+    submitterName: attr('string'),
+    deviceIdentifier: attr('string')
 });
 
-FLOW.QuestionAnswer = FLOW.BaseModel.extend({
-    value: DS.attr('string'),
-    type: DS.attr('string'),
-    oldValue: DS.attr('string'),
-    surveyId: DS.attr('number'),
-    collectionDate: DS.attr('number'),
-    surveyInstanceId: DS.attr('number'),
-    questionID: DS.attr('string'),
-    questionText: DS.attr('string')
+FLOW.QuestionAnswer = Base.extend({
+    value: attr('string'),
+    type: attr('string'),
+    oldValue: attr('string'),
+    surveyId: attr('number'),
+    collectionDate: attr('number'),
+    surveyInstanceId: attr('number'),
+    questionID: attr('string'),
+    questionText: attr('string')
 });
 
-FLOW.SurveyQuestionSummary = FLOW.BaseModel.extend({
-    response: DS.attr('string'),
-    count: DS.attr('number'),
-    questionId: DS.attr('string')
+FLOW.SurveyQuestionSummary = Base.extend({
+    response: attr('string'),
+    count: attr('number'),
+    questionId: attr('string')
 });
 
-FLOW.User = FLOW.BaseModel.extend({
-    userName: DS.attr('string'),
-    emailAddress: DS.attr('string'),
-    admin: DS.attr('boolean', {
+FLOW.User = Base.extend({
+    userName: attr('string'),
+    emailAddress: attr('string'),
+    admin: attr('boolean', {
         defaultValue: 0
     }),
-    superAdmin: DS.attr('boolean', {
+    superAdmin: attr('boolean', {
         defaultValue: 0
     }),
-    permissionList: DS.attr('string', {
+    permissionList: attr('string', {
         defaultValue: null
     })
 });
 
-FLOW.UserConfig = FLOW.BaseModel.extend({
-    group: DS.attr('string'),
-    name: DS.attr('string'),
-    value: DS.attr('string'),
-    userId: DS.attr('number')
+FLOW.UserConfig = Base.extend({
+    group: attr('string'),
+    name: attr('string'),
+    value: attr('string'),
+    userId: attr('number')
 });
 
 // this is called attribute in the dashboard, but metric in the backend, for historic reasons.
-FLOW.Metric = FLOW.BaseModel.extend({
-    organization: DS.attr('string'),
-    name: DS.attr('string'),
-    group: DS.attr('string'),
-    valueType: DS.attr('string')
+FLOW.Metric = Base.extend({
+    organization: attr('string'),
+    name: attr('string'),
+    group: attr('string'),
+    valueType: attr('string')
 });
 
-FLOW.Message = FLOW.BaseModel.extend({
-    objectId: DS.attr('number'),
-    lastUpdateDateTime: DS.attr('number'),
-    userName: DS.attr('string'),
-    objectTitle: DS.attr('string'),
-    actionAbout: DS.attr('string'),
-    shortMessage: DS.attr('string')
+FLOW.Message = Base.extend({
+    objectId: attr('number'),
+    userName: attr('string'),
+    objectTitle: attr('string'),
+    actionAbout: attr('string'),
+    shortMessage: attr('string')
 });
 
-FLOW.Action = FLOW.BaseModel.extend({});
+FLOW.Action = Base.extend({});
 
-FLOW.Translation = FLOW.BaseModel.extend({
-    parentType: DS.attr('string'),
-    parentId: DS.attr('string'),
-    surveyId: DS.attr('string'),
-    text: DS.attr('string'),
-    langCode: DS.attr('string')
+FLOW.Translation = Base.extend({
+    parentType: attr('string'),
+    parentId: attr('string'),
+    surveyId: attr('string'),
+    text: attr('string'),
+    langCode: attr('string')
 });
 
 
-FLOW.NotificationSubscription = FLOW.BaseModel.extend({
-    notificationDestination: DS.attr('string'),
-    notificationOption: DS.attr('string'),
-    notificationMethod: DS.attr('string'),
-    notificationType: DS.attr('string'),
-    expiryDate: DS.attr('number'),
-    entityId: DS.attr('number')
+FLOW.NotificationSubscription = Base.extend({
+    notificationDestination: attr('string'),
+    notificationOption: attr('string'),
+    notificationMethod: attr('string'),
+    notificationType: attr('string'),
+    expiryDate: attr('number'),
+    entityId: attr('number')
 });
