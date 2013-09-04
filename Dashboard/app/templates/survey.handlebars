@@ -1,0 +1,37 @@
+<div style="float:left; width: 30%">
+{{view Ember.TextField valueBinding="code"
+  placeholder="Type the name of your survey"}}
+
+<br>
+
+{{view Ember.TextArea valueBinding="description"
+  placeholder="Type in the description of your survey"}}
+  
+<br>
+version: {{version}}
+<br>
+ID number: {{id}}
+<br>
+{{view Ember.Select 
+      contentBinding="pointTypes" 
+      optionLabelPath="content.label" 
+      optionValuePath="content.value" 
+      valueBinding="pointType" 
+      prompt=""
+      promptBinding="Ember.STRINGS._select_survey_type"}}
+<br>
+{{view Ember.Select
+      contentBinding="languages"
+      optionLabelPath="content.labelShort"
+      optionValuePath="content.value"
+      valueBinding="defaultLanguageCode"
+      prompt=""
+      promptBinding="Ember.STRINGS._select_language"}}
+<br>
+</div>
+<div style="float:left;width:70%">
+<div style="float:right;">{{#if surveyGroup}}{{#link-to 'survey_group' surveyGroup}}Back to survey overview{{/link-to}}{{/if}}</div>
+<div style="clear:both"></div>
+<div>{{outlet}}</div>
+</div>
+<div style="clear:both"></div>

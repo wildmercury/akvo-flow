@@ -1,5 +1,6 @@
 require('akvo-flow/core');
 
+var Route = Ember.Route;
 
 FLOW.Router.map(function () {
 
@@ -9,11 +10,10 @@ FLOW.Router.map(function () {
 
         this.resource('survey_group', {
             path: '/survey_group/:survey_group_id'
-        });
+        }, function () {});
     });
 
     this.resource('surveys', function () {
-
         this.route('new', {
             path: '/:survey_group_id/new'
         });
@@ -21,9 +21,8 @@ FLOW.Router.map(function () {
 
     this.resource('survey', {
         path: '/survey/:survey_id'
-    }, function () {
-        this.resource('edit');
-    });
+    }, function () {});
+
 
     this.resource('devices', {
         path: '/devices'
@@ -63,15 +62,15 @@ FLOW.Router.map(function () {
 
 });
 
-FLOW.LoadingRoute = Ember.Route.extend({});
+FLOW.LoadingRoute = Route.extend({});
 
-FLOW.SurveyGroupsRoute = Ember.Route.extend({
+FLOW.SurveyGroupsRoute = Route.extend({
     model: function () {
         return this.store.find('survey_group');
     }
 });
 
-FLOW.SurveyGroupRoute = Ember.Route.extend({
+FLOW.SurveyGroupRoute = Route.extend({
     setupController: function (controller, model) {
         var surveys = Ember.ArrayController.create({
             sortAscending: true,
@@ -84,12 +83,12 @@ FLOW.SurveyGroupRoute = Ember.Route.extend({
             surveys.set('content', data);
         });
 
-        controller.set('model', model); // default action
+        controller.set('model', model);
         controller.set('surveys', surveys);
     }
 });
 
-FLOW.SurveysNewRoute = Ember.Route.extend({
+FLOW.SurveysNewRoute = Route.extend({
     getSurveyGroupId: function () {
         return parseInt(this.get('router').location.get('location').hash.split('/')[2], 10);
     },
@@ -107,13 +106,26 @@ FLOW.SurveysNewRoute = Ember.Route.extend({
     }
 });
 
-FLOW.DevicesRoute = Ember.Route.extend({
+FLOW.SurveyRoute = Route.extend({
+    setupController: function (controller, model) {
+
+        controller.set('model', model);
+        controller.set('languages', FLOW.LanguagesController.create());
+        controller.set('pointTypes', FLOW.SurveyPointTypeController.create());
+
+        this.store.find('survey_group', model.get('surveyGroupId')).then(function (sg) {
+            controller.set('surveyGroup', sg);
+        });
+    }
+});
+
+FLOW.DevicesRoute = Route.extend({
     model: function () {
         return this.store.find('device');
     }
 });
 
-FLOW.MessagesRoute = Ember.Route.extend({
+FLOW.MessagesRoute = Route.extend({
     model: function () {
         return this.store.find('message');
     }
