@@ -2,10 +2,10 @@ require('akvo-flow/core');
 require('akvo-flow/models/common');
 require('akvo-flow/models/models');
 
-DS.RESTAdapter.reopen({
+FLOW.ApplicationAdapter = DS.RESTAdapter.extend({
     namespace: 'rest'
 });
 
-DS.RESTSerializer.reopen({
+FLOW.ApplicationSerializer = DS.RESTSerializer.extend({
     primaryKey: 'keyId'
 });
