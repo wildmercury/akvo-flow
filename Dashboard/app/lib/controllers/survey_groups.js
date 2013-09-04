@@ -15,19 +15,19 @@ FLOW.SurveyGroupsController = Ember.ArrayController.extend({
         },
 
         createSurveyGroup: function () {
-            var groupName = this.get('newSurveyGroup') && this.get('newSurveyGroup').capitalize();
+            var controller = this,
+                groupName = this.get('newSurveyGroup') && this.get('newSurveyGroup').capitalize();
 
             if (!groupName) {
                 return;
             }
 
-            FLOW.SurveyGroup.createRecord({
+            this.store.createRecord('survey_group', {
                 code: groupName,
                 name: groupName
+            }).save().then(function () {
+                controller.send('cancelNewGroup');
             });
-
-            this.get('store').commit();
-            this.send('cancelNewGroup');
         }
     }
 });

@@ -63,9 +63,11 @@ FLOW.Router.map(function () {
 
 });
 
+FLOW.LoadingRoute = Ember.Route.extend({});
+
 FLOW.SurveyGroupsRoute = Ember.Route.extend({
     model: function () {
-        return FLOW.SurveyGroup.find();
+        return this.store.find('survey_group');
     }
 });
 
@@ -76,9 +78,11 @@ FLOW.SurveyGroupRoute = Ember.Route.extend({
             sortProperties: ['code']
         });
 
-        surveys.set('content', FLOW.Survey.find({
+        this.store.findQuery('survey', {
             surveyGroupId: model.get('id')
-        }));
+        }).then(function (data) {
+            surveys.set('content', data);
+        });
 
         controller.set('model', model); // default action
         controller.set('surveys', surveys);
@@ -99,18 +103,18 @@ FLOW.SurveysNewRoute = Ember.Route.extend({
         controller.set('pointTypes', FLOW.SurveyPointTypeController.create());
     },
     model: function () {
-        return FLOW.Survey.createRecord();
+        return this.store.createRecord('survey');
     }
 });
 
 FLOW.DevicesRoute = Ember.Route.extend({
     model: function () {
-        return FLOW.Device.find();
+        return this.store.find('device');
     }
 });
 
 FLOW.MessagesRoute = Ember.Route.extend({
     model: function () {
-        return FLOW.Message.find();
+        return this.store.find('message');
     }
 });

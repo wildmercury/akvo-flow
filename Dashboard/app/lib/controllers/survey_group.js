@@ -26,7 +26,8 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
         },
 
         saveEdit: function () {
-            var code = this.get('code') && this.get('code').capitalize();
+            var controller = this,
+                code = this.get('code') && this.get('code').capitalize();
 
             if (!code) {
                 return;
@@ -35,23 +36,16 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
             this.set('name', code);
             this.set('code', code);
 
-            this.get('model').one('didCommit', this, 'afterSave');
-            this.get('store').commit();
+            this.get('model').save().then(function () {
+                controller.send('cancelEdit');
+            });
 
         },
 
         deleteSurveyGroup: function () {
-            var sg = this.get('model');
-
-            sg.deleteRecord();
-
-            this.get('store').commit();
-
+            this.get('model').deleteRecord();
+            this.get('model').save();
             this.transitionToRoute('survey_groups');
         }
-    },
-
-    afterSave: function () {
-        this.set('isEditing', false);
     }
 });
