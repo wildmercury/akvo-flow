@@ -21,7 +21,19 @@ FLOW.Router.map(function () {
 
     this.resource('survey', {
         path: '/survey/:survey_id'
-    }, function () {});
+    }, function () {
+
+        this.route('question_groups', {
+            path: '/question_groups'
+        });
+
+        this.resource('question_group', {
+            path: '/question_group/:question_group_id'
+        }, function () {
+            this.route('edit');
+        });
+
+    });
 
 
     this.resource('devices', {
@@ -62,7 +74,11 @@ FLOW.Router.map(function () {
 
 });
 
-FLOW.LoadingRoute = Route.extend({});
+FLOW.LoadingRoute = Route.extend({
+    renderTemplate: function (controller, context) {
+
+    }
+});
 
 FLOW.SurveyGroupsRoute = Route.extend({
     model: function () {
@@ -108,13 +124,22 @@ FLOW.SurveysNewRoute = Route.extend({
 
 FLOW.SurveyRoute = Route.extend({
     setupController: function (controller, model) {
-
         controller.set('model', model);
         controller.set('languages', FLOW.LanguagesController.create());
         controller.set('pointTypes', FLOW.SurveyPointTypeController.create());
 
-        this.store.find('survey_group', model.get('surveyGroupId')).then(function (sg) {
-            controller.set('surveyGroup', sg);
+        this.store.find('survey_group', model.get('surveyGroupId')).then(function (surveyGroup) {
+            controller.set('surveyGroup', surveyGroup);
+        });
+    }
+});
+
+FLOW.SurveyQuestionGroupsRoute = Route.extend({
+    setupController: function (controller, model) {
+        this.store.findQuery('question_group', {
+            surveyId: controller.get('survey').get('id')
+        }).then(function (data) {
+            controller.set('content', data);
         });
     }
 });

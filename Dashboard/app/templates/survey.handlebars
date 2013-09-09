@@ -28,10 +28,27 @@ ID number: {{id}}
       prompt=""
       promptBinding="Ember.STRINGS._select_language"}}
 <br>
+<button>Manage translations</button>
+<br>
+<button>Manage notifications</button>
+<br>
+<div>Survey summary
+<br>
+Number of Question Groups:
+<br>
+Number of Questions:
+<br>
+Status:
+</div>
+<button {{action 'save'}} {{bindAttr disabled=disableSave}}>Save</button>
+<button {{action 'preview'}} {{bindAttr disabled=disablePreview}}>Preview</button>
+<button {{action 'publish'}} {{bindAttr disabled=disablePublish}}>Publish</button>
 </div>
 <div style="float:left;width:70%">
 <div style="float:right;">{{#if surveyGroup}}{{#link-to 'survey_group' surveyGroup}}Back to survey overview{{/link-to}}{{/if}}</div>
 <div style="clear:both"></div>
-<div>{{outlet}}</div>
+<div>
+{{outlet}}
+</div>
 </div>
 <div style="clear:both"></div>
