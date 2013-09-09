@@ -36,7 +36,6 @@ import org.waterforpeople.mapping.app.gwt.client.survey.SurveyDto;
 import org.waterforpeople.mapping.app.util.DtoMarshaller;
 import org.waterforpeople.mapping.app.web.rest.dto.RestStatusDto;
 import org.waterforpeople.mapping.app.web.rest.dto.SurveyPayload;
-import org.waterforpeople.mapping.dao.QuestionAnswerStoreDao;
 
 import com.gallatinsystems.common.Constants;
 import com.gallatinsystems.framework.exceptions.IllegalDeletionException;
@@ -86,7 +85,7 @@ public class SurveyRestService {
 
 	// TODO put in meta information?
 	// list surveys by surveyGroup id
-	@RequestMapping(method = RequestMethod.GET, value = "")
+	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> listSurveysByGroupId(
 			@RequestParam(value = "surveyGroupId", defaultValue = "") Long surveyGroupId,
@@ -111,9 +110,9 @@ public class SurveyRestService {
 				statusDto.setMessage("can_delete");
 				statusDto.setKeyId(surveyId);
 			}
-			
+
 			response.put("surveys", results);
-			response.put("meta",statusDto);
+			response.put("meta", statusDto);
 			return response;
 		}
 
@@ -203,7 +202,7 @@ public class SurveyRestService {
 	@RequestMapping(method = RequestMethod.PUT, value = "/{id}")
 	@ResponseBody
 	public Map<String, Object> saveExistingSurvey(
-			@RequestBody SurveyPayload payLoad) {
+			@RequestBody SurveyPayload payLoad, @PathVariable("id") Long id) {
 		final SurveyDto surveyDto = payLoad.getSurvey();
 		final Map<String, Object> response = new HashMap<String, Object>();
 		SurveyDto dto = null;
@@ -214,12 +213,11 @@ public class SurveyRestService {
 		// if the POST data contains a valid surveyDto, continue. Otherwise,
 		// server will respond with 400 Bad Request
 		if (surveyDto != null) {
-			Long keyId = surveyDto.getKeyId();
 			Survey s;
 
 			// if the surveyDto has a key, try to get the survey.
-			if (keyId != null) {
-				s = surveyDao.getByKey(keyId);
+			if (id != null) {
+				s = surveyDao.getByKey(id);
 				// if we find the survey, update it's properties
 				if (s != null) {
 					// copy the properties, except the createdDateTime property,
@@ -255,7 +253,7 @@ public class SurveyRestService {
 	}
 
 	// create new survey
-	@RequestMapping(method = RequestMethod.POST, value = "")
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> saveNewSurvey(@RequestBody SurveyPayload payLoad) {
 		final SurveyDto surveyDto = payLoad.getSurvey();
@@ -301,7 +299,7 @@ public class SurveyRestService {
 			// source survey not found, the getById already logged the problem
 			return null;
 		}
-		return SurveyUtils.copySurvey(source,dto);
+		return SurveyUtils.copySurvey(source, dto);
 	}
 
 	private Survey marshallToDomain(SurveyDto dto) {

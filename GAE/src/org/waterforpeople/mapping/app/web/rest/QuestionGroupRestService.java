@@ -78,7 +78,7 @@ public class QuestionGroupRestService {
 
 	// TODO put in meta information?
 	// list questionGroups by survey id
-	@RequestMapping(method = RequestMethod.GET, value = "")
+	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, List<QuestionGroupDto>> listQuestionGroupBySurvey(
 			@RequestParam("surveyId") Long surveyId) {
