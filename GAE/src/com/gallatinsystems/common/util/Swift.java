@@ -18,21 +18,19 @@ package com.gallatinsystems.common.util;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 
 /**
- * OpenStack/Swift uploader. This version uses Swift v1.0, with Token based
- * authentication. <br>
+ * OpenStack/Swift uploader. This version uses Http Basic Authentication
+ * <br>
  * TODO:
  * <ul>
- * <li>Cache the token and storage url</li>
- * <li>Upgrade API version depending on the backend</li>
  * <li>Add MIME type to objects</li>
  * <li>Discuss container security options (public/private)</li>
  * </ul>
@@ -43,60 +41,36 @@ public class Swift {
 
 	private String mApiUrl;
 	private String mUsername;
-	private String mApiKey;
-	private String mStorageUrl;
-	private String mToken;
+	private String mPassword;
 
-	public Swift(String apiUrl, String username, String apiKey) {
+	public Swift(String apiUrl, String username, String password) {
 		mApiUrl = apiUrl;
 		mUsername = username;
-		mApiKey = apiKey;
+		mPassword = password;
 	}
 
 	public boolean uploadFile(String container, String name, byte[] data) {
+		LOG.info("Uploading file: " + name);
 		try {
-			boolean reauthenticate = true;
-			if (mToken == null || "".equals(mToken)) {
-				reauthenticate = false;
-				authenticate();
-			}
-
-			return uploadFile(container, name, data, reauthenticate);
-		} catch (ApiException e) {
-			LOG.error(e.getMessage());
-			return false;
+			return put(container, name, data);
 		} catch (IOException e) {
 			LOG.error(e.getMessage());
 			return false;
 		}
 	}
 
-	private boolean uploadFile(String container, String name, byte[] data,
-			boolean reauthenticate) throws ApiException, IOException {
-		LOG.info("uploading file: " + name);
-		try {
-			return put(container, name, data);
-		} catch (UnauthorizedException e) {
-			if (reauthenticate) {
-				authenticate();
-				return uploadFile(container, name, data, false);
-			}
-			return false;
-		}
-	}
-
 	private boolean put(String container, String name, byte[] data)
-			throws UnauthorizedException, IOException {
-		InputStream in = null;
+			throws IOException {
 		OutputStream out = null;
 		HttpURLConnection conn = null;
+		boolean ok = false;
 
 		try {
-			URL url = new URL(mStorageUrl + "/" + container + "/" + name);
+			URL url = new URL(mApiUrl + "/" + container + "/" + name);
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setDoOutput(true);
 			conn.setRequestMethod("PUT");
-			conn.setRequestProperty(Header.AUTH_TOKEN, mToken);
+			conn.setRequestProperty(Header.AUTH, getAuthHeader());
 			conn.setRequestProperty(Header.ETAG, MD5Util.generateChecksum(data));
 
 			out = new BufferedOutputStream(conn.getOutputStream());
@@ -113,22 +87,16 @@ public class Swift {
 				// able to retrieve it.
 				status = conn.getResponseCode();
 			}
-			if (status == HttpStatus.SC_UNAUTHORIZED) {
-				throw new UnauthorizedException("401 - Unauthorized");
-			} else if (status != HttpStatus.SC_CREATED) {
-				throw new ApiException("Status Code: " + status
-						+ ". Expected: 201 - Created");
+			
+			ok = (HttpStatus.SC_CREATED == status);
+			if (!ok) {
+    			LOG.error("Status Code: " + status + ". Expected: 201 - Created");
 			}
 
-			return true;
+			return ok;
 		} finally {
 			if (conn != null)
 				conn.disconnect();
-			if (in != null) {
-				try {
-					in.close();
-				} catch (Exception ignored) {}
-			}
 			if (out != null) {
 				try {
 					out.close();
@@ -136,51 +104,15 @@ public class Swift {
 			}
 		}
 	}
-
-	private void authenticate() throws ApiException, IOException {
-		URL url = new URL(mApiUrl + "/" + Api.AUTH);
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-		try {
-			conn.setRequestProperty(Header.AUTH_USER, mUsername);
-			conn.setRequestProperty(Header.AUTH_KEY, mApiKey);
 	
-			final int statusCode = conn.getResponseCode();
-			if (statusCode == 200) {
-				mToken = conn.getHeaderField(Header.AUTH_TOKEN);
-				mStorageUrl = conn.getHeaderField(Header.STORAGE_URL);
-			} else {
-				throw new ApiException(
-						"Could not authenticate with Swift. Status Code: " + statusCode);
-			}
-		} finally {
-			conn.disconnect();
-		}
-	}
-
-	@SuppressWarnings("serial")
-	class ApiException extends RuntimeException {
-		ApiException(String message) {
-			super(message);
-		}
-	}
-
-	@SuppressWarnings("serial")
-	class UnauthorizedException extends ApiException {
-		UnauthorizedException(String message) {
-			super(message);
-		}
-	}
-
-	interface Api {
-		static final String AUTH = "/auth/v1.0";
+	private String getAuthHeader() {
+		final String userPassword = mUsername + ":" + mPassword;
+        final String auth = new String(Base64.encodeBase64(userPassword.getBytes()));
+		return "Basic " + auth;
 	}
 
 	interface Header {
-		static final String AUTH_USER   = "X-Auth-User";
-		static final String AUTH_KEY    = "X-Auth-Key";
-		static final String AUTH_TOKEN  = "X-Auth-Token";
-		static final String STORAGE_URL = "X-Storage-Url";
-		static final String ETAG        = "ETag";
+		static final String AUTH = "Authorization";
+		static final String ETAG = "ETag";
 	}
 }
