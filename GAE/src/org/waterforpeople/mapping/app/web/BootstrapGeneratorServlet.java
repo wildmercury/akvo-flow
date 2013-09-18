@@ -18,6 +18,7 @@ package org.waterforpeople.mapping.app.web;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.waterforpeople.mapping.app.web.dto.BootstrapGeneratorRequest;
 
 import com.gallatinsystems.common.util.MailUtil;
@@ -45,6 +47,7 @@ import com.gallatinsystems.survey.domain.Survey;
  * 
  */
 public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
+	private static final Logger LOG = Logger.getLogger(BootstrapGeneratorServlet.class.getName());
 
 	private static final long serialVersionUID = -6645180848307957119L;
 	private static final String DB_INST_ENTRY = "dbinstructions.sql";
@@ -131,9 +134,14 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 		Swift swift = new Swift(PropertyUtil.getProperty(SWIFT_URL),
 				PropertyUtil.getProperty(SWIFT_USER),
 				PropertyUtil.getProperty(SWIFT_KEY));
-
-		boolean uploadedFile = swift.uploadFile(PropertyUtil.getProperty(BOOTSTRAP_UPLOAD_DIR),
-				filename, os.toByteArray());
+        
+		boolean uploadedFile = false;
+        try {
+    		uploadedFile = swift.uploadFile(PropertyUtil.getProperty(BOOTSTRAP_UPLOAD_DIR),
+    				filename, os.toByteArray());
+        } catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		}
 		
 		if (!uploadedFile) {
 			errors.append("Could not upload file to Swift");

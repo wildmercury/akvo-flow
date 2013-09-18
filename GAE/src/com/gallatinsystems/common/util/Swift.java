@@ -49,14 +49,16 @@ public class Swift {
 		mPassword = password;
 	}
 
-	public boolean uploadFile(String container, String name, byte[] data) {
-		LOG.info("Uploading file: " + name);
-		try {
-			return put(container, name, data);
-		} catch (IOException e) {
-			LOG.error(e.getMessage());
-			return false;
-		}
+	public boolean uploadFile(String container, String name, byte[] data) 
+			throws IOException {
+		LOG.debug("Uploading file: " + name);
+        if (put(container, name, data)) {
+            LOG.debug(name + " succesfully uploaded");
+            return true;
+        } else {
+            LOG.error("Error uploading file: " + name);
+            return false;
+        }
 	}
 
 	private boolean put(String container, String name, byte[] data)

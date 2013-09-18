@@ -18,6 +18,7 @@ package org.waterforpeople.mapping.app.web;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -351,17 +352,23 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		Swift swift = new Swift(PropertyUtil.getProperty(SWIFT_URL),
 				PropertyUtil.getProperty(SWIFT_USER),
 				PropertyUtil.getProperty(SWIFT_KEY));
+        
+		boolean uploadedFile = false;
+		boolean	uploadedZip = false;
+        try {
+    		uploadedFile = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+    				surveyId + ".xml", surveyXML.getBytes());
+    
+    		ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
+    				+ ".xml");
+    		
+    		uploadedZip = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+    				surveyId + ".zip", os.toByteArray());
+        } catch (IOException e) {
+			log.error(e.getMessage(), e);
+		}
 
-		boolean uploadedFile = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
-				surveyId + ".xml", surveyXML.getBytes());
-
-		ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
-				+ ".xml");
 		UploadStatusContainer uc = new UploadStatusContainer();
-		
-		boolean uploadedZip = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
-				surveyId + ".zip", os.toByteArray());
-
 		uc.setUploadedFile(uploadedFile);
 		uc.setUploadedZip(uploadedZip);
 		uc.setUrl(props.getProperty(SURVEY_UPLOAD_URL)
