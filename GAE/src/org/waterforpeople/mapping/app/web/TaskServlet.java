@@ -20,7 +20,6 @@ package org.waterforpeople.mapping.app.web;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -56,6 +55,7 @@ import services.S3Driver;
 
 import com.gallatinsystems.common.util.MailUtil;
 import com.gallatinsystems.common.util.PropertyUtil;
+import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.device.domain.DeviceFiles;
 import com.gallatinsystems.framework.exceptions.SignedDataException;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
@@ -73,6 +73,10 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 public class TaskServlet extends AbstractRestApiServlet {
+	private static final String SWIFT_URL       = "swift_url";
+	private static final String SWIFT_USER      = "swift_user";
+	private static final String SWIFT_KEY       = "swift_key";
+	private static final String SWIFT_RESPONSES = "responses_container";
 
 	private static final String ALLOW_UNSIGNED = "allowUnsignedData";
 	private static final String SIGNING_KEY = "signingKey";
@@ -117,18 +121,25 @@ public class TaskServlet extends AbstractRestApiServlet {
 		ArrayList<SurveyInstance> surveyInstances = new ArrayList<SurveyInstance>();
 
 		try {
-			DeviceFilesDao dfDao = new DeviceFilesDao();
-
-			URL url = new URL(DEVICE_FILE_PATH + fileName);
-			URLConnection conn = url.openConnection();
+            final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
+            final String user= PropertyUtil.getProperty(SWIFT_USER);
+            final String password = PropertyUtil.getProperty(SWIFT_KEY);
+            final String responses = PropertyUtil.getProperty(SWIFT_RESPONSES);
+            
+            Swift swift = new Swift(apiUrl, user, password);
+			URLConnection conn = swift.newAuthConnection(responses, fileName);
 			conn.setConnectTimeout(CONNECTION_TIMEOUT);
 			conn.setReadTimeout(CONNECTION_TIMEOUT);
+            
+			DeviceFilesDao dfDao = new DeviceFilesDao();
+            
+			final String uri = conn.getURL().toURI().toString();
 
 			BufferedInputStream bis = new BufferedInputStream(conn.getInputStream());
 			ZipInputStream zis = new ZipInputStream(bis);
 			List<DeviceFiles> dfList = null;
 			DeviceFiles deviceFile = null;
-			dfList = dfDao.listByUri(url.toURI().toString());
+			dfList = dfDao.listByUri(uri);
 			if (dfList != null && dfList.size()>0) {
 				deviceFile = dfList.get(0);
 			}
@@ -137,7 +148,7 @@ public class TaskServlet extends AbstractRestApiServlet {
 			}
 			deviceFile.setProcessDate(getNowDateTimeFormatted());
 			deviceFile.setProcessedStatus(StatusCode.IN_PROGRESS);
-			deviceFile.setURI(url.toURI().toString());
+			deviceFile.setURI(uri);
 			if (phoneNumber == null || phoneNumber.equals("null")) {
 				deviceFile.setPhoneNumber(null);
 			} else {

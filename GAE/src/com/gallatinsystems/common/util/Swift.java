@@ -106,6 +106,14 @@ public class Swift {
 			}
 		}
 	}
+    
+    public HttpURLConnection newAuthConnection(String container, String name) throws IOException {
+        HttpURLConnection conn = null;
+		URL url = new URL(mApiUrl + "/" + container + "/" + name);
+        conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty(Header.AUTH, getAuthHeader());
+        return conn;
+    }
 	
 	private String getAuthHeader() {
 		final String userPassword = mUsername + ":" + mPassword;
