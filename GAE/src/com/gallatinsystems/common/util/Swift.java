@@ -17,14 +17,16 @@
 package com.gallatinsystems.common.util;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
+import org.apache.log4j.Logger;
 
 /**
  * OpenStack/Swift uploader. This version uses Http Basic Authentication
@@ -47,6 +49,26 @@ public class Swift {
 		mApiUrl = apiUrl;
 		mUsername = username;
 		mPassword = password;
+	}
+	
+	public String readFile(String container, String name) throws IOException {
+		BufferedReader reader = null;
+		StringBuilder buf = new StringBuilder();
+		HttpURLConnection conn = newAuthConnection(container, name);
+		try {
+			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				buf.append(line).append("\n");
+			}
+			reader.close();
+			return buf.toString();
+		} finally {
+			conn.disconnect();
+			if (reader != null) {
+				reader.close();
+			}
+		}
 	}
 
 	public boolean uploadFile(String container, String name, byte[] data) 
