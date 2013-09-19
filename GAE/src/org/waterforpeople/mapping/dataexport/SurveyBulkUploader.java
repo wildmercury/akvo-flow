@@ -38,7 +38,8 @@ import javax.swing.SwingUtilities;
 
 import com.gallatinsystems.common.util.FileUtil;
 import com.gallatinsystems.common.util.ImageUtil;
-import com.gallatinsystems.common.util.UploadUtil;
+import com.gallatinsystems.common.util.PropertyUtil;
+import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.dataexport.applet.DataImporter;
 import com.gallatinsystems.framework.dataexport.applet.ProgressDialog;
@@ -60,6 +61,11 @@ import com.gallatinsystems.framework.dataexport.applet.ProgressDialog;
  * 
  */
 public class SurveyBulkUploader implements DataImporter {
+	private static final String SWIFT_URL       = "swift_url";
+	private static final String SWIFT_USER      = "swift_user";
+	private static final String SWIFT_KEY       = "swift_key";
+	private static final String SWIFT_RESPONSES = "responses_container";
+	private static final String SWIFT_IMAGES    = "images_container";
 
 	private static final String NOTIFICATION_PATH = "/processor?action=submit&fileName=";
 	private static final String UPLOAD_IMAGE_MODE = "uploadImageOnly";
@@ -70,12 +76,6 @@ public class SurveyBulkUploader implements DataImporter {
 
 	private static final String IMAGE_TEMP_DIR = "resized";
 
-	private static final String IMAGE_POLICY_KEY = "imagePolicy";
-	private static final String IMAGE_SIG_KEY = "imageSig";
-	private static final String DATA_POLICY_KEY = "dataPolicy";
-	private static final String DATA_SIG_KEY = "dataSig";
-	private static final String AWS_ID_KEY = "awsId";
-	private static final String UPLOAD_BASE_KEY = "uploadBase";
 	private static final String DEFAULT_LOCALE = "en";
 	private static Map<String, String> UPLOADING;
 	private static Map<String, String> COMPLETE;
@@ -144,6 +144,14 @@ public class SurveyBulkUploader implements DataImporter {
 		File tempDir = new File(sourceDirectory, IMAGE_TEMP_DIR);
 		tempDir.mkdirs();
 
+        final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
+        final String user= PropertyUtil.getProperty(SWIFT_USER);
+        final String password = PropertyUtil.getProperty(SWIFT_KEY);
+        final String responsesContainer = PropertyUtil.getProperty(SWIFT_RESPONSES);
+        final String imagesContainer = PropertyUtil.getProperty(SWIFT_IMAGES);
+            
+        Swift swift = new Swift(apiUrl, user, password);
+
 		for (File fx : filesToUpload) {
 			if (!processedList.contains(fx.getName())) {
 				try {
@@ -155,27 +163,15 @@ public class SurveyBulkUploader implements DataImporter {
 						if (uploadImage) {
 							File resizedFile = ImageUtil.resizeImage(fx,
 									tempDir.getAbsolutePath(), 500, 500);
-							UploadUtil.upload(
-									FileUtil.readFileBytes(resizedFile),
-									resizedFile.getName(), "images",
-									criteria.get(UPLOAD_BASE_KEY),
-									criteria.get(AWS_ID_KEY),
-									criteria.get(IMAGE_POLICY_KEY),
-									criteria.get(IMAGE_SIG_KEY), "image/jpeg",
-									null);
+							swift.uploadFile(imagesContainer, resizedFile.getName(), 
+									FileUtil.readFileBytes(resizedFile));
 							// now delete the temp file
 							resizedFile.delete();
 						}
 					} else {
 						if (processZip) {
-							boolean success = UploadUtil.upload(FileUtil.readFileBytes(fx),
-									fx.getName(), "devicezip",
-									criteria.get(UPLOAD_BASE_KEY),
-									criteria.get(AWS_ID_KEY),
-									criteria.get(DATA_POLICY_KEY),
-									criteria.get(DATA_SIG_KEY),
-									"application/zip", null);
-
+							boolean success = swift.uploadFile(responsesContainer, fx.getName(), 
+									FileUtil.readFileBytes(fx));
 							if (success) {
 								// now notify the server that a new file is there
 								// for processing
@@ -208,7 +204,6 @@ public class SurveyBulkUploader implements DataImporter {
 		i++;
 		SwingUtilities.invokeLater(new StatusUpdater(i, COMPLETE.get(locale),
 				true));
-
 	}
 
 	public static void sendFileNotification(String serverBase, String fileName)
