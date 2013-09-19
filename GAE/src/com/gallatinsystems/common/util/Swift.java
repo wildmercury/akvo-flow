@@ -29,8 +29,7 @@ import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
 /**
- * OpenStack/Swift uploader. This version uses Http Basic Authentication
- * <br>
+ * OpenStack/Swift uploader. This version uses Http Basic Authentication <br>
  * TODO:
  * <ul>
  * <li>Add MIME type to objects</li>
@@ -50,13 +49,14 @@ public class Swift {
 		mUsername = username;
 		mPassword = password;
 	}
-	
+
 	public String readFile(String container, String name) throws IOException {
 		BufferedReader reader = null;
 		StringBuilder buf = new StringBuilder();
 		HttpURLConnection conn = newAuthConnection(container, name);
 		try {
-			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			reader = new BufferedReader(new InputStreamReader(
+					conn.getInputStream()));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				buf.append(line).append("\n");
@@ -71,16 +71,16 @@ public class Swift {
 		}
 	}
 
-	public boolean uploadFile(String container, String name, byte[] data) 
+	public boolean uploadFile(String container, String name, byte[] data)
 			throws IOException {
 		LOG.debug("Uploading file: " + name);
-        if (put(container, name, data)) {
-            LOG.debug(name + " succesfully uploaded");
-            return true;
-        } else {
-            LOG.error("Error uploading file: " + name);
-            return false;
-        }
+		if (put(container, name, data)) {
+			LOG.debug(name + " succesfully uploaded");
+			return true;
+		} else {
+			LOG.error("Error uploading file: " + name);
+			return false;
+		}
 	}
 
 	private boolean put(String container, String name, byte[] data)
@@ -111,10 +111,11 @@ public class Swift {
 				// able to retrieve it.
 				status = conn.getResponseCode();
 			}
-			
+
 			ok = (HttpStatus.SC_CREATED == status);
 			if (!ok) {
-    			LOG.error("Status Code: " + status + ". Expected: 201 - Created");
+				LOG.error("Status Code: " + status
+						+ ". Expected: 201 - Created");
 			}
 
 			return ok;
@@ -124,22 +125,25 @@ public class Swift {
 			if (out != null) {
 				try {
 					out.close();
-				} catch (Exception ignored) {}
+				} catch (Exception ignored) {
+				}
 			}
 		}
 	}
-    
-    public HttpURLConnection newAuthConnection(String container, String name) throws IOException {
-        HttpURLConnection conn = null;
+
+	public HttpURLConnection newAuthConnection(String container, String name)
+			throws IOException {
+		HttpURLConnection conn = null;
 		URL url = new URL(mApiUrl + "/" + container + "/" + name);
-        conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty(Header.AUTH, getAuthHeader());
-        return conn;
-    }
-	
+		conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestProperty(Header.AUTH, getAuthHeader());
+		return conn;
+	}
+
 	private String getAuthHeader() {
 		final String userPassword = mUsername + ":" + mPassword;
-        final String auth = new String(Base64.encodeBase64(userPassword.getBytes()));
+		final String auth = new String(Base64.encodeBase64(userPassword
+				.getBytes()));
 		return "Basic " + auth;
 	}
 
