@@ -27,6 +27,15 @@ import java.util.Properties;
  * 
  */
 public class PropertyUtil {
+	
+	/* Constants */
+	public static final String SWIFT_URL       = "swift_url";
+	public static final String SWIFT_USER      = "swift_user";
+	public static final String SWIFT_KEY       = "swift_key";
+	public static final String SWIFT_RESPONSES = "responses_container";
+	public static final String SWIFT_IMAGES    = "images_container";
+	public static final String SWIFT_BOOTSTRAP = "bootstrap_container";
+	public static final String SWIFT_SURVEYS   = "surveys_container";
 
 	private static Properties props = null;
 
