@@ -29,12 +29,6 @@ public class SurveyAssemblyRequest extends RestRequest {
 	private static final long serialVersionUID = -4264292935305363469L;
 
 	public static final String ASSEMBLE_SURVEY = "assembleSurvey";
-	public static final String DISPATCH_ASSEMBLE_QUESTION_GROUP = "dispatchAssembleQuestionGroup";
-	public static final String ASSEMBLE_QUESTION_GROUP = "assembleQuestionGroup";
-	public static final String ASSEMBLE_QUESTIONS = "assembleQuestions";
-	public static final String ASSEMBLE_SURVEY_FRAGMENTS = "assembleSurveyFragments";
-	public static final String DISTRIBUTE_SURVEY = "distributeSurvey";
-	public static final String CLEANUP = "cleanup";
 
 	public static final String SURVEY_ID_PARAM = "surveyId";
 	public static final String IS_FWD_PARAM = "isFwd";

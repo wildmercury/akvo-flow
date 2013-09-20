@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -33,12 +32,10 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.waterforpeople.mapping.app.web.dto.SurveyAssemblyRequest;
-import org.waterforpeople.mapping.dao.SurveyContainerDao;
 
 import com.gallatinsystems.common.domain.UploadStatusContainer;
 import com.gallatinsystems.common.util.PropertyUtil;
 import com.gallatinsystems.common.util.Swift;
-import com.gallatinsystems.common.util.UploadUtil;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
 import com.gallatinsystems.framework.rest.RestRequest;
@@ -50,7 +47,6 @@ import com.gallatinsystems.survey.dao.QuestionGroupDao;
 import com.gallatinsystems.survey.dao.SurveyDAO;
 import com.gallatinsystems.survey.dao.SurveyGroupDAO;
 import com.gallatinsystems.survey.dao.SurveyUtils;
-import com.gallatinsystems.survey.dao.SurveyXMLFragmentDao;
 import com.gallatinsystems.survey.dao.TranslationDao;
 import com.gallatinsystems.survey.domain.Question;
 import com.gallatinsystems.survey.domain.QuestionGroup;
@@ -58,10 +54,7 @@ import com.gallatinsystems.survey.domain.QuestionHelpMedia;
 import com.gallatinsystems.survey.domain.QuestionOption;
 import com.gallatinsystems.survey.domain.ScoringRule;
 import com.gallatinsystems.survey.domain.Survey;
-import com.gallatinsystems.survey.domain.SurveyContainer;
 import com.gallatinsystems.survey.domain.SurveyGroup;
-import com.gallatinsystems.survey.domain.SurveyXMLFragment;
-import com.gallatinsystems.survey.domain.SurveyXMLFragment.FRAGMENT_TYPE;
 import com.gallatinsystems.survey.domain.Translation;
 import com.gallatinsystems.survey.domain.xml.AltText;
 import com.gallatinsystems.survey.domain.xml.Dependency;
@@ -74,10 +67,6 @@ import com.gallatinsystems.survey.domain.xml.Scoring;
 import com.gallatinsystems.survey.domain.xml.ValidationRule;
 import com.gallatinsystems.survey.xml.SurveyXMLAdapter;
 import com.google.appengine.api.backends.BackendServiceFactory;
-import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskOptions;
 
 public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	private static final Logger log = Logger
@@ -96,15 +85,10 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	public static final String STRENGTH_QUESTION_TYPE = "strength";
 	public static final String DATE_QUESTION_TYPE = "date";
 
-	private static final String SURVEY_UPLOAD_URL = "surveyuploadurl";
-	private static final String SURVEY_UPLOAD_DIR = "surveyuploaddir";
-	private static final String SURVEY_UPLOAD_SIG = "surveyuploadsig";
-	private static final String SURVEY_UPLOAD_POLICY = "surveyuploadpolicy";
-	private static final String S3_ID = "aws_identifier";
-
-	private static final String SWIFT_URL = "swift_url";
-	private static final String SWIFT_USER = "swift_user";
-	private static final String SWIFT_KEY = "swift_key";
+	private static final String SWIFT_URL       = "swift_url";
+	private static final String SWIFT_USER      = "swift_user";
+	private static final String SWIFT_KEY       = "swift_key";
+	private static final String SWIFT_SURVEYS   = "surveys_container";
 
 	private Random randomNumber = new Random();
 
@@ -120,9 +104,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	protected RestResponse handleRequest(RestRequest req) throws Exception {
 		RestResponse response = new RestResponse();
 		SurveyAssemblyRequest importReq = (SurveyAssemblyRequest) req;
-		if (SurveyAssemblyRequest.ASSEMBLE_SURVEY.equalsIgnoreCase(importReq
-				.getAction())) {
-
+		if (SurveyAssemblyRequest.ASSEMBLE_SURVEY.equalsIgnoreCase(importReq.getAction())) {
 			QuestionDao questionDao = new QuestionDao();
 			boolean useBackend = false;
 			// make sure we're not already running on a backend and that we are
@@ -163,100 +145,12 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 			List<Long> ids = new ArrayList<Long>();
 			ids.add(importReq.getSurveyId());
 			SurveyUtils.notifyReportService(ids, "invalidate");
-
-		} else if (SurveyAssemblyRequest.DISPATCH_ASSEMBLE_QUESTION_GROUP
-				.equalsIgnoreCase(importReq.getAction())) {
-			this.dispatchAssembleQuestionGroup(importReq.getSurveyId(),
-					importReq.getQuestionGroupId(),
-					importReq.getTransactionId());
-		} else if (SurveyAssemblyRequest.ASSEMBLE_QUESTION_GROUP
-				.equalsIgnoreCase(importReq.getAction())) {
-			assembleQuestionGroups(importReq.getSurveyId(),
-					importReq.getTransactionId());
-		} else if (SurveyAssemblyRequest.DISTRIBUTE_SURVEY
-				.equalsIgnoreCase(importReq.getAction())) {
-			uploadSurvey(importReq.getSurveyId(), importReq.getTransactionId());
-		} else if (SurveyAssemblyRequest.CLEANUP.equalsIgnoreCase(importReq
-				.getAction())) {
-			cleanupFragments(importReq.getSurveyId(),
-					importReq.getTransactionId());
+		} else {
+			throw new RuntimeException("Action not implemented: " + req.getAction());
 		}
+			
 
 		return response;
-	}
-
-	/**
-	 * uploads full survey XML to S3
-	 *
-	 * @param surveyId
-	 */
-	private void uploadSurvey(Long surveyId, Long transactionId) {
-		SurveyContainerDao scDao = new SurveyContainerDao();
-		SurveyContainer sc = scDao.findBySurveyId(surveyId);
-		Properties props = System.getProperties();
-		String document = sc.getSurveyDocument().getValue();
-		boolean uploadedFile = UploadUtil.sendStringAsFile(sc.getSurveyId()
-				+ ".xml", document, props.getProperty(SURVEY_UPLOAD_DIR),
-				props.getProperty(SURVEY_UPLOAD_URL), props.getProperty(S3_ID),
-				props.getProperty(SURVEY_UPLOAD_POLICY),
-				props.getProperty(SURVEY_UPLOAD_SIG), "text/xml");
-
-		ByteArrayOutputStream os = ZipUtil.generateZip(document,
-				sc.getSurveyId() + ".xml");
-
-		boolean uploadedZip = UploadUtil.upload(os, sc.getSurveyId() + ".zip",
-				props.getProperty(SURVEY_UPLOAD_DIR),
-				props.getProperty(SURVEY_UPLOAD_URL), props.getProperty(S3_ID),
-				props.getProperty(SURVEY_UPLOAD_POLICY),
-				props.getProperty(SURVEY_UPLOAD_SIG), "application/zip", null);
-
-		sendQueueMessage(SurveyAssemblyRequest.CLEANUP, surveyId, null,
-				transactionId);
-
-		Message message = new Message();
-		message.setActionAbout("surveyAssembly");
-		message.setObjectId(surveyId);
-		// String messageText = CONSTANTS.surveyPublishOkMessage() + " "
-		// + url;
-
-		if (uploadedFile && uploadedZip) {
-			// increment the version so devices know to pick up the changes
-			SurveyDAO surveyDao = new SurveyDAO();
-			surveyDao.incrementVersion(surveyId);
-
-			String messageText = "Published.  Please check: "
-					+ props.getProperty(SURVEY_UPLOAD_URL)
-					+ props.getProperty(SURVEY_UPLOAD_DIR) + "/" + surveyId
-					+ ".xml";
-			message.setShortMessage(messageText);
-
-			Survey s = surveyDao.getById(surveyId);
-			if (s != null) {
-				message.setObjectTitle(s.getPath() + "/" + s.getName());
-			}
-
-			message.setTransactionUUID(transactionId.toString());
-			MessageDao messageDao = new MessageDao();
-			messageDao.save(message);
-		} else {
-			// String messageText =
-			// CONSTANTS.surveyPublishErrorMessage();
-			String messageText = "Failed to publish: " + surveyId + "\n";
-			message.setTransactionUUID(transactionId.toString());
-			message.setShortMessage(messageText);
-			MessageDao messageDao = new MessageDao();
-			messageDao.save(message);
-		}
-	}
-	
-	/**
-	 * deletes fragments for the survey
-	 *
-	 * @param surveyId
-	 */
-	private void cleanupFragments(Long surveyId, Long transactionId) {
-		SurveyXMLFragmentDao sxmlfDao = new SurveyXMLFragmentDao();
-		sxmlfDao.deleteFragmentsForSurvey(surveyId, transactionId);
 	}
 
 	@Override
@@ -345,24 +239,26 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	}
 
 	public UploadStatusContainer uploadSurveyXML(Long surveyId, String surveyXML) {
-		Properties props = System.getProperties();
 		String document = surveyXML;
+		
+		final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
+		final String user= PropertyUtil.getProperty(SWIFT_USER);
+		final String password = PropertyUtil.getProperty(SWIFT_KEY);
+		final String surveysContainer = PropertyUtil.getProperty(SWIFT_SURVEYS);
 
 		// Swift upload
-		Swift swift = new Swift(PropertyUtil.getProperty(SWIFT_URL),
-				PropertyUtil.getProperty(SWIFT_USER),
-				PropertyUtil.getProperty(SWIFT_KEY));
+		Swift swift = new Swift(apiUrl, user, password);
 		
 		boolean uploadedFile = false;
 		boolean	uploadedZip = false;
 		try {
-			uploadedFile = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+			uploadedFile = swift.uploadFile(surveysContainer,
 					surveyId + ".xml", surveyXML.getBytes());
 
 			ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
 					+ ".xml");
 			
-			uploadedZip = swift.uploadFile(props.getProperty(SURVEY_UPLOAD_DIR),
+			uploadedZip = swift.uploadFile(surveysContainer,
 					surveyId + ".zip", os.toByteArray());
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
@@ -371,9 +267,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		UploadStatusContainer uc = new UploadStatusContainer();
 		uc.setUploadedFile(uploadedFile);
 		uc.setUploadedZip(uploadedZip);
-		uc.setUrl(props.getProperty(SURVEY_UPLOAD_URL)
-				+ props.getProperty(SURVEY_UPLOAD_DIR) + "/" + surveyId
-				+ ".xml");
+		uc.setUrl(apiUrl + "/" + surveysContainer + "/" + surveyId + ".xml");
 		return uc;
 	}
 
@@ -396,109 +290,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		return sb.toString() + "</questionGroup>";
 	}
 
-	@SuppressWarnings("unused")
-	private void assembleSurvey(Long surveyId) {
-
-		/**************
-		 * 1, Select survey based on surveyId 2. Retrieve all question groups
-		 * fire off queue tasks
-		 */
-		QuestionGroupDao qgDao = new QuestionGroupDao();
-		TreeMap<Integer, QuestionGroup> qgList = qgDao
-				.listQuestionGroupsBySurvey(surveyId);
-		if (qgList != null) {
-			ArrayList<Long> questionGroupIdList = new ArrayList<Long>();
-			StringBuilder builder = new StringBuilder();
-			int count = 1;
-			for (QuestionGroup item : qgList.values()) {
-				questionGroupIdList.add(item.getKey().getId());
-				builder.append(item.getKey().getId());
-				if (count < qgList.size()) {
-					builder.append(",");
-				}
-				count++;
-			}
-			count = 0;
-			Long transactionId = randomNumber.nextLong();
-			sendQueueMessage(
-					SurveyAssemblyRequest.DISPATCH_ASSEMBLE_QUESTION_GROUP,
-					surveyId, builder.toString(), transactionId);
-		}
-	}
-
-	/**
-	 * sends a message to the task queue for survey assembly
-	 *
-	 * @param action
-	 * @param surveyId
-	 * @param questionGroups
-	 */
-	private void sendQueueMessage(String action, Long surveyId,
-			String questionGroups, Long transactionId) {
-		Queue surveyAssemblyQueue = QueueFactory.getQueue("surveyAssembly");
-		TaskOptions task = TaskOptions.Builder.withUrl("/app_worker/surveyassembly").param("action",
-				action).param("surveyId", surveyId.toString());
-		if (questionGroups != null) {
-			task.param("questionGroupId", questionGroups);
-		}
-		if (transactionId != null) {
-			task.param("transactionId", transactionId.toString());
-		}
-		surveyAssemblyQueue.add(task);
-	}
-
-	private void dispatchAssembleQuestionGroup(Long surveyId,
-			String questionGroupIds, Long transactionId) {
-		boolean isLast = true;
-		String currentId = questionGroupIds;
-		String remainingIds = null;
-		if (questionGroupIds.contains(",")) {
-			isLast = false;
-			currentId = questionGroupIds.substring(0,
-					questionGroupIds.indexOf(","));
-			remainingIds = questionGroupIds.substring(questionGroupIds
-					.indexOf(",") + 1);
-		}
-
-		QuestionDao questionDao = new QuestionDao();
-		QuestionGroupDao questionGroupDao = new QuestionGroupDao();
-		QuestionGroup group = questionGroupDao.getByKey(Long
-				.parseLong(currentId));
-		TreeMap<Integer, Question> questionList = questionDao
-				.listQuestionsByQuestionGroup(Long.parseLong(currentId), true);
-
-		StringBuilder sb = new StringBuilder("<questionGroup><heading>")
-				.append(group.getCode()).append("</heading>");
-
-		if (questionList != null) {
-			for (Question q : questionList.values()) {
-				sb.append(marshallQuestion(q));
-			}
-		}
-		SurveyXMLFragment sxf = new SurveyXMLFragment();
-		sxf.setSurveyId(surveyId);
-		sxf.setQuestionGroupId(Long.parseLong(currentId));
-		sxf.setFragmentOrder(group.getOrder());
-		sxf.setFragment(new Text(sb.append("</questionGroup>").toString()));
-		sxf.setTransactionId(transactionId);
-
-		sxf.setFragmentType(FRAGMENT_TYPE.QUESTION_GROUP);
-		SurveyXMLFragmentDao sxmlfDao = new SurveyXMLFragmentDao();
-		sxmlfDao.save(sxf);
-		if (isLast) {
-			// Assemble the fragments
-			sendQueueMessage(SurveyAssemblyRequest.ASSEMBLE_QUESTION_GROUP,
-					surveyId, null, transactionId);
-
-		} else {
-			sendQueueMessage(
-					SurveyAssemblyRequest.DISPATCH_ASSEMBLE_QUESTION_GROUP,
-					surveyId, remainingIds, transactionId);
-		}
-	}
-
 	private String marshallQuestion(Question q) {
-
 		SurveyXMLAdapter sax = new SurveyXMLAdapter();
 		ObjectFactory objFactory = new ObjectFactory();
 		com.gallatinsystems.survey.domain.xml.Question qXML = objFactory
@@ -729,34 +521,4 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		return altTextList;
 	}
 
-	private void assembleQuestionGroups(Long surveyId, Long transactionId) {
-		SurveyXMLFragmentDao sxmlfDao = new SurveyXMLFragmentDao();
-		List<SurveyXMLFragment> sxmlfList = sxmlfDao.listSurveyFragments(
-				surveyId, SurveyXMLFragment.FRAGMENT_TYPE.QUESTION_GROUP,
-				transactionId);
-		StringBuilder sbQG = new StringBuilder();
-		for (SurveyXMLFragment item : sxmlfList) {
-			sbQG.append(item.getFragment().getValue());
-		}
-		StringBuilder completeSurvey = new StringBuilder();
-		String surveyHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><survey>";
-		String surveyFooter = "</survey>";
-		completeSurvey.append(surveyHeader);
-		completeSurvey.append(sbQG.toString());
-		sbQG = null;
-		completeSurvey.append(surveyFooter);
-
-		SurveyContainerDao scDao = new SurveyContainerDao();
-		SurveyContainer sc = scDao.findBySurveyId(surveyId);
-		if (sc == null) {
-			sc = new SurveyContainer();
-		}
-		sc.setSurveyDocument(new Text(completeSurvey.toString()));
-		sc.setSurveyId(surveyId);
-
-		scDao.save(sc);
-
-		sendQueueMessage(SurveyAssemblyRequest.DISTRIBUTE_SURVEY, surveyId,
-				null, transactionId);
-	}
 }
