@@ -17,6 +17,7 @@
 package org.waterforpeople.mapping.notification;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.TreeMap;
 import com.gallatinsystems.common.util.MD5Util;
 import com.gallatinsystems.common.util.MailUtil;
 import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.UploadUtil;
+import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.notification.NotificationRequest;
 import com.gallatinsystems.notification.dao.NotificationSubscriptionDao;
 import com.gallatinsystems.notification.domain.NotificationHistory;
@@ -35,8 +36,8 @@ import com.gallatinsystems.survey.domain.Survey;
 
 /**
  * base class that supports the generation of a report file. The report file
- * will either be uploaded to S3 or emailed as an attachment. If it's uploaded
- * to S3, the notification subscribers will be notified of the url to download
+ * will either be uploaded to OpenStack or emailed as an attachment. If it's uploaded
+ * to OpenStack, the notification subscribers will be notified of the url to download
  * the file via email. Subclasses need to simply provide the implementation of
  * writing the report bytes to the print writer instantiated in this class.
  * 
@@ -46,13 +47,19 @@ import com.gallatinsystems.survey.domain.Survey;
 public abstract class AbstractReportNotificationHandler extends
 		BaseNotificationHandler {
 	private static final String LINK_OPT = "LINK";
-	protected static final String REPORT_S3_SIG = "reportS3Sig";
-	protected static final String REPORT_S3_POLICY = "reportS3Policy";
-	protected static final String AWS_IDENTIFIER = "aws_identifier";
-	protected static final String SURVEY_UPLOAD_URL = "surveyuploadurl";
-	protected static final String REPORT_S3_PATH = "reportS3Path";
 	protected static final String DATE_DISPLAY_FORMAT = "MMddyyyy";
 	protected static final String ATTACH_REPORT_FLAG = "attachreport";
+	
+	private Swift mSwift;
+	private String mReportsContainer;
+	
+	public AbstractReportNotificationHandler() {
+		mSwift = new Swift(
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
+		mReportsContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_REPORTS);
+	}
 
 	/**
 	 * generates the report and sends it as an email attachment
@@ -98,21 +105,18 @@ public abstract class AbstractReportNotificationHandler extends
 
 				if (linkAddrList.size() > 0) {
 					String fileName = getFileName(entityId.toString());
-					UploadUtil.upload(bos, fileName,
-							PropertyUtil.getProperty(REPORT_S3_PATH),
-							PropertyUtil.getProperty(SURVEY_UPLOAD_URL),
-							PropertyUtil.getProperty(AWS_IDENTIFIER),
-							PropertyUtil.getProperty(REPORT_S3_POLICY),
-							PropertyUtil.getProperty(REPORT_S3_SIG),
-							"text/plain", null);
+					try {
+						mSwift.uploadFile(mReportsContainer, fileName, bos.toByteArray());
+					} catch (IOException e) {
+						e.printStackTrace();
+						throw new RuntimeException("Error uploading file: " + fileName);
+					}
 
 					sendMail(
 							linkAddrList,
 							emailTitle,
 							emailBody
-									+ PropertyUtil
-											.getProperty(SURVEY_UPLOAD_URL)
-									+ PropertyUtil.getProperty(REPORT_S3_PATH)
+									+ mSwift.getUrl() + "/" + mReportsContainer
 									+ "/" + fileName);
 				}
 				if (attachAddrList.size() > 0) {

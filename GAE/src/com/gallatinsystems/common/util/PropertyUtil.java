@@ -36,6 +36,7 @@ public class PropertyUtil {
 	public static final String SWIFT_IMAGES    = "images_container";
 	public static final String SWIFT_BOOTSTRAP = "bootstrap_container";
 	public static final String SWIFT_SURVEYS   = "surveys_container";
+	public static final String SWIFT_REPORTS   = "reports_container";
 
 	private static Properties props = null;
 
