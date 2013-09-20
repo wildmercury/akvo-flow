@@ -130,6 +130,10 @@ public class Swift {
 			}
 		}
 	}
+	
+	public String getUrl() {
+		return mApiUrl;
+	}
 
 	public HttpURLConnection newAuthConnection(String container, String name)
 			throws IOException {
