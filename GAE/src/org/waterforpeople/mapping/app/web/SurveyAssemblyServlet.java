@@ -84,13 +84,19 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	public static final String SCAN_QUESTION_TYPE = "scan";
 	public static final String STRENGTH_QUESTION_TYPE = "strength";
 	public static final String DATE_QUESTION_TYPE = "date";
-
-	private static final String SWIFT_URL       = "swift_url";
-	private static final String SWIFT_USER      = "swift_user";
-	private static final String SWIFT_KEY       = "swift_key";
-	private static final String SWIFT_SURVEYS   = "surveys_container";
+	
+	private Swift mSwift;
+	private String mSurveysContainer;
 
 	private Random randomNumber = new Random();
+	
+	public SurveyAssemblyServlet() {
+		mSwift = new Swift(
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
+		mSurveysContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_SURVEYS);
+	}
 
 	@Override
 	protected RestRequest convertRequest() throws Exception {
@@ -241,24 +247,16 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	public UploadStatusContainer uploadSurveyXML(Long surveyId, String surveyXML) {
 		String document = surveyXML;
 		
-		final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
-		final String user= PropertyUtil.getProperty(SWIFT_USER);
-		final String password = PropertyUtil.getProperty(SWIFT_KEY);
-		final String surveysContainer = PropertyUtil.getProperty(SWIFT_SURVEYS);
-
-		// Swift upload
-		Swift swift = new Swift(apiUrl, user, password);
-		
 		boolean uploadedFile = false;
 		boolean	uploadedZip = false;
 		try {
-			uploadedFile = swift.uploadFile(surveysContainer,
+			uploadedFile = mSwift.uploadFile(mSurveysContainer,
 					surveyId + ".xml", surveyXML.getBytes());
 
 			ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
 					+ ".xml");
 			
-			uploadedZip = swift.uploadFile(surveysContainer,
+			uploadedZip = mSwift.uploadFile(mSurveysContainer,
 					surveyId + ".zip", os.toByteArray());
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
@@ -267,7 +265,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		UploadStatusContainer uc = new UploadStatusContainer();
 		uc.setUploadedFile(uploadedFile);
 		uc.setUploadedZip(uploadedZip);
-		uc.setUrl(apiUrl + "/" + surveysContainer + "/" + surveyId + ".xml");
+		uc.setUrl(mSwift.getUrl() + "/" + mSurveysContainer + "/" + surveyId + ".xml");
 		return uc;
 	}
 

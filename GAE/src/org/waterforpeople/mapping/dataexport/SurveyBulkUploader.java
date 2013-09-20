@@ -61,12 +61,6 @@ import com.gallatinsystems.framework.dataexport.applet.ProgressDialog;
  * 
  */
 public class SurveyBulkUploader implements DataImporter {
-	private static final String SWIFT_URL       = "swift_url";
-	private static final String SWIFT_USER      = "swift_user";
-	private static final String SWIFT_KEY       = "swift_key";
-	private static final String SWIFT_RESPONSES = "responses_container";
-	private static final String SWIFT_IMAGES    = "images_container";
-
 	private static final String NOTIFICATION_PATH = "/processor?action=submit&fileName=";
 	private static final String UPLOAD_IMAGE_MODE = "uploadImageOnly";
 	private static final String ZIP_ONLY_MODE = "processZipOnly";
@@ -80,6 +74,10 @@ public class SurveyBulkUploader implements DataImporter {
 	private static Map<String, String> UPLOADING;
 	private static Map<String, String> COMPLETE;
 	private List<File> filesToUpload;
+	
+	private Swift mSwift;
+	private String mResponsesContainer;
+	private String mImagesContainer;
 
 	static {
 		UPLOADING = new HashMap<String, String>();
@@ -91,6 +89,15 @@ public class SurveyBulkUploader implements DataImporter {
 
 	private String locale = DEFAULT_LOCALE;
 	private ProgressDialog progressDialog;
+	
+	public SurveyBulkUploader() {
+		mSwift = new Swift(
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
+		mResponsesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_RESPONSES);
+		mImagesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_IMAGES);
+	}
 
 	@Override
 	public Map<Integer, String> validate(File file) {
@@ -144,14 +151,6 @@ public class SurveyBulkUploader implements DataImporter {
 		File tempDir = new File(sourceDirectory, IMAGE_TEMP_DIR);
 		tempDir.mkdirs();
 
-        final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
-        final String user= PropertyUtil.getProperty(SWIFT_USER);
-        final String password = PropertyUtil.getProperty(SWIFT_KEY);
-        final String responsesContainer = PropertyUtil.getProperty(SWIFT_RESPONSES);
-        final String imagesContainer = PropertyUtil.getProperty(SWIFT_IMAGES);
-            
-        Swift swift = new Swift(apiUrl, user, password);
-
 		for (File fx : filesToUpload) {
 			if (!processedList.contains(fx.getName())) {
 				try {
@@ -163,14 +162,14 @@ public class SurveyBulkUploader implements DataImporter {
 						if (uploadImage) {
 							File resizedFile = ImageUtil.resizeImage(fx,
 									tempDir.getAbsolutePath(), 500, 500);
-							swift.uploadFile(imagesContainer, resizedFile.getName(), 
+							mSwift.uploadFile(mImagesContainer, resizedFile.getName(), 
 									FileUtil.readFileBytes(resizedFile));
 							// now delete the temp file
 							resizedFile.delete();
 						}
 					} else {
 						if (processZip) {
-							boolean success = swift.uploadFile(responsesContainer, fx.getName(), 
+							boolean success = mSwift.uploadFile(mResponsesContainer, fx.getName(), 
 									FileUtil.readFileBytes(fx));
 							if (success) {
 								// now notify the server that a new file is there

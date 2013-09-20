@@ -73,15 +73,9 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 
 public class TaskServlet extends AbstractRestApiServlet {
-	private static final String SWIFT_URL       = "swift_url";
-	private static final String SWIFT_USER      = "swift_user";
-	private static final String SWIFT_KEY       = "swift_key";
-	private static final String SWIFT_RESPONSES = "responses_container";
-
 	private static final String ALLOW_UNSIGNED = "allowUnsignedData";
 	private static final String SIGNING_KEY = "signingKey";
 	private static final String SIGNING_ALGORITHM = "HmacSHA1";
-	private static String DEVICE_FILE_PATH;
 	private static String FROM_ADDRESS;
 	private static final String REGION_FLAG = "regionFlag=true";
 	private static final long serialVersionUID = -2607990749512391457L;
@@ -92,15 +86,22 @@ public class TaskServlet extends AbstractRestApiServlet {
 	private final static String EMAIL_FROM_ADDRESS_KEY = "emailFromAddress";
 	private TreeMap<String, String> recepientList = null;
 	private static final int CONNECTION_TIMEOUT = 5 * 60 * 1000; // 5min
+	
+	private Swift mSwift;
+	private String mResponsesContainer;
 
 	public TaskServlet() {
-		DEVICE_FILE_PATH = com.gallatinsystems.common.util.PropertyUtil
-				.getProperty("deviceZipPath");
 		FROM_ADDRESS = com.gallatinsystems.common.util.PropertyUtil
 				.getProperty(EMAIL_FROM_ADDRESS_KEY);
 		aph = new AccessPointHelper();
 		siDao = new SurveyInstanceDAO();
 		recepientList = MailUtil.loadRecipientList();
+		
+		mSwift = new Swift(
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
+		mResponsesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_RESPONSES);
 	}
 
 	/**
@@ -121,18 +122,12 @@ public class TaskServlet extends AbstractRestApiServlet {
 		ArrayList<SurveyInstance> surveyInstances = new ArrayList<SurveyInstance>();
 
 		try {
-            final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
-            final String user= PropertyUtil.getProperty(SWIFT_USER);
-            final String password = PropertyUtil.getProperty(SWIFT_KEY);
-            final String responses = PropertyUtil.getProperty(SWIFT_RESPONSES);
-            
-            Swift swift = new Swift(apiUrl, user, password);
-			URLConnection conn = swift.newAuthConnection(responses, fileName);
+			URLConnection conn = mSwift.newAuthConnection(mResponsesContainer, fileName);
 			conn.setConnectTimeout(CONNECTION_TIMEOUT);
 			conn.setReadTimeout(CONNECTION_TIMEOUT);
-            
+
 			DeviceFilesDao dfDao = new DeviceFilesDao();
-            
+
 			final String uri = conn.getURL().toURI().toString();
 
 			BufferedInputStream bis = new BufferedInputStream(conn.getInputStream());
@@ -276,8 +271,8 @@ public class TaskServlet extends AbstractRestApiServlet {
 				String message = "Error empty file: " + deviceFile.getURI();
 				log.log(Level.SEVERE, message);
 				deviceFile.addProcessingMessage(message);
-				MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList,
-						"Device File Processing Error: " + fileName, DEVICE_FILE_PATH+fileName+"\n"+message);
+				MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList, "Device File Processing Error: " + fileName, 
+						mSwift.getUrl() + "/" + mResponsesContainer + "/" + fileName + "\n" + message);
 
 			}
 
@@ -285,8 +280,8 @@ public class TaskServlet extends AbstractRestApiServlet {
 			zis.close();
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "Could not process data file", e);
-			MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList,
-					"Device File Processing Error: " +fileName,DEVICE_FILE_PATH+fileName+"\n"+(e.getMessage()!=null?e.getMessage():""));
+			MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList, "Device File Processing Error: " + fileName,
+					mSwift.getUrl() + "/" + mResponsesContainer + "/" + fileName + "\n" + (e.getMessage()!=null?e.getMessage():""));
 		}
 
 		return surveyInstances;

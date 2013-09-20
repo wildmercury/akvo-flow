@@ -52,18 +52,23 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 	private static final String EMAIL_SUB = "FLOW Bootstrap File";
 	private static final String EMAIL_BODY = "Click the link to download the bootstrap file";
 	private static final String ERROR_BODY = "There were errors while attempting to generate the bootstrap file:";
-
-	private static final String SWIFT_URL       = "swift_url";
-	private static final String SWIFT_USER      = "swift_user";
-	private static final String SWIFT_KEY       = "swift_key";
-	private static final String SWIFT_SURVEYS   = "surveys_container";
-	private static final String SWIFT_BOOTSTRAP = "bootstrap_container";
+	
+	private Swift mSwift;
+	private String mSurveysContainer;
+	private String mBootstrapContainer;
 
 	private SurveyDAO surveyDao;
 
 	public BootstrapGeneratorServlet() {
 		super();
 		surveyDao = new SurveyDAO();
+		
+		mSwift = new Swift(
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
+				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
+		mSurveysContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_SURVEYS);
+		mBootstrapContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_BOOTSTRAP);
 	}
 
 	@Override
@@ -94,13 +99,6 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 		Map<String, String> contentMap = new HashMap<String, String>();
 		StringBuilder errors = new StringBuilder();
 
-		final String apiUrl= PropertyUtil.getProperty(SWIFT_URL);
-		final String user= PropertyUtil.getProperty(SWIFT_USER);
-		final String password = PropertyUtil.getProperty(SWIFT_KEY);
-		final String surveysContainer = PropertyUtil.getProperty(SWIFT_SURVEYS);
-		final String bootstrapContainer = PropertyUtil.getProperty(SWIFT_BOOTSTRAP);
-		Swift swift = new Swift(apiUrl, user, password);
-
 		if (req.getSurveyIds() != null) {
 			for (Long id : req.getSurveyIds()) {
 				try {
@@ -108,7 +106,7 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 					String name = s.getName().replaceAll(" ", "_");
 					
 					final String filename = s.getKey().getId() + ".xml";
-					final String survey = swift.readFile(surveysContainer, filename);
+					final String survey = mSwift.readFile(mSurveysContainer, filename);
 					
 					contentMap.put(s.getKey().getId() + "/" + name + ".xml",
 							survey);
@@ -126,7 +124,7 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 		
 		boolean uploadedFile = false;
 		try {
-			uploadedFile = swift.uploadFile(bootstrapContainer, filename, os.toByteArray());
+			uploadedFile = mSwift.uploadFile(mBootstrapContainer, filename, os.toByteArray());
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -139,7 +137,7 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
 		if (errors.toString().trim().length() > 0) {
 			body = ERROR_BODY + "\n\n" + errors.toString();
 		} else {
-			body += "\n\n" + apiUrl + "/" + bootstrapContainer + "/" + filename;
+			body += "\n\n" + mSwift.getUrl() + "/" + mBootstrapContainer + "/" + filename;
 		}
 		MailUtil.sendMail(PropertyUtil.getProperty(EMAIL_FROM_ADDRESS_KEY),
 				"FLOW", req.getEmail(), EMAIL_SUB, body);
