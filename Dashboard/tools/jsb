@@ -1,5 +1,5 @@
 #!/bin/sh
 
-find $1 -name '*.js' -exec js-beautify --replace --indent-size 4 --jslint-happy --preserve-newlines --file {} \;
+find $1 -name '*.js' -exec js-beautify --replace --indent-size 4 --jslint-happy --preserve-newlines --keep-array-indentation --file {} \;
 
 exit 0

@@ -48,7 +48,16 @@ Status:
 <div style="float:right;">{{#if surveyGroup}}{{#link-to 'survey_group' surveyGroup}}Back to survey overview{{/link-to}}{{/if}}</div>
 <div style="clear:both"></div>
 <div>
-{{outlet}}
+<ul>
+{{#each questionGroups.arrangedContent itemController="question_group"}}
+  <li>{{uName}} <button {{action 'show'}}>{{#if isShowing}}Hide{{else}}Show{{/if}}</button></li>
+  <ul>
+    {{#each questions.arrangedContent itemController="question"}}
+      <li>{{text}}</li>
+    {{/each}}
+  </ul>
+{{/each}}
+</ul>
 </div>
 </div>
 <div style="clear:both"></div>
