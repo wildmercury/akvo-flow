@@ -125,8 +125,7 @@ public class Swift {
 			if (out != null) {
 				try {
 					out.close();
-				} catch (Exception ignored) {
-				}
+				} catch (IOException ignored) {}
 			}
 		}
 	}
