@@ -24,10 +24,11 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import com.gallatinsystems.common.objectstore.ObjectStore;
+import com.gallatinsystems.common.objectstore.ObjectStore.Container;
 import com.gallatinsystems.common.util.MD5Util;
 import com.gallatinsystems.common.util.MailUtil;
 import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.notification.NotificationRequest;
 import com.gallatinsystems.notification.dao.NotificationSubscriptionDao;
 import com.gallatinsystems.notification.domain.NotificationHistory;
@@ -50,15 +51,12 @@ public abstract class AbstractReportNotificationHandler extends
 	protected static final String DATE_DISPLAY_FORMAT = "MMddyyyy";
 	protected static final String ATTACH_REPORT_FLAG = "attachreport";
 	
-	private Swift mSwift;
+	private ObjectStore mObjectStore;
 	private String mReportsContainer;
 	
 	public AbstractReportNotificationHandler() {
-		mSwift = new Swift(
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
-		mReportsContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_REPORTS);
+		mObjectStore = ObjectStore.instantiate();
+		mReportsContainer = ObjectStore.getContainerName(Container.REPORTS);
 	}
 
 	/**
@@ -106,7 +104,7 @@ public abstract class AbstractReportNotificationHandler extends
 				if (linkAddrList.size() > 0) {
 					String fileName = getFileName(entityId.toString());
 					try {
-						mSwift.uploadFile(mReportsContainer, fileName, bos.toByteArray());
+						mObjectStore.uploadFile(mReportsContainer, fileName, bos.toByteArray());
 					} catch (IOException e) {
 						e.printStackTrace();
 						throw new RuntimeException("Error uploading file: " + fileName);
@@ -116,7 +114,7 @@ public abstract class AbstractReportNotificationHandler extends
 							linkAddrList,
 							emailTitle,
 							emailBody
-									+ mSwift.getUrl() + "/" + mReportsContainer
+									+ ObjectStore.getApiUrl() + "/" + mReportsContainer
 									+ "/" + fileName);
 				}
 				if (attachAddrList.size() > 0) {

@@ -14,7 +14,7 @@
  *  The full license text can also be seen at <http://www.gnu.org/licenses/agpl.html>.
  */
 
-package com.gallatinsystems.common.util;
+package com.gallatinsystems.common.objectstore;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -28,6 +28,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpStatus;
 import org.apache.log4j.Logger;
 
+import com.gallatinsystems.common.util.MD5Util;
+
 /**
  * OpenStack/Swift uploader. This version uses Http Basic Authentication <br>
  * TODO:
@@ -37,7 +39,7 @@ import org.apache.log4j.Logger;
  * </ul>
  * 
  */
-public class Swift {
+public class Swift extends ObjectStore {
 	private static final Logger LOG = Logger.getLogger(Swift.class.getName());
 
 	private String mApiUrl;
@@ -50,6 +52,7 @@ public class Swift {
 		mPassword = password;
 	}
 
+	@Override
 	public String readFile(String container, String name) throws IOException {
 		BufferedReader reader = null;
 		StringBuilder buf = new StringBuilder();
@@ -71,6 +74,7 @@ public class Swift {
 		}
 	}
 
+	@Override
 	public boolean uploadFile(String container, String name, byte[] data)
 			throws IOException {
 		LOG.debug("Uploading file: " + name);
@@ -129,11 +133,8 @@ public class Swift {
 			}
 		}
 	}
-	
-	public String getUrl() {
-		return mApiUrl;
-	}
 
+	@Override
 	public HttpURLConnection newAuthConnection(String container, String name)
 			throws IOException {
 		HttpURLConnection conn = null;

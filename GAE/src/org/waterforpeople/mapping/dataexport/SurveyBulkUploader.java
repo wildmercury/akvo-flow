@@ -36,10 +36,10 @@ import java.util.StringTokenizer;
 
 import javax.swing.SwingUtilities;
 
+import com.gallatinsystems.common.objectstore.ObjectStore;
+import com.gallatinsystems.common.objectstore.ObjectStore.Container;
 import com.gallatinsystems.common.util.FileUtil;
 import com.gallatinsystems.common.util.ImageUtil;
-import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.dataexport.applet.DataImporter;
 import com.gallatinsystems.framework.dataexport.applet.ProgressDialog;
@@ -75,7 +75,7 @@ public class SurveyBulkUploader implements DataImporter {
 	private static Map<String, String> COMPLETE;
 	private List<File> filesToUpload;
 	
-	private Swift mSwift;
+	private ObjectStore mObjectStore;
 	private String mResponsesContainer;
 	private String mImagesContainer;
 
@@ -91,12 +91,9 @@ public class SurveyBulkUploader implements DataImporter {
 	private ProgressDialog progressDialog;
 	
 	public SurveyBulkUploader() {
-		mSwift = new Swift(
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
-		mResponsesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_RESPONSES);
-		mImagesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_IMAGES);
+		mObjectStore = ObjectStore.instantiate();
+		mResponsesContainer = ObjectStore.getContainerName(Container.RESPONSES);
+		mImagesContainer = ObjectStore.getContainerName(Container.IMAGES);
 	}
 
 	@Override
@@ -162,14 +159,14 @@ public class SurveyBulkUploader implements DataImporter {
 						if (uploadImage) {
 							File resizedFile = ImageUtil.resizeImage(fx,
 									tempDir.getAbsolutePath(), 500, 500);
-							mSwift.uploadFile(mImagesContainer, resizedFile.getName(), 
+							mObjectStore.uploadFile(mImagesContainer, resizedFile.getName(), 
 									FileUtil.readFileBytes(resizedFile));
 							// now delete the temp file
 							resizedFile.delete();
 						}
 					} else {
 						if (processZip) {
-							boolean success = mSwift.uploadFile(mResponsesContainer, fx.getName(), 
+							boolean success = mObjectStore.uploadFile(mResponsesContainer, fx.getName(), 
 									FileUtil.readFileBytes(fx));
 							if (success) {
 								// now notify the server that a new file is there

@@ -34,8 +34,9 @@ import org.apache.log4j.Logger;
 import org.waterforpeople.mapping.app.web.dto.SurveyAssemblyRequest;
 
 import com.gallatinsystems.common.domain.UploadStatusContainer;
+import com.gallatinsystems.common.objectstore.ObjectStore;
+import com.gallatinsystems.common.objectstore.ObjectStore.Container;
 import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.common.util.ZipUtil;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
 import com.gallatinsystems.framework.rest.RestRequest;
@@ -85,17 +86,14 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 	public static final String STRENGTH_QUESTION_TYPE = "strength";
 	public static final String DATE_QUESTION_TYPE = "date";
 	
-	private Swift mSwift;
+	private ObjectStore mObjectStore;
 	private String mSurveysContainer;
 
 	private Random randomNumber = new Random();
 	
 	public SurveyAssemblyServlet() {
-		mSwift = new Swift(
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
-		mSurveysContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_SURVEYS);
+		mObjectStore = ObjectStore.instantiate();
+		mSurveysContainer = ObjectStore.getContainerName(Container.SURVEYS);
 	}
 
 	@Override
@@ -250,13 +248,13 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		boolean uploadedFile = false;
 		boolean	uploadedZip = false;
 		try {
-			uploadedFile = mSwift.uploadFile(mSurveysContainer,
+			uploadedFile = mObjectStore.uploadFile(mSurveysContainer,
 					surveyId + ".xml", surveyXML.getBytes());
 
 			ByteArrayOutputStream os = ZipUtil.generateZip(document, surveyId
 					+ ".xml");
 			
-			uploadedZip = mSwift.uploadFile(mSurveysContainer,
+			uploadedZip = mObjectStore.uploadFile(mSurveysContainer,
 					surveyId + ".zip", os.toByteArray());
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
@@ -265,7 +263,7 @@ public class SurveyAssemblyServlet extends AbstractRestApiServlet {
 		UploadStatusContainer uc = new UploadStatusContainer();
 		uc.setUploadedFile(uploadedFile);
 		uc.setUploadedZip(uploadedZip);
-		uc.setUrl(mSwift.getUrl() + "/" + mSurveysContainer + "/" + surveyId + ".xml");
+		uc.setUrl(ObjectStore.getApiUrl() + "/" + mSurveysContainer + "/" + surveyId + ".xml");
 		return uc;
 	}
 

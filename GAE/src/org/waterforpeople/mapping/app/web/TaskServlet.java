@@ -53,9 +53,10 @@ import org.waterforpeople.mapping.helper.SurveyEventHelper;
 
 import services.S3Driver;
 
+import com.gallatinsystems.common.objectstore.ObjectStore;
+import com.gallatinsystems.common.objectstore.ObjectStore.Container;
 import com.gallatinsystems.common.util.MailUtil;
 import com.gallatinsystems.common.util.PropertyUtil;
-import com.gallatinsystems.common.util.Swift;
 import com.gallatinsystems.device.domain.DeviceFiles;
 import com.gallatinsystems.framework.exceptions.SignedDataException;
 import com.gallatinsystems.framework.rest.AbstractRestApiServlet;
@@ -87,7 +88,7 @@ public class TaskServlet extends AbstractRestApiServlet {
 	private TreeMap<String, String> recepientList = null;
 	private static final int CONNECTION_TIMEOUT = 5 * 60 * 1000; // 5min
 	
-	private Swift mSwift;
+	private ObjectStore mObjectStore;
 	private String mResponsesContainer;
 
 	public TaskServlet() {
@@ -97,11 +98,8 @@ public class TaskServlet extends AbstractRestApiServlet {
 		siDao = new SurveyInstanceDAO();
 		recepientList = MailUtil.loadRecipientList();
 		
-		mSwift = new Swift(
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_URL),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_USER),
-				PropertyUtil.getProperty(PropertyUtil.SWIFT_KEY));
-		mResponsesContainer = PropertyUtil.getProperty(PropertyUtil.SWIFT_RESPONSES);
+		mObjectStore = ObjectStore.instantiate();
+		mResponsesContainer = ObjectStore.getContainerName(Container.RESPONSES);
 	}
 
 	/**
@@ -122,7 +120,7 @@ public class TaskServlet extends AbstractRestApiServlet {
 		ArrayList<SurveyInstance> surveyInstances = new ArrayList<SurveyInstance>();
 
 		try {
-			URLConnection conn = mSwift.newAuthConnection(mResponsesContainer, fileName);
+			URLConnection conn = mObjectStore.newAuthConnection(mResponsesContainer, fileName);
 			conn.setConnectTimeout(CONNECTION_TIMEOUT);
 			conn.setReadTimeout(CONNECTION_TIMEOUT);
 
@@ -272,7 +270,7 @@ public class TaskServlet extends AbstractRestApiServlet {
 				log.log(Level.SEVERE, message);
 				deviceFile.addProcessingMessage(message);
 				MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList, "Device File Processing Error: " + fileName, 
-						mSwift.getUrl() + "/" + mResponsesContainer + "/" + fileName + "\n" + message);
+						ObjectStore.getApiUrl() + "/" + mResponsesContainer + "/" + fileName + "\n" + message);
 
 			}
 
@@ -281,7 +279,8 @@ public class TaskServlet extends AbstractRestApiServlet {
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "Could not process data file", e);
 			MailUtil.sendMail(FROM_ADDRESS, "FLOW", recepientList, "Device File Processing Error: " + fileName,
-					mSwift.getUrl() + "/" + mResponsesContainer + "/" + fileName + "\n" + (e.getMessage()!=null?e.getMessage():""));
+					ObjectStore.getApiUrl() + "/" + mResponsesContainer
+					+ "/" + fileName + "\n" + (e.getMessage()!=null?e.getMessage():""));
 		}
 
 		return surveyInstances;
