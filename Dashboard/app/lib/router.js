@@ -8,7 +8,7 @@ FLOW.Router.map(function () {
         path: '/'
     }, function () {
         this.resource('survey_group', {
-            path: '/survey_group/:id'
+            path: '/survey_group/:survey_group_id'
         }, function () {});
     });
 
@@ -19,7 +19,7 @@ FLOW.Router.map(function () {
     });
 
     this.resource('survey', {
-        path: '/survey/:id'
+        path: '/survey/:survey_id'
     }, function () {});
 
     this.resource('devices', {
@@ -83,9 +83,6 @@ FLOW.SurveyGroupRoute = Route.extend({
 
         controller.set('model', model);
         controller.set('surveys', surveys);
-    },
-    model: function (params) {
-        return this.store.find('survey_group', params.id);
     }
 });
 
@@ -125,9 +122,6 @@ FLOW.SurveyRoute = Route.extend({
         }).then(function (data) {
             controller.get('questionGroups').set('content', data);
         });
-    },
-    model: function (params) {
-        return this.store.find('survey', params.id);
     }
 });
 

@@ -50,12 +50,14 @@ Status:
 <div>
 <ul>
 {{#each questionGroups.arrangedContent itemController="question_group"}}
-  <li>{{uName}} <button {{action 'show'}}>{{#if isShowing}}Hide{{else}}Show{{/if}}</button></li>
+  <li>{{uName}} <button {{action 'show'}}>{{#if isEditing}}Hide{{else}}Show{{/if}}</button></li>
+  {{#if isEditing}}
   <ul>
     {{#each questions.arrangedContent itemController="question"}}
       <li>{{text}}</li>
     {{/each}}
   </ul>
+  {{/if}}
 {{/each}}
 </ul>
 </div>

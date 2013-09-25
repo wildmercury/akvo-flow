@@ -1,4 +1,6 @@
 FLOW.SurveyController = Ember.ObjectController.extend({
+    editingGroup: null,
+
     disableSave: function () {
         return !this.get('code') || this.get('code').trim() === '' || !this.get('isDirty') || this.get('isSaving');
     }.property('code', 'isDirty', 'isSaving'),
@@ -18,6 +20,13 @@ FLOW.SurveyController = Ember.ObjectController.extend({
             this.set('name', this.get('code'));
 
             survey.save();
+        },
+
+        collapseGroups: function (selected) {
+            var editing = this.get('editingGroup');
+            if (editing) {
+                editing.send('collapse');
+            }
         }
     }
 });
