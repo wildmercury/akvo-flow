@@ -14,7 +14,7 @@
 <div>
 <ul>
 {{#each surveys.arrangedContent}}
-  <li>{{#link-to 'survey' this}}{{code}}{{/link-to}}</li>
+  <li>{{code}} {{#link-to 'survey' this}}<button>edit</button>{{/link-to}} <button>preview</button> <button>delete</button> <button>copy</button></li>
 {{/each}}
 </ul>
 </div>
