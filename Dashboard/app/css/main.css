@@ -1,5 +1,6 @@
 body {
 	padding-top: 20px;
+	color: #000;
 }
 
 #ember-testing-container {
@@ -16,4 +17,13 @@ body {
 
 #ember-testing {
 	zoom: 50%;
+}
+
+a, a:visited {
+	color: #000;
+}
+
+a.active {
+	background-color: gray;
+	color: #fff;
 }

@@ -6,12 +6,12 @@ FLOW.SurveyGroupsController = Ember.ArrayController.extend({
 
     actions: {
         addNewGroup: function () {
-            this.set('creatingNew', true);
+            this.toggleProperty('creatingNew');
         },
 
         cancelNewGroup: function () {
             this.set('newSurveyGroup', '');
-            this.set('creatingNew', false);
+            this.toggleProperty('creatingNew');
         },
 
         createSurveyGroup: function () {

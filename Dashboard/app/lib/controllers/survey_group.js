@@ -15,14 +15,14 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
 
     actions: {
         edit: function () {
-            this.set('isEditing', true);
+            this.toggleProperty('isEditing');
         },
 
         cancelEdit: function () {
             if (this.get('model').get('isDirty')) {
                 this.get('model').rollback();
             }
-            this.set('isEditing', false);
+            this.toggleProperty('isEditing');
         },
 
         saveEdit: function () {
