@@ -46,6 +46,10 @@ FLOW.SurveyGroupController = Ember.ObjectController.extend({
             this.get('model').deleteRecord();
             this.get('model').save();
             this.transitionToRoute('survey_groups');
+        },
+
+        editSurvey: function (survey) {
+            this.transitionToRoute('survey', survey);
         }
     }
 });
