@@ -87,7 +87,7 @@ FLOW.SurveyGroupRoute = Route.extend({
     }
 });
 
-FLOW.SurveysNewRoute = Route.extend({
+FLOW.SurveyGroupsNewRoute = Route.extend({
     getSurveyGroupId: function () {
         return parseInt(this.get('router').location.get('location').hash
             .split('/')[2], 10);

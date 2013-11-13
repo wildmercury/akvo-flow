@@ -1,4 +1,4 @@
-FLOW.SurveysNewController = Ember.ObjectController.extend({
+FLOW.SurveyGroupsNewController = Ember.ObjectController.extend({
     disableSave: function () {
         return !this.get('code') || this.get('code').trim() === '' || this.get('isSaving');
     }.property('code', 'isSaving'),
