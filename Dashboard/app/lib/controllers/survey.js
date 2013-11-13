@@ -1,4 +1,7 @@
 FLOW.SurveyController = Ember.ObjectController.extend({
+    needs: 'survey_groups',
+    survey_groups: Ember.computed.alias('controllers.survey_groups'),
+
     editingGroup: null,
 
     disableSave: function () {

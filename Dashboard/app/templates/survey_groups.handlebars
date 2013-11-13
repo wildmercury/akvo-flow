@@ -1,5 +1,5 @@
 <h2>Survey Groups</h2>
-<div style="float:left; width: 30%;">
+<div style="float:left; width: 30%;" {{bind-attr class="isShown:show:hide"}}>
 {{#if creatingNew }}
   {{view Ember.TextField data-flow-id="new_survey_group" 
          placeholder="Survey Group name"

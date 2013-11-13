@@ -1,4 +1,5 @@
 FLOW.SurveyGroupsController = Ember.ArrayController.extend({
+    isShown: true,
     sortAscending: true,
     sortProperties: ['code'],
 

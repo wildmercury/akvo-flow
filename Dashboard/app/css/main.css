@@ -27,3 +27,11 @@ a.active {
 	background-color: gray;
 	color: #fff;
 }
+
+.show {
+	visibility: block;
+}
+
+.hide {
+	display: none;
+}
