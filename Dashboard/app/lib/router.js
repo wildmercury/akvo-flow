@@ -70,7 +70,7 @@ FLOW.SurveyGroupsRoute = Route.extend({
 
 FLOW.SurveyGroupRoute = Route.extend({
     setupController: function (controller, model) {
-        controller.get('survey_groups').set('isShown', true);
+        controller.get('survey_groups').set('isShowing', true);
         var surveys = Ember.ArrayController.create({
             sortAscending: true,
             sortProperties: ['code']
@@ -109,7 +109,7 @@ FLOW.SurveysNewRoute = Route.extend({
 
 FLOW.SurveyRoute = Route.extend({
     setupController: function (controller, model) {
-        controller.get('survey_groups').set('isShown', false);
+        controller.get('survey_groups').set('isShowing', false);
         controller.set('model', model);
         controller.set('languages', FLOW.LanguagesController.create());
         controller.set('pointTypes', FLOW.SurveyPointTypeController.create());
