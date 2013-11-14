@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 find $1 -name '*.js' -exec js-beautify --replace --indent-size 4 --jslint-happy --preserve-newlines --keep-array-indentation --file {} \;
 
