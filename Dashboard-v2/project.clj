@@ -6,7 +6,7 @@
                  [org.clojure/clojurescript "0.0-2173"]
                  [org.clojure/core.async "0.1.278.0-76b25b-alpha"]
                  [jayq "2.4.0"]
-                 [om "0.5.0"]
+                 [om "0.5.3"]
                  [sablono "0.2.6"]
                  [cljs-ajax "0.2.3"]]
 
