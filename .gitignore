@@ -29,6 +29,9 @@ Dashboard/node_modules
 Dashboard/test_assets
 Dashboard/tmp
 
+Dashboard-v2/out
+Dashboard-v2/app.js
+
 # Server config files
 *.jks
 appengine-web.xml
