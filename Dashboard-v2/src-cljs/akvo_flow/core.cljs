@@ -15,13 +15,6 @@
 (def api-ch
   (chan))
 
-(def app-state 
-  (atom {
-         :tab "devices" 
-         :subtab "devices-list"
-         :comms {:control controls-ch
-                 :api api-ch}}))
-
 ;; ------------------- event handling -----------------
 (defmulti handle-control-event (fn [event state] (first event)))
 
@@ -43,17 +36,21 @@
   (print "Can't handle this control event"))
 
 ;; -------------------- setup of main loop ---------------
-(defn main [target state]
-  (let [comms (:comms @state)]
+(defn main [target]
+  (let [state (atom {
+         :tab "devices"
+         :subtab "devices-list"
+         :comms {:control controls-ch
+                 :api api-ch}})]
     (om/root app state {:target target})
     (go (while true
           (alt!
-            (:control comms)([v]
+            controls-ch ([v]
                              (handle-control-event v state))
-            (:api comms) ([v]
+            api-ch ([v]
                           (print "api:" (pr-str v))))))))
 
 (defn setup! []
-  (main (. js/document (getElementById "root")) app-state))
+  (main (. js/document (getElementById "root"))))
 
 (set! (.-onload js/window) setup!)
