@@ -22,20 +22,27 @@
          :comms {:control controls-ch
                  :api api-ch}}))
 
-(defn handle-control-event 
-  [event state]
-  (let [[e-name e-data] event] 
-    (case e-name
-      :tab-selected (let [
-                          tab-content (keep #(if (= e-data (:id %)) %) nav-tabs)
-                          subtabs (:subtabs (first tab-content))
-                          first-subtab-id (:id (first subtabs))] 
-                      (swap! state assoc :tab e-data :subtab first-subtab-id))
-      :subtab-selected (do
-                         (swap! state assoc :subtab e-data))
-      
-      (print "unrecognised"))))
+;; ------------------- event handling -----------------
+(defmulti handle-control-event (fn [event state] (first event)))
 
+(defmethod handle-control-event :tab-selected
+  [event state]
+  (let [[_ e-data] event
+        tab-content (keep #(if (= e-data (:id %)) %) nav-tabs)
+        subtabs (:subtabs (first tab-content))
+        first-subtab-id (:id (first subtabs))] 
+    (swap! state assoc :tab e-data :subtab first-subtab-id)))
+
+(defmethod handle-control-event :subtab-selected
+  [event state]
+  (let [[_ e-data] event]
+    (swap! state assoc :subtab e-data)))
+
+(defmethod handle-control-event :default
+  [event state]
+  (print "Can't handle this control event"))
+
+;; -------------------- setup of main loop ---------------
 (defn main [target state]
   (let [comms (:comms @state)]
     (om/root app state {:target target})
