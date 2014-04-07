@@ -4,7 +4,7 @@
     [om.core :as om :include-macros true]
     [om.dom :as dom :include-macros true]
     [sablono.core :as html :refer-macros [html]]
-    [akvo-flow.components :refer [app]])
+    [akvo-flow.components :refer [app nav-tabs]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt!]]))
 
 (enable-console-print!)
@@ -17,8 +17,8 @@
 
 (def app-state 
   (atom {
-         :tab 2 
-         :subtab 1
+         :tab "devices" 
+         :subtab "devices-list"
          :comms {:control controls-ch
                  :api api-ch}}))
 
@@ -26,13 +26,14 @@
   [event state]
   (let [[e-name e-data] event] 
     (case e-name
-      :tab-selected (do 
-                      (print "tab selected: " e-data)
-                      (swap! state assoc :tab e-data :subtab 1))
-      :subtab-selected (do 
-                      (print "subtab selected: " e-data)
-                      (swap! state assoc :subtab e-data))
-                      
+      :tab-selected (let [
+                          tab-content (keep #(if (= e-data (:id %)) %) nav-tabs)
+                          subtabs (:subtabs (first tab-content))
+                          first-subtab-id (:id (first subtabs))] 
+                      (swap! state assoc :tab e-data :subtab first-subtab-id))
+      :subtab-selected (do
+                         (swap! state assoc :subtab e-data))
+      
       (print "unrecognised"))))
 
 (defn main [target state]
@@ -41,7 +42,6 @@
     (go (while true
           (alt!
             (:control comms)([v]
-                             (print "control:" (pr-str v))
                              (handle-control-event v state))
             (:api comms) ([v]
                           (print "api:" (pr-str v))))))))
