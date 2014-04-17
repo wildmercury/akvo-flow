@@ -16,7 +16,7 @@
 
   :cljsbuild {
     :builds [{:id "flow-dashboard" 
-              :source-paths ["src-cljs"]
+              :source-paths ["src"]
               :compiler { 
                 :output-to "app.js"
                 :output-dir "out"

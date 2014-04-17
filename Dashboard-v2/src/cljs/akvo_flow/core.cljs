@@ -4,16 +4,18 @@
     [om.core :as om :include-macros true]
     [om.dom :as dom :include-macros true]
     [sablono.core :as html :refer-macros [html]]
+    [akvo-flow.remote]
     [akvo-flow.components :refer [app nav-tabs]])
   (:require-macros [cljs.core.async.macros :as m :refer [go alt!]]))
 
 (enable-console-print!)
-
+  
 (def controls-ch
   (chan))
 
 (def api-ch
   (chan))
+
 
 ;; ------------------- event handling -----------------
 (defmulti handle-control-event (fn [event state] (first event)))
@@ -41,7 +43,8 @@
          :tab "devices"
          :subtab "devices-list"
          :comms {:control controls-ch
-                 :api api-ch}})]
+                 :api api-ch}
+         :datastore {:users [{:id 1 :display-name "mark westra"}{:id 2 :display-name "Linda Porsius"}]}})]
     (om/root app state {:target target})
     (go (while true
           (alt!

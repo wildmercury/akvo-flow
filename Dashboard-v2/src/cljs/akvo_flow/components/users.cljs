@@ -12,4 +12,6 @@
     om/IRender
     (render 
       [this]
-      (html [:div "users-tab"]))))
+      (html  [:ul.menuGroup (for [u (get-in state [:datastore :users])]
+                                  [:li {:key (:id u)}
+                                   [:a (:display-name u)]])]]))))
