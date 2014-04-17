@@ -32,11 +32,18 @@ Dashboard/tmp
 Dashboard-v2/out
 Dashboard-v2/app.js
 
+# clojure
+Dashboard-v2/.repl/*
+Dashboard-v2/repl/*
+Dashboard-v2/.lein*
+Dashboard-v2/target*
+
 # Server config files
 *.jks
 appengine-web.xml
 build.properties
 UploadConstants.properties
+
 
 # Server paths
 GAE/appletbin
