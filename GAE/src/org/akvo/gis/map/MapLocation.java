@@ -32,9 +32,7 @@ public class MapLocation {
     public boolean equals(Object obj) {
         if ((obj != null) && (obj instanceof MapLocation)) {
             MapLocation other = (MapLocation) obj;
-
-            return (latitude == other.latitude)
-                    && (longitude == other.longitude);
+            return (latitude == other.latitude) && (longitude == other.longitude);
         } else
             return false;
     }
