@@ -42,36 +42,36 @@ public class MapClusterTest extends TestCase {
     }
 
     @Test
+    public void testNewMapClusterIsEmpty() {
+        assertThat(emptyMapCluster.getLocationCount()).isEqualTo(0);
+        assertThat(emptyMapCluster.isEmpty()).isTrue();
+    }
+
+    @Test
     public void testNewMapClusterHasOriginAsCentre() {
         assertThat(emptyMapCluster.getCentre().isOrigin()).isTrue();
     }
 
     @Test
-    public void testNewMapClusterIsEmpty() {
-        assertThat(emptyMapCluster.isEmpty()).isTrue();
-    }
-
-    @Test
-    public void testCanAddMapLocationToCluster() {
+    public void testAddingMapLocationsToClusterShouldRecalculateClusterCentre() {
         MapCluster mapCluster = emptyMapCluster;
+        assertThat(mapCluster.isEmpty()).isTrue();
+
         mapCluster.addLocation(mapLocation1);
-
         assertThat(mapCluster.isNotEmpty()).isTrue();
+        assertThat(mapCluster.getLocationCount()).isEqualTo(1);
+
+        mapCluster.addLocation(mapLocation2);
+        mapCluster.addLocation(mapLocation3);
+        assertThat(mapCluster.isNotEmpty()).isTrue();
+        assertThat(mapCluster.getLocationCount()).isEqualTo(3);
+        
+        fail("to still check centering recalculation");
     }
 
     @Test
-    public void testCentreForMapClusterWithSingleLocationShouldEqualFirstLocation() {
-        createSingleLocationMapCluster();
-
-        assertThat(singleLocationMapCluster.getCentre()).isEqualTo(mapLocation1);
-    }
-
-    @Test
-    public void testCentreForMapClusterWithMultipleLocationsShouldEqualAverageCentreOfAllLocations() {
-        createMultiLocationMapCluster();
-
-        // assertThat(multiLocationMapCluster.getCentre()).isEqualTo(expectedMultiClusterCentre());
-        fail("in progres");
+    public void testRemovingMapLocationsFromClusterShouldRecalculateClusterCentre() {
+        fail("to do");
     }
 
     @Test
@@ -95,27 +95,4 @@ public class MapClusterTest extends TestCase {
         assertThat(multiLocationMapCluster.isNotEmpty()).isTrue();
         assertThat(multiLocationMapCluster.isDisplayable()).isTrue();
     }
-
-    @Test
-    public void testCentreForMapClusterWithMultipleGeoLocationsEqualsWeightedAverageGeoLocation() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testClusterCentreIsUpdatedWhenNewGeoLocationsIsAdded() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testClusterCentreIsUpdatedWhenExistingGeoLocationsIsRemoved() {
-        fail("Not yet implemented");
-    }
-
-    /*
-     * Scenarios: - initial map cluster contains single point - can add multiple
-     * points - can remove multiple points - centre calc updates only on
-     * insertion or removal of geo locations
-     * 
-     * - MapCluster depends on a ClusteringCalculator
-     */
 }

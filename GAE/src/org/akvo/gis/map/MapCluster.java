@@ -3,10 +3,12 @@ package org.akvo.gis.map;
 public class MapCluster {
 
     private ClusteringCalculator calculator;
+    private long locationCount;
     private MapLocation clusterCentre;
 
     public MapCluster(ClusteringCalculator calc) {
         calculator = calc;
+        locationCount = 0;
         clusterCentre = MapLocation.ORIGIN;
     }
 
@@ -14,6 +16,12 @@ public class MapCluster {
         if (isEmpty()) {
             clusterCentre = newlocation;
         }
+
+        locationCount++;
+    }
+
+    public long getLocationCount() {
+        return locationCount;
     }
 
     public MapLocation getCentre() {
@@ -21,11 +29,11 @@ public class MapCluster {
     }
 
     public boolean isEmpty() {
-        return clusterCentre.isOrigin();
+        return locationCount == 0;
     }
 
     public boolean isNotEmpty() {
-        return clusterCentre.isNotOrigin();
+        return locationCount > 0;
     }
 
     public boolean isDisplayable() {
