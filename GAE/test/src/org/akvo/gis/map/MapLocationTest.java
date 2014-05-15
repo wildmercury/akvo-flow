@@ -22,4 +22,15 @@ public class MapLocationTest extends TestCase {
 
         assertThat(location).isNotEqualTo(differentLocation);
     }
+
+    @Test
+    public void testHasOrigin() {
+        assertThat(MapLocation.ORIGIN).isEqualTo(new MapLocation(0d, 0d));
+    }
+
+    @Test
+    public void testCanRecogniseOrigin() {
+        assertThat(MapLocation.ORIGIN.isOrigin()).isTrue();
+        assertThat(new MapLocation(30d, 3d).isNotOrigin()).isTrue();
+    }
 }

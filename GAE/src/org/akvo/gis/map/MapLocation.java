@@ -5,6 +5,8 @@ public class MapLocation {
     private double latitude;
     private double longitude;
 
+    static public final MapLocation ORIGIN = new MapLocation(0d, 0d);
+
     public MapLocation(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
@@ -16,6 +18,14 @@ public class MapLocation {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public boolean isOrigin() {
+        return equals(ORIGIN);
+    }
+
+    public boolean isNotOrigin() {
+        return !isOrigin();
     }
 
     @Override
