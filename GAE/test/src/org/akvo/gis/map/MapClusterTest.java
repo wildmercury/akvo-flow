@@ -29,18 +29,6 @@ public class MapClusterTest extends TestCase {
         emptyMapCluster = new MapCluster(clusteringCalculator);
     }
 
-    private void createMultiLocationMapCluster() {
-        multiLocationMapCluster = new MapCluster(clusteringCalculator);
-        multiLocationMapCluster.addLocation(mapLocation1);
-        multiLocationMapCluster.addLocation(mapLocation2);
-        multiLocationMapCluster.addLocation(mapLocation3);
-    }
-
-    private void createSingleLocationMapCluster() {
-        singleLocationMapCluster = new MapCluster(clusteringCalculator);
-        singleLocationMapCluster.addLocation(mapLocation1);
-    }
-
     @Test
     public void testNewMapClusterIsEmpty() {
         assertThat(emptyMapCluster.getLocationCount()).isEqualTo(0);
@@ -53,7 +41,7 @@ public class MapClusterTest extends TestCase {
     }
 
     @Test
-    public void testAddingMapLocationsToClusterShouldRecalculateClusterCentre() {
+    public void testClusterLocationCountShouldMatchNumberOfAddedMapLocations() {
         MapCluster mapCluster = emptyMapCluster;
         assertThat(mapCluster.isEmpty()).isTrue();
 
@@ -65,23 +53,21 @@ public class MapClusterTest extends TestCase {
         mapCluster.addLocation(mapLocation3);
         assertThat(mapCluster.isNotEmpty()).isTrue();
         assertThat(mapCluster.getLocationCount()).isEqualTo(3);
-        
-        fail("to still check centering recalculation");
     }
 
     @Test
-    public void testRemovingMapLocationsFromClusterShouldRecalculateClusterCentre() {
+    public void testClusterCentreShouldBeUpdatedWhenAddingMapLocations() {
         fail("to do");
     }
 
     @Test
-    public void testClusterShouldNotBeDisplayableWhenEmpty() {
+    public void testEmptyClusterShouldNotBeDisplayable() {
         assertThat(emptyMapCluster.isEmpty()).isTrue();
         assertThat(emptyMapCluster.isDisplayable()).isFalse();
     }
 
     @Test
-    public void testClusterWithSingleLocationShouldBeDisplayable() {
+    public void testSingleLocationClusterShouldBeDisplayable() {
         createSingleLocationMapCluster();
 
         assertThat(singleLocationMapCluster.isNotEmpty()).isTrue();
@@ -89,10 +75,22 @@ public class MapClusterTest extends TestCase {
     }
 
     @Test
-    public void testClusterWithMultipleLocationsShouldBeDisplayable() {
+    public void testMultiLocationClusterShouldBeDisplayable() {
         createMultiLocationMapCluster();
 
         assertThat(multiLocationMapCluster.isNotEmpty()).isTrue();
         assertThat(multiLocationMapCluster.isDisplayable()).isTrue();
+    }
+
+    private void createSingleLocationMapCluster() {
+        singleLocationMapCluster = new MapCluster(clusteringCalculator);
+        singleLocationMapCluster.addLocation(mapLocation1);
+    }
+
+    private void createMultiLocationMapCluster() {
+        multiLocationMapCluster = new MapCluster(clusteringCalculator);
+        multiLocationMapCluster.addLocation(mapLocation1);
+        multiLocationMapCluster.addLocation(mapLocation2);
+        multiLocationMapCluster.addLocation(mapLocation3);
     }
 }
