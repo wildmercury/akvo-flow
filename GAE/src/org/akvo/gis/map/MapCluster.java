@@ -35,8 +35,4 @@ public class MapCluster {
     public boolean isNotEmpty() {
         return locationCount > 0;
     }
-
-    public boolean isDisplayable() {
-        return isNotEmpty();
-    }
 }

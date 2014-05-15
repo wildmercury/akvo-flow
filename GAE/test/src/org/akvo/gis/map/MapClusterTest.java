@@ -15,8 +15,6 @@ public class MapClusterTest extends TestCase {
     private MapLocation mapLocation3;
 
     private MapCluster emptyMapCluster;
-    private MapCluster singleLocationMapCluster;
-    private MapCluster multiLocationMapCluster;
 
     @Before
     protected void setUp() throws Exception {
@@ -61,36 +59,7 @@ public class MapClusterTest extends TestCase {
     }
 
     @Test
-    public void testEmptyClusterShouldNotBeDisplayable() {
-        assertThat(emptyMapCluster.isEmpty()).isTrue();
-        assertThat(emptyMapCluster.isDisplayable()).isFalse();
-    }
-
-    @Test
-    public void testSingleLocationClusterShouldBeDisplayable() {
-        createSingleLocationMapCluster();
-
-        assertThat(singleLocationMapCluster.isNotEmpty()).isTrue();
-        assertThat(singleLocationMapCluster.isDisplayable()).isTrue();
-    }
-
-    @Test
-    public void testMultiLocationClusterShouldBeDisplayable() {
-        createMultiLocationMapCluster();
-
-        assertThat(multiLocationMapCluster.isNotEmpty()).isTrue();
-        assertThat(multiLocationMapCluster.isDisplayable()).isTrue();
-    }
-
-    private void createSingleLocationMapCluster() {
-        singleLocationMapCluster = new MapCluster(clusteringCalculator);
-        singleLocationMapCluster.addLocation(mapLocation1);
-    }
-
-    private void createMultiLocationMapCluster() {
-        multiLocationMapCluster = new MapCluster(clusteringCalculator);
-        multiLocationMapCluster.addLocation(mapLocation1);
-        multiLocationMapCluster.addLocation(mapLocation2);
-        multiLocationMapCluster.addLocation(mapLocation3);
+    public void testClusterCentreShouldBeUpdatedWhenRemovingMapLocations() {
+        fail("to do");
     }
 }
