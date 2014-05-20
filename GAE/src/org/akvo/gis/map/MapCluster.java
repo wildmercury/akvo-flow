@@ -2,22 +2,14 @@ package org.akvo.gis.map;
 
 public class MapCluster {
 
-    private ClusteringCalculator calculator;
+    static public final int GEO_CELL_MAX_RESOLUTION = 4;
+
     private long locationCount;
     private MapLocation clusterCentre;
 
-    public MapCluster(ClusteringCalculator calc) {
-        calculator = calc;
+    public MapCluster() {
         locationCount = 0;
         clusterCentre = MapLocation.ORIGIN;
-    }
-
-    public void addLocation(MapLocation newlocation) {
-        if (isEmpty()) {
-            clusterCentre = newlocation;
-        }
-
-        locationCount++;
     }
 
     public long getLocationCount() {
@@ -34,5 +26,23 @@ public class MapCluster {
 
     public boolean isNotEmpty() {
         return locationCount > 0;
+    }
+
+    public void addLocation(MapLocation newLocation) {
+        if (isEmpty()) {
+            clusterCentre = newLocation;
+        } else {
+            clusterCentre = new MapLocation(recentreLatitudeWith(newLocation), recentreLongitudeWith(newLocation));
+        }
+
+        locationCount++;
+    }
+
+    private double recentreLatitudeWith(MapLocation newLocation) {
+        return clusterCentre.getLatitude() * locationCount + newLocation.getLatitude() / (locationCount + 1);
+    }
+
+    private double recentreLongitudeWith(MapLocation newLocation) {
+        return clusterCentre.getLongitude() * locationCount + newLocation.getLongitude() / (locationCount + 1);
     }
 }

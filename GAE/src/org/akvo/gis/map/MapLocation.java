@@ -29,6 +29,11 @@ public class MapLocation {
     }
 
     @Override
+    public String toString() {
+        return "[lat: " + latitude + ", long: " + longitude + "]";
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if ((obj != null) && (obj instanceof MapLocation)) {
             MapLocation other = (MapLocation) obj;
