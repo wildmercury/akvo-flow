@@ -78,10 +78,6 @@ public class MapClusterTest extends TestCase {
 
     private double newLatitudeCentreWith(MapLocation locationToAdd, MapCluster mapCluster) {
         long locationCount = mapCluster.getLocationCount();
-        // is getLatitude() * locationCount returning 0? (due to mixed types)
-        System.out.println("Count: " + locationCount);
-        System.out.println("Lat: " + mapCluster.getCentre().getLatitude());
-        System.out.println("Lat * count: " + (mapCluster.getCentre().getLatitude() * locationCount));
         return mapCluster.getCentre().getLatitude() * locationCount + mapLocation1.getLatitude() / (locationCount + 1);
     }
 
@@ -94,25 +90,6 @@ public class MapClusterTest extends TestCase {
     public void testClusterCentreShouldBeUpdatedWhenRemovingMapLocations() {
         fail("to do");
     }
-
-    // final Long count = clusterInStore.getCount().longValue();
-    // latCenter = (clusterInStore.getLatCenter() * count +
-    // locale.getLatitude()*delta)
-    // / (count + delta);
-    // lonCenter = (clusterInStore.getLonCenter() * count +
-    // locale.getLongitude()*delta)
-    // / (count + delta);
-    //
-    // if (cache != null) {
-    // addToCache(cache, cell, clusterInStore.getKey().getId(),
-    // clusterInStore.getCount() + delta,
-    // Math.round(MULT * latCenter * (count + delta)),
-    // Math.round(MULT * lonCenter * (count + delta)));
-    // }
-    //
-    // clusterInStore.setCount(clusterInStore.getCount() + delta);
-    // clusterInStore.setLatCenter(latCenter);
-    // clusterInStore.setLonCenter(lonCenter);
 
     @Test
     public void testHasExpectedGeoCellConstants() {
