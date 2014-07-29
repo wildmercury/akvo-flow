@@ -63,6 +63,7 @@ public class QuestionDto extends BaseDto implements NamedObject {
     private Double maxVal;
     private Boolean isName;
     private Long sourceId = null;
+    private Boolean allowExternalSources;
 
     public Boolean getAllowDecimal() {
         return allowDecimal;
@@ -402,5 +403,13 @@ public class QuestionDto extends BaseDto implements NamedObject {
 
     public void setRequireDoubleEntry(Boolean requireDoubleEntry) {
         this.requireDoubleEntry = requireDoubleEntry;
+    }
+
+    public Boolean getAllowExternalSources() {
+        return allowExternalSources;
+    }
+
+    public void setAllowExternalSources(Boolean allowExternalSources) {
+        this.allowExternalSources = allowExternalSources;
     }
 }

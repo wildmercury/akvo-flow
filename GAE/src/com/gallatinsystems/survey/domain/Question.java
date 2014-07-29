@@ -75,6 +75,7 @@ public class Question extends BaseDomain {
     private Long sourceId;
     private Boolean localeNameFlag;
     private Boolean localeLocationFlag;
+    private Boolean allowExternalSources;
 
     public Boolean getAllowDecimal() {
         return allowDecimal;
@@ -365,4 +366,13 @@ public class Question extends BaseDomain {
     public void setLocaleLocationFlag(Boolean localeLocationFlag) {
         this.localeLocationFlag = localeLocationFlag;
     }
+
+    public Boolean getAllowExternalSources() {
+        return this.allowExternalSources;
+    }
+
+    public void setAllowExternalSources(Boolean allowExternalSources) {
+        this.allowExternalSources = allowExternalSources;
+    }
+
 }

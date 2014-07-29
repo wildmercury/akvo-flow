@@ -160,6 +160,9 @@ FLOW.Question = FLOW.BaseModel.extend({
   // Most of the times is `null`
   sourceId: DS.attr('number', {
 	 defaultValue: null
+  }),
+  allowExternalSources: DS.attr('boolean', {
+      defaultValue: false
   })
 });
 

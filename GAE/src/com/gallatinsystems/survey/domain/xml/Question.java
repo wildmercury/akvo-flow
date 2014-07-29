@@ -115,6 +115,10 @@ public class Question {
     @XmlSchemaType(name = "NMTOKEN")
     protected String sourceId;
 
+    @XmlAttribute(required = false)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    protected String allowExternalSources;
+
     public String getSourceId() {
         return sourceId;
     }
@@ -374,6 +378,14 @@ public class Question {
 
     public void setScoring(Scoring scoring) {
         this.scoring = scoring;
+    }
+    
+    public String getAllowExternalSources() {
+        return this.allowExternalSources;
+    }
+    
+    public void setAllowExternalSources(String allowExternalSources) {
+        this.allowExternalSources = allowExternalSources;
     }
 
 }
