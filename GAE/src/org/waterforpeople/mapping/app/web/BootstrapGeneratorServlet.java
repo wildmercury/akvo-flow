@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,9 +104,11 @@ public class BootstrapGeneratorServlet extends AbstractRestApiServlet {
                             .getProperty(SURVEY_UPLOAD_URL)
                             + PropertyUtil.getProperty(SURVEY_UPLOAD_DIR)
                             + "/"
-                            + +s.getKey().getId() + ".xml");
+                            + s.getKey().getId() + ".xml");
+                    URLConnection conn = url.openConnection();
+                    conn.addRequestProperty("Cache-Control", "no-cache,max-age=0");
                     BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(url.openStream(), "UTF-8"));
+                            new InputStreamReader(conn.getInputStream(), "UTF-8"));
                     String line;
                     while ((line = reader.readLine()) != null) {
                         buf.append(line).append("\n");
