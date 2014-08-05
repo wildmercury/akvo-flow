@@ -4,11 +4,7 @@
             [org.akvo.flow.components.header :refer (header)]
             [org.akvo.flow.components.devices :as devices]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [secretary.core :as secretary :include-macros true :refer (defroute)]
-            [goog.events :as events]
-            [goog.history.EventType :as EventType])
-  (:import goog.History))
+            [om.dom :as dom :include-macros true]))
 
 (enable-console-print!)
 
@@ -74,12 +70,6 @@
                (om/build header data)
                (dom/div #js {:id "pageWrap"}
                         (om/build page data))))))
-
-(defn widget [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/h1 nil (:text data)))))
 
 (om/root app
          app-state

@@ -70,5 +70,3 @@
   (reify om/IRender
     (render [this]
       (dom/h1 nil "Manual survey transfer"))))
-
-

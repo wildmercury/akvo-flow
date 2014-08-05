@@ -7,7 +7,6 @@
 
 (secretary/set-config! :prefix "#")
 
-;; Routes
 (defroute "/surveys" {:as params}
   (swap! app-state assoc :current-page [:surveys]))
 
