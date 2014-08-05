@@ -8,7 +8,8 @@
                                       ;; "0.1.267.0-0d7780-alpha"
                   ]
                  [om "0.7.1"]
-                 [secretary "1.2.0"]]
+                 [secretary "1.2.0"]
+                 [cljs-ajax "0.2.6"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
 

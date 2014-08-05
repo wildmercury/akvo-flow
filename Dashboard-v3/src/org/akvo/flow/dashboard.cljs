@@ -15,7 +15,7 @@
 (defmulti page (fn [data owner]
                  (:current-page data)))
 
-(defmethod page :surveys [data owner]
+(defmethod page [:surveys] [data owner]
   (reify
     om/IRender
     (render [this]
@@ -26,31 +26,41 @@
     (render [this]
       (om/build devices/devices data {:opts devices/devices-list}))))
 
-(defmethod page :data [data owner]
+(defmethod page [:devices :assignments-list] [data owner]
+  (reify om/IRender
+    (render [this]
+      (om/build devices/devices data {:opts devices/assignments-list}))))
+
+(defmethod page [:devices :manual-survey-transfer] [data owner]
+  (reify om/IRender
+    (render [this]
+      (om/build devices/devices data {:opts devices/manual-survey-transfer}))))
+
+(defmethod page [:data] [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/h1 nil "Data"))))
 
-(defmethod page :reports [data owner]
+(defmethod page [:reports] [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/h1 nil "Reports"))))
 
-(defmethod page :maps [data owner]
+(defmethod page [:maps] [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/h1 nil "Maps"))))
 
-(defmethod page :users [data owner]
+(defmethod page [:users] [data owner]
   (reify
     om/IRender
     (render [this]
       (dom/h1 nil "Users"))))
 
-(defmethod page :messages [data owner]
+(defmethod page [:messages] [data owner]
   (reify
     om/IRender
     (render [this]

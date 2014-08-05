@@ -9,10 +9,7 @@
 
 ;; Routes
 (defroute "/surveys" {:as params}
-  (swap! app-state assoc :current-page :surveys))
-
-(defroute "/devices" {:as params}
-  (swap! app-state assoc :current-page :devices))
+  (swap! app-state assoc :current-page [:surveys]))
 
 (defroute "/devices/devices-list" {:as params}
   (swap! app-state assoc :current-page [:devices :devices-list]))
@@ -24,19 +21,19 @@
   (swap! app-state assoc :current-page [:devices :manual-survey-transfer]))
 
 (defroute "/data" {:as params}
-  (swap! app-state assoc :current-page :data))
+  (swap! app-state assoc :current-page [:data]))
 
 (defroute "/reports" {:as params}
-  (swap! app-state assoc :current-page :reports))
+  (swap! app-state assoc :current-page [:reports]))
 
 (defroute "/maps" {:as params}
-  (swap! app-state assoc :current-page :maps))
+  (swap! app-state assoc :current-page [:maps]))
 
 (defroute "/users" {:as params}
-  (swap! app-state assoc :current-page :users))
+  (swap! app-state assoc :current-page [:users]))
 
 (defroute "/messages" {:as params}
-  (swap! app-state assoc :current-page :messages))
+  (swap! app-state assoc :current-page [:messages]))
 
 (let [h (History.)]
   (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
