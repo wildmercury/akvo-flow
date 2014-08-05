@@ -17,7 +17,7 @@
            #js {:id "tabs"}
            (dom/nav 
             #js {:className "tabNav floats-in"}
-            (dom/ul 
+            (dom/ul
              nil
              (dom/li 
               #js {:className (active current-page :devices-list)}

@@ -9,6 +9,7 @@
                   ]
                  [om "0.7.1"]
                  [secretary "1.2.0"]
+                 [sablono "0.2.20"]
                  [cljs-ajax "0.2.6"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
