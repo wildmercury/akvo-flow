@@ -31,5 +31,4 @@
           [:li {:class (class-str current-page :users)}
            [:a {:href "#/users"} "users"]]
           [:li {:class (class-str current-page :messages)}
-           [:a {:href "#/messages"} "Messages"]]
-          ]]]]))))
+           [:a {:href "#/messages"} "Messages"]]]]]]))))
