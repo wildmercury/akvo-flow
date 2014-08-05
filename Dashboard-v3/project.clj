@@ -7,7 +7,8 @@
                  [org.clojure/core.async "0.1.303.0-886421-alpha" 
                                       ;; "0.1.267.0-0d7780-alpha"
                   ]
-                 [om "0.7.1"]]
+                 [om "0.7.1"]
+                 [secretary "1.2.0"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
 
