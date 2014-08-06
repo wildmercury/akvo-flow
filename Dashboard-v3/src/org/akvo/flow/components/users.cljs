@@ -1,7 +1,9 @@
 (ns org.akvo.flow.components.users
-  (:require [om.core :as om :include-macros true]
+  (:require [org.akvo.flow.dispatcher :refer (dispatch)]
+            [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [sablono.core :as html :refer-macros (html)]))
+            [sablono.core :as html :refer-macros (html)]
+            ))
 
 (defn users-table-head []
   [:tr
@@ -24,7 +26,7 @@
          :style {:text-align "left"}}
     (get user "emailAddress")]
    [:td [:span {:class "Admin"}
-         (if (get user "admin") "Admin" "User")]]
+         (if (= (get user "permissionList") "10") "Admin" "User")]]
    [:td.action 
     [:a.edit "Edit"]
     [:a.remove "Remove"]]])
@@ -36,23 +38,31 @@
     [:div.confirmDialog.dialog
      content]]])
 
+(defn extract-new-user [owner]
+  {"userName" (->> "new-username" (om/get-node owner) .-value)
+   "emailAddress" (->> "new-email" (om/get-node owner) .-value)
+   "permissionList" (->> "new-permission-level" (om/get-node owner) .-value)})
+
 (defn new-user-dialog [owner]
   (dialog 
    [:h2 "Add new user"]
    [:p.dialogMsg "Please provide a user name, email address and permission level below."]
    [:label {:for "newUserName"} "Username:"]
-   [:input#newUserName {:type "text" :size "40"}]
+   [:input#newUserName {:type "text" :size "40" :ref "new-username"}]
    [:br]
    [:label {:for "newEmail"} "Email address:"]
-   [:input#newUserName {:type "text" :size "40"}]
+   [:input#newUserName {:type "text" :size "40" :ref "new-email"}]
    [:br]
-   [:select
-    [:option "Select permission level"]
+   [:select {:default-value "20" :ref "new-permission-level"}
+    [:option {:value "0"} "Select permission level"]
     [:option {:value "10"} "Admin"]
-    [:option {:value "20" :selected "selected"} "User"]]
+    [:option {:value "20"} "User"]]
    [:div.buttons.menuCentre
     [:ul 
-     [:li [:a.ok.smallBtn "Save"]]
+     [:li [:a.ok.smallBtn 
+           {:on-click #(do (dispatch :new-user (extract-new-user owner))
+                           (om/set-state! owner :new-user-dialog false))} 
+           "Save"]]
      [:li [:a.cancel {:on-click #(om/set-state! owner :new-user-dialog false)} 
            "Cancel"]]]]))
 
