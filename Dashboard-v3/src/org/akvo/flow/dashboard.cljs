@@ -3,6 +3,7 @@
             [org.akvo.flow.routes]
             [org.akvo.flow.components.header :refer (header)]
             [org.akvo.flow.components.devices :as devices]
+            [org.akvo.flow.components.users :as users]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
@@ -54,7 +55,7 @@
   (reify
     om/IRender
     (render [this]
-      (dom/h1 nil "Users"))))
+      (om/build users/users data))))
 
 (defmethod page [:messages] [data owner]
   (reify

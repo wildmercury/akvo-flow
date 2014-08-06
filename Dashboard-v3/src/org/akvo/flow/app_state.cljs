@@ -3,11 +3,22 @@
 
 (def app-state (atom {:current-page :surveys}))
 
-(defn handler [[ok response]]
-  (if ok
-    (swap! app-state assoc :devices (get response "devices"))
-    (.error js/console (str response))))
-
 (ajax-request "devices.json" :get
-              {:handler handler
+              {:handler (fn [[ok response]]
+                          (if ok
+                            (swap! app-state 
+                                   assoc 
+                                   :devices 
+                                   (get response "devices"))
+                            (.error js/console (str response))))
+               :format (json-format {:keywords? false})})
+
+(ajax-request "users.json" :get
+              {:handler (fn [[ok response]]
+                          (if ok
+                            (swap! app-state 
+                                   assoc 
+                                   :users 
+                                   (get response "users"))
+                            (.error js/console (str response))))
                :format (json-format {:keywords? false})})
