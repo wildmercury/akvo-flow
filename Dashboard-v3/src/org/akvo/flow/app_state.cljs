@@ -44,9 +44,24 @@
 
 (let [chan (dispatcher/register :edit-user)]
   (go-loop []
-    (let [[_ {:keys [new-value old-value]}] (<! chan)]
-      (let [idx (index-of old-value (:users @app-state))]
-        (if (>= idx 0)
+    (let [[_ {:keys [new-value old-value]}] (<! chan)
+          idx (index-of old-value (:users @app-state))]
+      (if (>= idx 0)
           (swap! app-state assoc-in [:users idx] new-value)
-          (println "No such user " old-value))))
+          (println "No such user " old-value)))
     (recur)))
+
+
+(defn remove-idx 
+  "Remove item at index i from vector v"
+  [v i]
+  (vec (concat (subvec v 0 i)
+               (subvec v (inc i)))))
+
+(let [chan (dispatcher/register :delete-user)]
+  (go-loop []
+    (let [[_ user] (<! chan)
+          idx (index-of user (:users @app-state))]
+      (if (>= idx 0)
+        (swap! app-state update-in [:users] remove-idx idx)
+        (println "No such user " user)))))

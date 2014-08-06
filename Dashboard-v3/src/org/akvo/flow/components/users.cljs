@@ -29,7 +29,7 @@
          (if (= (get user "permissionList") "10") "Admin" "User")]]
    [:td.action 
     [:a.edit {:on-click #(om/set-state! owner :edit-user-dialog user)} "Edit"]
-    [:a.remove "Remove"]]])
+    [:a.remove {:on-click #(om/set-state! owner :delete-user-dialog user)} "Remove"]]])
 
 (defn dialog [& content]
   [:div.overlay.display
@@ -90,13 +90,27 @@
      [:li [:a.cancel {:on-click #(om/set-state! owner :edit-user-dialog false)} 
            "Cancel"]]]]))
 
+(defn delete-user-dialog [owner user]
+  (dialog 
+   [:h2 "Are you sure you want to delete this user?"]
+   [:p.dialogMsg "This can not be undone"]
+   [:div.buttons.menuCentre
+    [:ul 
+     [:li [:a.ok.smallBtn 
+           {:on-click #(do (dispatch :delete-user @user)
+                           (om/set-state! owner :delete-user-dialog false))} 
+           "Ok"]]
+     [:li [:a.cancel {:on-click #(om/set-state! owner :delete-user-dialog false)} 
+           "Cancel"]]]]))
+
 (defn users [data owner]
   (reify 
 
     om/IInitState
     (init-state [this]
       {:new-user-dialog false
-       :edit-user-dialog false})
+       :edit-user-dialog false
+       :delete-user-dialog false})
 
     om/IRenderState
     (render-state [this state]
@@ -114,4 +128,5 @@
         (cond 
          (:new-user-dialog state) (new-user-dialog owner)
          (:edit-user-dialog state) (edit-user-dialog owner (:edit-user-dialog state))
+         (:delete-user-dialog state) (delete-user-dialog owner (:delete-user-dialog state))
          :else [:div])]))))
