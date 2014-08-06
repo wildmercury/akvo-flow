@@ -16,7 +16,7 @@
          :title "There are two permission levels: User, Administrator. Read more on the FLOW documentation site, or contact your Administrator for details."} "?"]]
    [:th.action.noArrows "Actions"]])
 
-(defn users-table-row [user]
+(defn users-table-row [owner user]
   [:tr
    [:td {:class "userName"
          :style {:text-align "left"
@@ -28,7 +28,7 @@
    [:td [:span {:class "Admin"}
          (if (= (get user "permissionList") "10") "Admin" "User")]]
    [:td.action 
-    [:a.edit "Edit"]
+    [:a.edit {:on-click #(om/set-state! owner :edit-user-dialog user)} "Edit"]
     [:a.remove "Remove"]]])
 
 (defn dialog [& content]
@@ -66,12 +66,37 @@
      [:li [:a.cancel {:on-click #(om/set-state! owner :new-user-dialog false)} 
            "Cancel"]]]]))
 
+(defn edit-user-dialog [owner user]
+  (dialog 
+   [:h2 "Edit user"]
+   [:p.dialogMsg "Please edit the user name, email address and permission level below."]
+   [:label {:for "newUserName"} "Username:"]
+   [:input#newUserName {:type "text" :size "40" :ref "new-username" :default-value (get user "userName")}]
+   [:br]
+   [:label {:for "newEmail"} "Email address:"]
+   [:input#newUserName {:type "text" :size "40" :ref "new-email" :default-value (get user "emailAddress")}]
+   [:br]
+   [:select {:default-value (get user "permissionList") :ref "new-permission-level"}
+    [:option {:value "0"} "Select permission level"]
+    [:option {:value "10"} "Admin"]
+    [:option {:value "20"} "User"]]
+   [:div.buttons.menuCentre
+    [:ul 
+     [:li [:a.ok.smallBtn 
+           {:on-click #(do (dispatch :edit-user {:new-value (extract-new-user owner)
+                                                 :old-value @user})
+                           (om/set-state! owner :edit-user-dialog false))} 
+           "Save"]]
+     [:li [:a.cancel {:on-click #(om/set-state! owner :edit-user-dialog false)} 
+           "Cancel"]]]]))
+
 (defn users [data owner]
   (reify 
 
     om/IInitState
     (init-state [this]
-      {:new-user-dialog false})
+      {:new-user-dialog false
+       :edit-user-dialog false})
 
     om/IRenderState
     (render-state [this state]
@@ -85,9 +110,8 @@
            "Add new user"]
           [:table#usersListTable.dataTable
            [:thead (users-table-head)]
-           [:tbody (map users-table-row (:users data))]]]]
-        (if (:new-user-dialog state)
-          (new-user-dialog owner)
-          [:div])] 
-       
-       ))))
+           [:tbody (map #(users-table-row owner %) (:users data))]]]]
+        (cond 
+         (:new-user-dialog state) (new-user-dialog owner)
+         (:edit-user-dialog state) (edit-user-dialog owner (:edit-user-dialog state))
+         :else [:div])]))))

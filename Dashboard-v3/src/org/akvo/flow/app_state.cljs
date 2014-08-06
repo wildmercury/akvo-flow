@@ -32,3 +32,21 @@
     (let [[_ new-user] (<! chan)]
       (swap! app-state update-in [:users] conj new-user))
     (recur)))
+
+(defn index-of 
+  "Returns the index of (the first) item in coll, or -1 if not present."
+  [item coll]
+  (or (->> coll
+           (map-indexed (fn [i val] (if (= item val) i)))
+           (remove nil?)
+           first)
+      -1))
+
+(let [chan (dispatcher/register :edit-user)]
+  (go-loop []
+    (let [[_ {:keys [new-value old-value]}] (<! chan)]
+      (let [idx (index-of old-value (:users @app-state))]
+        (if (>= idx 0)
+          (swap! app-state assoc-in [:users idx] new-value)
+          (println "No such user " old-value))))
+    (recur)))
