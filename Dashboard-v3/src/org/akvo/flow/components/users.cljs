@@ -1,5 +1,6 @@
 (ns org.akvo.flow.components.users
   (:require [org.akvo.flow.dispatcher :refer (dispatch)]
+            [org.akvo.flow.components.dialog :refer (dialog)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
@@ -30,20 +31,13 @@
     [:a.edit {:href (str "#/users/edit/" (get user "keyId"))} "Edit"]
     [:a.remove {:href (str "#/users/delete/" (get user "keyId"))} "Remove"]]])
 
-(defn dialog [& content]
-  [:div.overlay.display
-   [:div.blanket]
-   [:div.dialogWrap
-    [:div.confirmDialog.dialog
-     content]]])
-
+;; Temp ids are negative
 (let [n (atom 0)]
   (defn next-key-id []
     (swap! n dec)
     @n))
 
 (defn create-user [username email permission-level]
-  ;; Negative
   {"admin" false
    "logoutUrl" nil
    "config" nil
@@ -53,71 +47,71 @@
    "userName" username
    "keyId" (next-key-id)})
 
-(defn extract-new-user [owner]
-  (let [username (->> "new-username" (om/get-node owner) .-value)
-        email (->> "new-email" (om/get-node owner) .-value)
-        permission-level (->> "new-permission-level" (om/get-node owner) .-value)]
+(defn by-id [id]
+  (.getElementById js/document id))
+
+(defn extract-user []
+  (let [username (.-value (by-id "newUserName"))
+        email (.-value (by-id "newEmail"))
+        permission-level (.-value (by-id "newPermissionList"))]
     (create-user username email permission-level)))
 
+(defn user-form 
+  ([] (user-form (create-user "" "" "")))
+  ([user] 
+     (fn [data owner]
+       (om/component
+        (html
+         [:div
+          [:label {:for "newUserName"} "Username:"]
+          [:input#newUserName {:type "text" :size "40" :ref "new-username" :default-value (get user "userName")}]
+          [:br]
+          [:label {:for "newEmail"} "Email address:"]
+          [:input#newEmail {:type "text" :size "40" :ref "new-email" :default-value (get user "emailAddress")}]
+          [:br]
+          [:select#newPermissionList {:default-value (get user "permissionList") :ref "new-permission-level"}
+           [:option {:value "0"} "Select permission level"]
+           [:option {:value "10"} "Admin"]
+           [:option {:value "20"} "User"]]])))))
+
 (defn new-user-dialog [owner]
-  (dialog 
-   [:h2 "Add new user"]
-   [:p.dialogMsg "Please provide a user name, email address and permission level below."]
-   [:label {:for "newUserName"} "Username:"]
-   [:input#newUserName {:type "text" :size "40" :ref "new-username"}]
-   [:br]
-   [:label {:for "newEmail"} "Email address:"]
-   [:input#newUserName {:type "text" :size "40" :ref "new-email"}]
-   [:br]
-   [:select {:default-value "20" :ref "new-permission-level"}
-    [:option {:value "0"} "Select permission level"]
-    [:option {:value "10"} "Admin"]
-    [:option {:value "20"} "User"]]
-   [:div.buttons.menuCentre
-    [:ul 
-     [:li [:a.ok.smallBtn 
-           {:on-click #(do (dispatch :new-user (extract-new-user owner))
-                           (dispatch :navigate "/users"))} 
-           "Save"]]
-     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
-           "Cancel"]]]]))
+  (om/build dialog
+            {:title "Add new user"
+             :text "Please provide a user name, email address and permission level below."
+             :content (user-form)
+             :buttons [{:caption "Save"
+                        :class "ok smallBtn"
+                        :action #(do (dispatch :new-user (extract-user))
+                                     (dispatch :navigate "/users"))}
+                       {:caption "Cancel"
+                        :class "cancel"
+                        :action #(dispatch :navigate "/users")}]}))
 
 (defn edit-user-dialog [owner user]
-  (dialog 
-   [:h2 "Edit user"]
-   [:p.dialogMsg "Please edit the user name, email address and permission level below."]
-   [:label {:for "newUserName"} "Username:"]
-   [:input#newUserName {:type "text" :size "40" :ref "new-username" :default-value (get user "userName")}]
-   [:br]
-   [:label {:for "newEmail"} "Email address:"]
-   [:input#newUserName {:type "text" :size "40" :ref "new-email" :default-value (get user "emailAddress")}]
-   [:br]
-   [:select {:default-value (get user "permissionList") :ref "new-permission-level"}
-    [:option {:value "0"} "Select permission level"]
-    [:option {:value "10"} "Admin"]
-    [:option {:value "20"} "User"]]
-   [:div.buttons.menuCentre
-    [:ul 
-     [:li [:a.ok.smallBtn 
-           {:on-click #(do (dispatch :edit-user {:new-value (extract-new-user owner)
-                                                 :old-value @user})
-                           (dispatch :navigate "/users"))} 
-           "Save"]]
-     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
-           "Cancel"]]]]))
+  (om/build dialog
+            {:title "Edit user"
+             :text "Please edit the user name, email address and permission level below."
+             :content (user-form user)
+             :buttons [{:caption "Save"
+                        :class "ok smallBtn"
+                        :action #(do (dispatch :edit-user {:new-value (extract-user)
+                                                           :old-value @user})
+                                     (dispatch :navigate "/users"))}
+                       {:caption "Cancel"
+                        :class "cancel"
+                        :action #(dispatch :navigate "/users")}]}))
 
 (defn delete-user-dialog [owner user]
-  (dialog 
-   [:h2 "Are you sure you want to delete this user?"]
-   [:p.dialogMsg "This can not be undone"]
-   [:div.buttons.menuCentre
-    [:ul 
-     [:li [:a.ok.smallBtn 
-           {:on-click #(do (dispatch :delete-user @user)
-                           (dispatch :navigate "/users"))} 
-           "Ok"]]
-     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
-           "Cancel"]]]]))
+  (om/build dialog
+            {:title "Are you sure you want to delete this user?"
+             :text "This can not be undone!!!"
+             :buttons [{:caption "Ok"
+                        :class "ok smallBtn"
+                        :action #(do (dispatch :delete-user @user)
+                                     (dispatch :navigate "/users"))}
+                       {:caption "Cancel"
+                        :class "cancel"
+                        :action #(dispatch :navigate "/users")}]}))
 
 ;; TODO index on keyId
 (defn find-user-by-id [users id]
