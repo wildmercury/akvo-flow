@@ -2,8 +2,7 @@
   (:require [org.akvo.flow.dispatcher :refer (dispatch)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [sablono.core :as html :refer-macros (html)]
-            ))
+            [sablono.core :as html :refer-macros (html)]))
 
 (defn users-table-head []
   [:tr
@@ -28,8 +27,8 @@
    [:td [:span {:class "Admin"}
          (if (= (get user "permissionList") "10") "Admin" "User")]]
    [:td.action 
-    [:a.edit {:on-click #(om/set-state! owner :edit-user-dialog user)} "Edit"]
-    [:a.remove {:on-click #(om/set-state! owner :delete-user-dialog user)} "Remove"]]])
+    [:a.edit {:href (str "#/users/edit/" (get user "keyId"))} "Edit"]
+    [:a.remove {:href (str "#/users/delete/" (get user "keyId"))} "Remove"]]])
 
 (defn dialog [& content]
   [:div.overlay.display
@@ -38,10 +37,27 @@
     [:div.confirmDialog.dialog
      content]]])
 
+(let [n (atom 0)]
+  (defn next-key-id []
+    (swap! n dec)
+    @n))
+
+(defn create-user [username email permission-level]
+  ;; Negative
+  {"admin" false
+   "logoutUrl" nil
+   "config" nil
+   "emailAddress" email
+   "superAdmin" false
+   "permissionList" permission-level
+   "userName" username
+   "keyId" (next-key-id)})
+
 (defn extract-new-user [owner]
-  {"userName" (->> "new-username" (om/get-node owner) .-value)
-   "emailAddress" (->> "new-email" (om/get-node owner) .-value)
-   "permissionList" (->> "new-permission-level" (om/get-node owner) .-value)})
+  (let [username (->> "new-username" (om/get-node owner) .-value)
+        email (->> "new-email" (om/get-node owner) .-value)
+        permission-level (->> "new-permission-level" (om/get-node owner) .-value)]
+    (create-user username email permission-level)))
 
 (defn new-user-dialog [owner]
   (dialog 
@@ -61,9 +77,9 @@
     [:ul 
      [:li [:a.ok.smallBtn 
            {:on-click #(do (dispatch :new-user (extract-new-user owner))
-                           (om/set-state! owner :new-user-dialog false))} 
+                           (dispatch :navigate "/users"))} 
            "Save"]]
-     [:li [:a.cancel {:on-click #(om/set-state! owner :new-user-dialog false)} 
+     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
            "Cancel"]]]]))
 
 (defn edit-user-dialog [owner user]
@@ -85,9 +101,9 @@
      [:li [:a.ok.smallBtn 
            {:on-click #(do (dispatch :edit-user {:new-value (extract-new-user owner)
                                                  :old-value @user})
-                           (om/set-state! owner :edit-user-dialog false))} 
+                           (dispatch :navigate "/users"))} 
            "Save"]]
-     [:li [:a.cancel {:on-click #(om/set-state! owner :edit-user-dialog false)} 
+     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
            "Cancel"]]]]))
 
 (defn delete-user-dialog [owner user]
@@ -98,35 +114,45 @@
     [:ul 
      [:li [:a.ok.smallBtn 
            {:on-click #(do (dispatch :delete-user @user)
-                           (om/set-state! owner :delete-user-dialog false))} 
+                           (dispatch :navigate "/users"))} 
            "Ok"]]
-     [:li [:a.cancel {:on-click #(om/set-state! owner :delete-user-dialog false)} 
+     [:li [:a.cancel {:on-click #(dispatch :navigate "/users")} 
            "Cancel"]]]]))
+
+;; TODO index on keyId
+(defn find-user-by-id [users id]
+  (some (fn [user] 
+          (when (= id (get user "keyId"))
+            user))
+        users))
 
 (defn users [data owner]
   (reify 
 
-    om/IInitState
-    (init-state [this]
-      {:new-user-dialog false
-       :edit-user-dialog false
-       :delete-user-dialog false})
-
-    om/IRenderState
-    (render-state [this state]
-      (html
-       [:div 
-        [:div.greyBg
-         [:section.fullWidth.usersList
-          [:h1 "Manage users and user rights"]
-          [:a.standardBtn.btnAboveTable 
-           {:on-click #(om/set-state! owner :new-user-dialog true)} 
-           "Add new user"]
-          [:table#usersListTable.dataTable
-           [:thead (users-table-head)]
-           [:tbody (map #(users-table-row owner %) (:users data))]]]]
-        (cond 
-         (:new-user-dialog state) (new-user-dialog owner)
-         (:edit-user-dialog state) (edit-user-dialog owner (:edit-user-dialog state))
-         (:delete-user-dialog state) (delete-user-dialog owner (:delete-user-dialog state))
-         :else [:div])]))))
+    om/IRender
+    (render [this]
+      (let [current-page (:current-page data)]
+        (html
+         [:div 
+          [:div.greyBg
+           [:section.fullWidth.usersList
+            [:h1 "Manage users and user rights"]
+            [:a.standardBtn.btnAboveTable 
+             {:on-click #(dispatch :navigate "/users/add")} 
+             "Add new user"]
+            [:table#usersListTable.dataTable
+             [:thead (users-table-head)]
+             [:tbody (map #(users-table-row owner %) (:users data))]]]]
+          (cond 
+           (= (:dialog current-page) :add) 
+           (new-user-dialog owner)
+           
+           (= (:dialog current-page) :edit) 
+           (edit-user-dialog owner (find-user-by-id (:users data)
+                                                    (:user-id current-page)))
+       
+           (= (:dialog current-page) :delete)
+           (delete-user-dialog owner (find-user-by-id (:users data)
+                                                      (:user-id current-page)))
+           
+           :else [:div])])))))

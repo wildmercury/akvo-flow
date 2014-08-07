@@ -10,7 +10,7 @@
 (enable-console-print!)
 
 (defmulti page (fn [data owner]
-                 (:current-page data)))
+                 (:path (:current-page data))))
 
 (defmethod page [:surveys] [data owner]
   (reify

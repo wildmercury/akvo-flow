@@ -4,7 +4,7 @@
             [ajax.core :refer (ajax-request json-format)])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
 
-(def app-state (atom {:current-page :surveys}))
+(def app-state (atom {:current-page {:path [:surveys]}}))
 
 (ajax-request "devices.json" :get
               {:handler (fn [[ok response]]
@@ -64,4 +64,5 @@
           idx (index-of user (:users @app-state))]
       (if (>= idx 0)
         (swap! app-state update-in [:users] remove-idx idx)
-        (println "No such user " user)))))
+        (println "No such user " user)))
+    (recur)))

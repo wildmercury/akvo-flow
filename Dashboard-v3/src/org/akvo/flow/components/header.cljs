@@ -8,7 +8,7 @@
   (str "nav" (s/capitalize (name page)) (if (= current-page page) " current" "")))
 
 (defn header [data owner]
-  (let [[current-page] (:current-page data)]
+  (let [[current-page] (:path (:current-page data))]
     (om/component
      (html
       [:header {:class "floats-in top"

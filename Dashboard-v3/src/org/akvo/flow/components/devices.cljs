@@ -7,7 +7,7 @@
   (if (= current-page page) "active" ""))
 
 (defn devices [data owner child]
-  (let [[_ current-page] (:current-page data)]
+  (let [[_ current-page] (:path (:current-page data))]
     (om/component
      (html
       [:div
