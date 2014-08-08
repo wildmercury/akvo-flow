@@ -31,33 +31,29 @@
     [:a.edit {:href (str "#/users/edit/" (get user "keyId"))} "Edit"]
     [:a.remove {:href (str "#/users/delete/" (get user "keyId"))} "Remove"]]])
 
-;; Temp ids are negative
-(let [n (atom 0)]
-  (defn next-key-id []
-    (swap! n dec)
-    @n))
-
-(defn create-user [username email permission-level]
+(def empty-user
   {"admin" false
    "logoutUrl" nil
    "config" nil
-   "emailAddress" email
+   "emailAddress" ""
    "superAdmin" false
-   "permissionList" permission-level
-   "userName" username
-   "keyId" (next-key-id)})
+   "permissionList" ""
+   "userName" ""
+   "keyId" nil})
 
 (defn by-id [id]
   (.getElementById js/document id))
 
-(defn extract-user []
+(defn extract-user-data []
   (let [username (.-value (by-id "newUserName"))
         email (.-value (by-id "newEmail"))
         permission-level (.-value (by-id "newPermissionList"))]
-    (create-user username email permission-level)))
+    {"userName" username
+     "emailAddress" email
+     "permissionList" permission-level}))
 
 (defn user-form 
-  ([] (user-form (create-user "" "" "")))
+  ([] (user-form empty-user))
   ([user] 
      (fn [data owner]
        (om/component
@@ -81,7 +77,8 @@
              :content (user-form)
              :buttons [{:caption "Save"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :new-user (extract-user))
+                        :action #(do (dispatch :new-user (merge empty-user 
+                                                                (extract-user-data)))
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
                         :class "cancel"
@@ -94,7 +91,8 @@
              :content (user-form user)
              :buttons [{:caption "Save"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :edit-user {:new-value (extract-user)
+                        :action #(do (dispatch :edit-user {:new-value (merge @user 
+                                                                             (extract-user-data))
                                                            :old-value @user})
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
