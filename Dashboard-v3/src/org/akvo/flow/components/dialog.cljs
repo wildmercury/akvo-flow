@@ -4,29 +4,21 @@
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
 
-;; Interface
+
 (comment
   
-  (om/build dialog {:title "Delete User"
-                    :text "Are you sure you want to delete this user?"
-                    :buttons [{:caption "Yes"
-                               :action #(do (delete user)
-                                            (close dialog))}
-                              {:caption "No"
-                               :action (close dialog)}]})
-
+  ;; Example usage
   (om/build dialog {:title "Add user"
                     :text "Fill in the form below to create a new user"
+                    ;; Content is optional
                     :content form-component
-                    :content-data form-component-data
                     :buttons [{:caption "Create"
                                :class "ok smallBtn"
-                               :action (do (extract user)
-                                           (close dialog))}
+                               :action #(some action)}
                               {:caption "Cancel"
-                               :action (close dialog)}]})
-
-)
+                               :action #(some action)}]})
+  
+  )
 
 (defn button-item [data owner]
   (let [{:keys [caption class action]} data]
