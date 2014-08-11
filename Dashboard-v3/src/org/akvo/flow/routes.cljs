@@ -18,8 +18,14 @@
 (defroute "/surveys" {:as params}
   (swap! app-state assoc :current-page {:path [:surveys]}))
 
-(defroute "/devices/devices-list" {:as params}
-  (swap! app-state assoc :current-page {:path [:devices :devices-list]}))
+(defroute "/devices/devices-list" [query-params]
+  (let [query-params (if-let [idx (:sort-idx query-params)]
+                       {:sort-idx (js/parseInt idx)
+                        :sort-order (if (= (:sort-order query-params) "descending")
+                                      :descending
+                                      :ascending)})]
+    (swap! app-state assoc :current-page {:path [:devices :devices-list]
+                                          :query-params query-params})))
 
 (defroute "/devices/assignments-list" {:as params}
   (swap! app-state assoc :current-page {:path [:devices :assignments-list]}))

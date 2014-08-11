@@ -38,26 +38,23 @@
   {:ascending :descending
    :descending :ascending})
 
-(defn table-head [data owner]
-  (reify
-    om/IRenderState
-    (render-state [this {:keys [sort-chan sort-idx sort-order]}]
-      (html
-       [:tr
-        (->> (:columns data)
-             (map :title)
-             (map-indexed 
-              (fn [idx item]
-                [:th {:class (if (= sort-idx idx)
-                                 (if (= sort-order :ascending)
-                                   "sorting_asc"
-                                   "sorting_desc")
-                                 "")} 
-                   [:a {:on-click #(async/put! sort-chan {:sort-idx idx
-                                                          :sort-order (if (= idx sort-idx)
-                                                                        (change-direction sort-order)
-                                                                        :ascending)})}
-                    (if (fn? item) (om/build item {}) item)]])))]))))
+(defn table-head [{:keys [sort-idx sort-order] :as data} owner]
+  (om/component
+   (html
+    [:tr
+     (->> (:columns data)
+          (map :title)
+          (map-indexed 
+           (fn [idx item]
+             [:th {:class (if (= sort-idx idx)
+                            (if (= sort-order :ascending)
+                              "sorting_asc"
+                              "sorting_desc")
+                            "")} 
+              [:a {:href (str "#/devices/devices-list?sort-idx=" idx "&sort-order=" (if (= idx sort-idx)
+                                                                                      (name (change-direction sort-order))
+                                                                                      "ascending"))}
+               (if (fn? item) (om/build item {}) item)]])))])))
 
 (defn table-row [columns]
   (fn [data owner]
@@ -71,34 +68,20 @@
                   item))])]))))
 
 (defn grid [data owner]
-  (reify 
-    
-    om/IInitState
-    (init-state [this]
-      {:sort-idx 0
-       :sort-order :ascending
-       :sort-chan (async/chan)})
-    
-    om/IWillMount
-    (will-mount [this]
-      (let [chan (om/get-state owner :sort-chan)]
-        (go-loop []
-          (let [{:keys [sort-idx sort-order]} (<! chan)]
-            (om/set-state! owner :sort-idx sort-idx)
-            (om/set-state! owner :sort-order sort-order)
-            (recur)))))
-
-    om/IRenderState
-    (render-state [this state]
-      (let [sort-fn (get-in data [:columns (:sort-idx state) :cell-fn])
-            grid-data (sort-by sort-fn (:data data))
-            grid-data (if (= (:sort-order state) :descending)
+  (om/component
+   (let [sorted? (boolean (:sort-idx data))
+         sort-fn (get-in data [:columns (:sort-idx data) :cell-fn])
+         grid-data (:data data)
+         grid-data (if sorted? 
+                     (sort-by sort-fn grid-data)
+                     grid-data)
+         grid-data (if sorted?
+                      (if (= (:sort-order data) :descending)
                         (reverse grid-data)
-                        grid-data)]
-        (html
-         [:table.dataTable {:id (:id data)}
-          [:thead (om/build table-head data {:state {:sort-chan (:sort-chan state)
-                                                     :sort-idx (:sort-idx state)
-                                                     :sort-order (:sort-order state)}})]
-          [:tbody (om/build-all (table-row (:columns data)) grid-data)]])))))
+                        grid-data)
+                      grid-data)]
+     (html
+      [:table.dataTable {:id (:id data)}
+       [:thead (om/build table-head data)]
+       [:tbody (om/build-all (table-row (:columns data)) grid-data)]]))))
 

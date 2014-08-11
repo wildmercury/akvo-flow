@@ -31,6 +31,8 @@
      [:a.standardBtn.btnAboveTable "Manage device groups"]
      (om/build grid
                {:id "surveyDataTable"
+                :sort-idx (-> data :current-page :query-params :sort-idx)
+                :sort-order (-> data :current-page :query-params :sort-order)
                 :data (:devices data)
                 :columns [{:title [:input {:type "checkbox"}]
                            :cell-fn (constantly [:input {:type "checkbox"}])}
