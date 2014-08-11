@@ -1,8 +1,10 @@
 (ns ^{:doc "Reusable grid component"}
   org.akvo.flow.components.grid
-  (:require [om.core :as om :include-macros true]
+  (:require [cljs.core.async :as async] 
+            [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [sablono.core :as html :refer-macros (html)]))
+            [sablono.core :as html :refer-macros (html)])
+  (:require-macros [cljs.core.async.macros :refer (go-loop)]))
 
 (comment
 
@@ -32,14 +34,30 @@
   
   )
 
+(def change-direction
+  {:ascending :descending
+   :descending :ascending})
+
 (defn table-head [data owner]
-  (om/component
-   (html
-    [:tr
-     (->> (:columns data)
-          (map :title)
-          (map (fn [item]
-                 [:th [:a (if (fn? item) (om/build item {}) item)]])))])))
+  (reify
+    om/IRenderState
+    (render-state [this {:keys [sort-chan sort-idx sort-order]}]
+      (html
+       [:tr
+        (->> (:columns data)
+             (map :title)
+             (map-indexed 
+              (fn [idx item]
+                [:th {:class (if (= sort-idx idx)
+                                 (if (= sort-order :ascending)
+                                   "sorting_asc"
+                                   "sorting_desc")
+                                 "")} 
+                   [:a {:on-click #(async/put! sort-chan {:sort-idx idx
+                                                          :sort-order (if (= idx sort-idx)
+                                                                        (change-direction sort-order)
+                                                                        :ascending)})}
+                    (if (fn? item) (om/build item {}) item)]])))]))))
 
 (defn table-row [columns]
   (fn [data owner]
@@ -53,9 +71,34 @@
                   item))])]))))
 
 (defn grid [data owner]
-  (om/component
-   (html
-    [:table.dataTable {:id (:id data)}
-     [:thead (om/build table-head data)]
-     [:tbody (om/build-all (table-row (:columns data)) (:data data))]])))
+  (reify 
+    
+    om/IInitState
+    (init-state [this]
+      {:sort-idx 0
+       :sort-order :ascending
+       :sort-chan (async/chan)})
+    
+    om/IWillMount
+    (will-mount [this]
+      (let [chan (om/get-state owner :sort-chan)]
+        (go-loop []
+          (let [{:keys [sort-idx sort-order]} (<! chan)]
+            (om/set-state! owner :sort-idx sort-idx)
+            (om/set-state! owner :sort-order sort-order)
+            (recur)))))
+
+    om/IRenderState
+    (render-state [this state]
+      (let [sort-fn (get-in data [:columns (:sort-idx state) :cell-fn])
+            grid-data (sort-by sort-fn (:data data))
+            grid-data (if (= (:sort-order state) :descending)
+                        (reverse grid-data)
+                        grid-data)]
+        (html
+         [:table.dataTable {:id (:id data)}
+          [:thead (om/build table-head data {:state {:sort-chan (:sort-chan state)
+                                                     :sort-idx (:sort-idx state)
+                                                     :sort-order (:sort-order state)}})]
+          [:tbody (om/build-all (table-row (:columns data)) grid-data)]])))))
 
