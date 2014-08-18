@@ -19,21 +19,31 @@
       :email "zyx@gmail.com"}])
 
   (om/build grid 
-            {:id "deviceDataTable"
+            {;; The id of this table
+             :id "deviceDataTable"
+             ;; The data to be rendered
              :data the-data
+             ;; The route to this grid. Used by e.g. sorting
              :route-fn route-fn
+             ;; The column (zero based) index used for sorting
+             :sort-idx 2
+             ;; The sort order (either :ascending or :descending)
+             :sort-order :descending
+             ;; Description of the columns
              :columns [{:title "Id"
                         :cell-fn :user-id}
-                       {:title "Username"
+                       {;; The title of this column
+                        :title "Username"
+                        ;; A function that returns the cell value. This function can return a
+                        ;; * simple value: string/number/nil etc.
+                        ;; * a sablono vector
+                        ;; * an om/react component
                         :cell-fn :username
-                        :sort :ascending}
+                        ;; (optional) class name to add to the <td>
+                        :class "some-class"
+                        }
                        {:title "Actions"
-                        :cell-fn edit-and-delete-component}]})
-  
-  ;; :cell-fn takes a record and returns either a string or a
-  ;; react component. :title can also be a component
-  
-  )
+                        :cell-fn edit-and-delete-component}]}))
 
 (def change-direction
   {:ascending :descending
