@@ -81,19 +81,20 @@
               (om/build item {})
               item)]))]))))
 
+(defn comparator-complement
+  "Like cljs.core/complement for comparator functions"
+  [comparator]
+  (fn [x y]
+    (comparator y x)))
+
 (defn grid [data owner]
   (om/component
-   (let [sorted? (boolean (:sort-idx data))
-         sort-fn (get-in data [:columns (:sort-idx data) :cell-fn])
-         grid-data (:data data)
-         grid-data (if sorted? 
-                     (sort-by sort-fn grid-data)
-                     grid-data)
-         grid-data (if sorted?
-                     (if (= (:sort-order data) :descending)
-                       (reverse grid-data)
-                       grid-data)
-                     grid-data)]
+   (let [key-fn (or (get-in data [:columns (:sort-idx data) :cell-fn])
+                     identity)
+         descending? (boolean (= (:sort-order data) :descending))
+         ;; TODO optional custom comparator
+         comparator (if descending? (comparator-complement compare) compare)
+         grid-data (sort-by key-fn comparator (:data data))]
      (html
       [:table.dataTable {:id (:id data)}
        [:thead (om/build table-head data)]
