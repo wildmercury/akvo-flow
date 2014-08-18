@@ -1,6 +1,6 @@
 (defproject dashboard "0.1.0-SNAPSHOT"
-  :description "FIXME: write this!"
-  :url "http://example.com/FIXME"
+  :description "Dashboard for Akvo FLOW"
+  :url "http://akvo.org/products/akvoflow/"
 
   :dependencies [[org.clojure/clojure "1.7.0-alpha1"]
                  [org.clojure/clojurescript "0.0-2311"]
