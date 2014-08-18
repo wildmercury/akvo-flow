@@ -15,51 +15,57 @@
       (set! js/window.location.hash path))
     (recur)))
 
-(defroute "/surveys" {:as params}
-  (swap! app-state assoc :current-page {:path [:surveys]}))
-
-(defroute "/devices/devices-list" [query-params]
+(defn parse-sort-params [query-params]
   (let [query-params (if-let [idx (:sort-idx query-params)]
                        {:sort-idx (js/parseInt idx)
                         :sort-order (if (= (:sort-order query-params) "descending")
                                       :descending
                                       :ascending)})]
+    query-params))
+
+(defroute surveys "/surveys" {:as params}
+  (swap! app-state assoc :current-page {:path [:surveys]}))
+
+(defroute devices-list "/devices/devices-list" [query-params]
+  (let [query-params (parse-sort-params query-params)]
     (swap! app-state assoc :current-page {:path [:devices :devices-list]
                                           :query-params query-params})))
 
-(defroute "/devices/assignments-list" {:as params}
+(defroute assignments-list "/devices/assignments-list" {:as params}
   (swap! app-state assoc :current-page {:path [:devices :assignments-list]}))
 
-(defroute "/devices/manual-survey-transfer" {:as params}
+(defroute manual-survey-transfer "/devices/manual-survey-transfer" {:as params}
   (swap! app-state assoc :current-page {:path [:devices :manual-survey-transfer]}))
 
-(defroute "/data" {:as params}
+(defroute data "/data" {:as params}
   (swap! app-state assoc :current-page {:path [:data]}))
 
-(defroute "/reports" {:as params}
+(defroute reports "/reports" {:as params}
   (swap! app-state assoc :current-page {:path [:reports]}))
 
-(defroute "/maps" {:as params}
+(defroute maps "/maps" {:as params}
   (swap! app-state assoc :current-page {:path [:maps]}))
 
-(defroute "/users" {:as params}
-  (swap! app-state assoc :current-page {:path [:users]}))
+(defroute users "/users" [query-params]
+  (let [query-params (parse-sort-params query-params)]
+    (swap! app-state assoc :current-page {:path [:users]
+                                          :query-params query-params})))
 
-(defroute "/users/add" {:as params}
+(defroute users-add "/users/add" {:as params}
   (swap! app-state assoc :current-page {:path [:users]
                                         :dialog :add}))
 
-(defroute "/users/edit/:id" [id]
+(defroute users-edit "/users/edit/:id" [id]
   (swap! app-state assoc :current-page {:path [:users]
                                         :dialog :edit
                                         :user-id (js/parseInt id)}))
 
-(defroute "/users/delete/:id" [id]
+(defroute users-delete "/users/delete/:id" [id]
   (swap! app-state assoc :current-page {:path [:users]
                                         :dialog :delete
                                         :user-id (js/parseInt id)}))
 
-(defroute "/messages" {:as params}
+(defroute messages "/messages" {:as params}
   (swap! app-state assoc :current-page {:path [:messages]}))
 
 (let [h (History.)]

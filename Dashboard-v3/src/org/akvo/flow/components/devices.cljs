@@ -1,5 +1,6 @@
 (ns org.akvo.flow.components.devices
-  (:require [org.akvo.flow.components.grid :refer (grid)] 
+  (:require [org.akvo.flow.routes :as routes]
+            [org.akvo.flow.components.grid :refer (grid)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
@@ -17,11 +18,11 @@
          [:nav {:class "tabNav floats-in"}
           [:ul
            [:li {:class (active current-page :devices-list)}
-            [:a {:href "#/devices/devices-list"} "Devices list"]]
+            [:a {:href (routes/devices-list)} "Devices list"]]
            [:li {:class (active current-page :assignments-list)}
-            [:a {:href "#/devices/assignments-list"} "Assignments list"]]
+            [:a {:href (routes/assignments-list)} "Assignments list"]]
            [:li {:class (active current-page :manual-survey-transfer)}
-            [:a {:href "#/devices/manual-survey-transfer"} "Manual survey transfer"]]]]
+            [:a {:href (routes/manual-survey-transfer)} "Manual survey transfer"]]]]
          (om/build child data)]]]))))
 
 (defn devices-list [data owner]
@@ -31,6 +32,7 @@
      [:a.standardBtn.btnAboveTable "Manage device groups"]
      (om/build grid
                {:id "surveyDataTable"
+                :route-fn routes/devices-list
                 :sort-idx (-> data :current-page :query-params :sort-idx)
                 :sort-order (-> data :current-page :query-params :sort-order)
                 :data (:devices data)

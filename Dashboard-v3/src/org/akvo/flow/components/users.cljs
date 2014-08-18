@@ -1,35 +1,11 @@
 (ns org.akvo.flow.components.users
   (:require [org.akvo.flow.dispatcher :refer (dispatch)]
+            [org.akvo.flow.routes :as routes]
             [org.akvo.flow.components.dialog :refer (dialog)]
+            [org.akvo.flow.components.grid :refer (grid)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
-
-(defn users-table-head []
-  [:tr
-   [:th [:a.userName "User name"]]
-   [:th [:a.emailAdr "Email"]]
-   [:th 
-    ;; NOTE: probably wrong classname?
-    [:a.emailAdr "Permission level"]
-    [:a {:class "helpIcon tooltip"
-         :title "There are two permission levels: User, Administrator. Read more on the FLOW documentation site, or contact your Administrator for details."} "?"]]
-   [:th.action.noArrows "Actions"]])
-
-(defn users-table-row [owner user]
-  [:tr
-   [:td {:class "userName"
-         :style {:text-align "left"
-                 :padding "0 0 0 20px"}}
-    (get user "userName")]
-   [:td {:class "emailAdr"
-         :style {:text-align "left"}}
-    (get user "emailAddress")]
-   [:td [:span {:class "Admin"}
-         (if (= (get user "permissionList") "10") "Admin" "User")]]
-   [:td.action 
-    [:a.edit {:href (str "#/users/edit/" (get user "keyId"))} "Edit"]
-    [:a.remove {:href (str "#/users/delete/" (get user "keyId"))} "Remove"]]])
 
 (def empty-user
   {"admin" false
@@ -129,12 +105,29 @@
           [:div.greyBg
            [:section.fullWidth.usersList
             [:h1 "Manage users and user rights"]
-            [:a.standardBtn.btnAboveTable 
-             {:on-click #(dispatch :navigate "/users/add")} 
+            [:a.standardBtn.btnAboveTable
+             {:href (routes/users-add)}
              "Add new user"]
-            [:table#usersListTable.dataTable
-             [:thead (users-table-head)]
-             [:tbody (map #(users-table-row owner %) (:users data))]]]]
+            (om/build grid
+                      {:id "usersListTable"
+                       :route-fn routes/users
+                       :data (:users data)
+                       :sort-idx (-> data :current-page :query-params :sort-idx)
+                       :sort-order (-> data :current-page :query-params :sort-order)
+                       :columns [{:title "User name"
+                                  :cell-fn #(get % "userName")}
+                                 {:title "Email"
+                                  :cell-fn #(get % "emailAddress")}
+                                 {:title "Permission list"
+                                  :cell-fn #(if (= (get % "permissionList") "10")
+                                              "Admin"
+                                              "User")}
+                                 {:title "Actions"
+                                  :class "action"
+                                  :cell-fn (fn [user]
+                                             [:span
+                                              [:a.edit {:href (routes/users-edit {:id (get user "keyId")})} "Edit"]
+                                              [:a.remove {:href (routes/users-delete {:id (get user "keyId")})} "Remove"]])}]})]]
           (cond 
            (= (:dialog current-page) :add) 
            (new-user-dialog owner)

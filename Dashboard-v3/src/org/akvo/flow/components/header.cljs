@@ -1,5 +1,6 @@
 (ns org.akvo.flow.components.header
-  (:require [clojure.string :as s]
+  (:require [org.akvo.flow.routes :as routes]
+            [clojure.string :as s]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
@@ -19,16 +20,16 @@
         [:nav {:id "topnav" :role "navigation"}
          [:ul {:class "floats-in"}
           [:li {:class (class-str current-page :surveys)}
-           [:a {:href "#/surveys"} "Surveys"]]
+           [:a {:href (routes/surveys)} "Surveys"]]
           [:li {:class (class-str current-page :devices)}
-           [:a {:href "#/devices/devices-list"} "Devices"]]
+           [:a {:href (routes/devices-list)} "Devices"]]
           [:li {:class (class-str current-page :data)}
-           [:a {:href "#/data"} "Data"]]
+           [:a {:href (routes/data)} "Data"]]
           [:li {:class (class-str current-page :reports)}
-           [:a {:href "#/reports"} "Reports"]]
+           [:a {:href (routes/reports)} "Reports"]]
           [:li {:class (class-str current-page :maps)}
-           [:a {:href "#/maps"} "maps"]]
+           [:a {:href (routes/maps)} "maps"]]
           [:li {:class (class-str current-page :users)}
-           [:a {:href "#/users"} "users"]]
+           [:a {:href (routes/users)} "users"]]
           [:li {:class (class-str current-page :messages)}
-           [:a {:href "#/messages"} "Messages"]]]]]]))))
+           [:a {:href (routes/messages)} "Messages"]]]]]]))))

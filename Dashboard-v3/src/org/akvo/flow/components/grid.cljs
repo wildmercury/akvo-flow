@@ -21,6 +21,7 @@
   (om/build grid 
             {:id "deviceDataTable"
              :data the-data
+             :route-fn route-fn
              :columns [{:title "Id"
                         :cell-fn :user-id}
                        {:title "Username"
@@ -38,7 +39,7 @@
   {:ascending :descending
    :descending :ascending})
 
-(defn table-head [{:keys [sort-idx sort-order] :as data} owner]
+(defn table-head [{:keys [sort-idx sort-order route-fn] :as data} owner]
   (om/component
    (html
     [:tr
@@ -51,9 +52,10 @@
                               "sorting_asc"
                               "sorting_desc")
                             "")} 
-              [:a {:href (str "#/devices/devices-list?sort-idx=" idx "&sort-order=" (if (= idx sort-idx)
-                                                                                      (name (change-direction sort-order))
-                                                                                      "ascending"))}
+              [:a {:href (route-fn {:query-params {:sort-idx idx
+                                                   :sort-order (if (= idx sort-idx)
+                                                                 (name (change-direction sort-order))
+                                                                 "ascending")}})}
                (if (fn? item) (om/build item {}) item)]])))])))
 
 (defn table-row [columns]
@@ -62,10 +64,12 @@
      (html
       [:tr
        (for [col columns]
-         [:td (let [item ((:cell-fn col) data)]
-                (if (fn? item) 
-                  (om/build item {})
-                  item))])]))))
+         (let [class (:class col)
+               item ((:cell-fn col) data)]
+           [:td {:class (if class class "")}
+            (if (fn? item)
+              (om/build item {})
+              item)]))]))))
 
 (defn grid [data owner]
   (om/component
@@ -76,10 +80,10 @@
                      (sort-by sort-fn grid-data)
                      grid-data)
          grid-data (if sorted?
-                      (if (= (:sort-order data) :descending)
-                        (reverse grid-data)
-                        grid-data)
-                      grid-data)]
+                     (if (= (:sort-order data) :descending)
+                       (reverse grid-data)
+                       grid-data)
+                     grid-data)]
      (html
       [:table.dataTable {:id (:id data)}
        [:thead (om/build table-head data)]
