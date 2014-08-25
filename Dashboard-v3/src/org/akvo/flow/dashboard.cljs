@@ -75,9 +75,3 @@
 (om/root app
          app-state
          {:target (.getElementById js/document "app")})
-
-
-
-
-
-

@@ -14,9 +14,10 @@
 
   :source-paths ["src"]
 
-  :cljsbuild { 
+  :cljsbuild {
     :builds [{:id "dashboard"
               :source-paths ["src"]
+              :notify-command ["./postcompile.sh"]
               :compiler {
                 :output-to "dashboard.js"
                 :output-dir "out"
