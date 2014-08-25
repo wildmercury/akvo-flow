@@ -16,6 +16,7 @@
     <servlet-mapping>
         <servlet-name>rest</servlet-name>
         <url-pattern>/rest/*</url-pattern>
+        <url-pattern>/api/v1/*</url-pattern>
     </servlet-mapping>
 
 	<filter>
@@ -60,6 +61,7 @@
 	<servlet-mapping>
 		<servlet-name>ApkRedirectServlet</servlet-name>
 		<url-pattern>/app</url-pattern>
+		<url-pattern>/app2</url-pattern>
 		<url-pattern>/gps</url-pattern>
 	</servlet-mapping>
 
