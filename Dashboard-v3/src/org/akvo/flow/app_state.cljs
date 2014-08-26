@@ -20,13 +20,19 @@
                                :devices
                                (get response "devices")))}))
 
+(defn index-users-by-id [users]
+  (reduce-kv (fn [res k v]
+               (assoc res k (first v)))
+             {}
+             (group-by #(get % "keyId") users)))
+
 (GET "/rest/users"
      (merge default-ajax-config
             {:handler (fn [{:strs [users]}]
                         (swap! app-state
                                assoc
                                :users
-                               users))}))
+                               (index-users-by-id users)))}))
 
 
 (let [chan (dispatcher/register :new-user)]
@@ -37,52 +43,32 @@
                    {:params {"user" new-user}
                     :handler (fn [response]
                                (let [user (get response "user")]
-                                 (swap! app-state update-in [:users] conj user)))})))
+                                 (swap! app-state assoc-in [:users (get user "keyId")] user)))})))
     (recur)))
-
-(defn index-of
-  "Returns the index of (the first) item in coll, or -1 if not present."
-  [item coll]
-  (or (->> coll
-           (map-indexed (fn [i val] (if (= item val) i)))
-           (remove nil?)
-           first)
-      -1))
 
 (let [chan (dispatcher/register :edit-user)]
   (go-loop []
-    (let [[_ {:keys [new-value old-value]}] (<! chan)
-          idx (index-of old-value (:users @app-state))]
-      (PUT (str "/rest/users/" (get new-value "keyId"))
+    (let [[_ {:keys [user]}] (<! chan)
+          user-id (get user "keyId")]
+      (PUT (str "/rest/users/" user-id)
            (merge default-ajax-config
-                  {:params {"user" new-value}
+                  {:params {"user" user}
                    :handler (fn [response]
-                              (if (>= idx 0)
-                                (swap! app-state assoc-in [:users idx] new-value)
-                                (println "No such user " old-value)))})))
+                              (swap! app-state assoc-in [:users user-id] user))})))
     (recur)))
-
-(defn remove-idx
-  "Remove item at index i from vector v"
-  [v i]
-  (vec (concat (subvec v 0 i)
-               (subvec v (inc i)))))
 
 (let [chan (dispatcher/register :delete-user)]
   (go-loop []
     (let [[_ user] (<! chan)
-          idx (index-of user (:users @app-state))]
-      (DELETE (str "/rest/users/" (get user "keyId"))
+          user-id (get user "keyId")]
+      (DELETE (str "/rest/users/" user-id)
               (merge default-ajax-config
                      {:handler (fn [response]
-                                 (if (>= idx 0)
-                                   (swap! app-state update-in [:users] remove-idx idx)
-                                   (println "No such user " user)))})))
+                                 (swap! app-state update-in [:users] dissoc user-id))})))
     (recur)))
 
 (let [chan (dispatcher/register :new-access-key)]
   (go-loop []
-    (let [[_ {:keys [user access-key]}] (<! chan)
-          idx (index-of user (:users @app-state))]
-      (swap! app-state assoc-in [:users idx "accessKey"] access-key)
+    (let [[_ {:keys [user access-key]}] (<! chan)]
+      (swap! app-state assoc-in [:users (get user "keyId") "accessKey"] access-key)
       (recur))))

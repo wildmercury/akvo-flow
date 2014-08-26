@@ -69,9 +69,8 @@
              :content (user-form user)
              :buttons [{:caption "Save"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :edit-user {:new-value (merge @user
-                                                                             (extract-user-data))
-                                                           :old-value @user})
+                        :action #(do (dispatch :edit-user {:user (merge @user
+                                                                        (extract-user-data))})
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
                         :class "cancel"
@@ -154,12 +153,6 @@
                         :class "cancel"
                         :action #(dispatch :navigate "/users")}]}))
 
-;; TODO index on keyId
-(defn find-user-by-id [users id]
-  (some (fn [user]
-          (when (= id (get user "keyId"))
-            user))
-        users))
 
 (defn users [data owner]
   (reify
@@ -178,7 +171,7 @@
             (om/build grid
                       {:id "usersListTable"
                        :route-fn routes/users
-                       :data (:users data)
+                       :data (vals (:users data))
                        :sort-idx (-> data :current-page :query-params :sort-idx)
                        :sort-order (-> data :current-page :query-params :sort-order)
                        :columns [{:title "User name"
@@ -196,20 +189,10 @@
                                               [:a.edit {:href (routes/users-edit {:id (get user "keyId")})} "Edit"]
                                               [:a.remove {:href (routes/users-delete {:id (get user "keyId")})} "Remove"]
                                               [:a.api {:href (routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
-          (cond
-           (= (:dialog current-page) :add)
-           (new-user-dialog owner)
-
-           (= (:dialog current-page) :edit)
-           (edit-user-dialog owner (find-user-by-id (:users data)
-                                                    (:user-id current-page)))
-
-           (= (:dialog current-page) :delete)
-           (delete-user-dialog owner (find-user-by-id (:users data)
-                                                      (:user-id current-page)))
-
-           (= (:dialog current-page) :manage-apikeys)
-           (manage-apikeys-dialog owner (find-user-by-id (:users data)
-                                                         (:user-id current-page)))
-
-           :else [:div])])))))
+          (let [current-user (get (:users data) (:user-id current-page))]
+            (condp = (:dialog current-page)
+              :add (new-user-dialog owner)
+              :edit (edit-user-dialog owner current-user)
+              :delete (delete-user-dialog owner current-user)
+              :manage-apikeys (manage-apikeys-dialog owner current-user)
+              [:div]))])))))
