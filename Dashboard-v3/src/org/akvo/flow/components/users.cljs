@@ -15,7 +15,7 @@
    "config" nil
    "emailAddress" ""
    "superAdmin" false
-   "permissionList" ""
+   "permissionList" "20"
    "userName" ""
    "keyId" nil})
 
@@ -43,8 +43,8 @@
           [:label {:for "newEmail"} "Email address:"]
           [:input#newEmail {:type "text" :size "40" :ref "new-email" :default-value (get user "emailAddress")}]
           [:br]
+          [:label {:for "newPermissionList"} "Select permission level"]
           [:select#newPermissionList {:default-value (get user "permissionList") :ref "new-permission-level"}
-           [:option {:value "0"} "Select permission level"]
            [:option {:value "10"} "Admin"]
            [:option {:value "20"} "User"]]])))))
 
