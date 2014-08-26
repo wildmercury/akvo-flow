@@ -9,9 +9,9 @@
 (ajax-request "/rest/devices" :get
               {:handler (fn [[ok response]]
                           (if ok
-                            (swap! app-state 
-                                   assoc 
-                                   :devices 
+                            (swap! app-state
+                                   assoc
+                                   :devices
                                    (get response "devices"))
                             (.error js/console (str response))))
                :format (json-format {:keywords? false})})
@@ -19,9 +19,9 @@
 (ajax-request "/rest/users" :get
               {:handler (fn [[ok response]]
                           (if ok
-                            (swap! app-state 
-                                   assoc 
-                                   :users 
+                            (swap! app-state
+                                   assoc
+                                   :users
                                    (get response "users"))
                             (.error js/console (str response))))
                :format (json-format {:keywords? false})})
@@ -41,7 +41,7 @@
              :keywords? false}))
     (recur)))
 
-(defn index-of 
+(defn index-of
   "Returns the index of (the first) item in coll, or -1 if not present."
   [item coll]
   (or (->> coll
@@ -67,7 +67,7 @@
     (recur)))
 
 
-(defn remove-idx 
+(defn remove-idx
   "Remove item at index i from vector v"
   [v i]
   (vec (concat (subvec v 0 i)
@@ -87,3 +87,10 @@
                :response-format :json
                :keywords? false}))
     (recur)))
+
+(let [chan (dispatcher/register :new-access-key)]
+  (go-loop []
+    (let [[_ {:keys [user access-key]}] (<! chan)
+          idx (index-of user (:users @app-state))]
+      (swap! app-state assoc-in [:users idx "accessKey"] access-key)
+      (recur))))

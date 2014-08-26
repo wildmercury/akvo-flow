@@ -65,6 +65,11 @@
                                         :dialog :delete
                                         :user-id (js/parseInt id)}))
 
+(defroute users-manage-apikeys "/users/manage-apikeys/:id" [id]
+  (swap! app-state assoc :current-page {:path [:users]
+                                        :dialog :manage-apikeys
+                                        :user-id (js/parseInt id)}))
+
 (defroute messages "/messages" {:as params}
   (swap! app-state assoc :current-page {:path [:messages]}))
 
