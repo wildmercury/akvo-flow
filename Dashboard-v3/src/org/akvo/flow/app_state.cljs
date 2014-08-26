@@ -1,16 +1,11 @@
 (ns org.akvo.flow.app-state
   (:require [org.akvo.flow.dispatcher :as dispatcher]
+            [org.akvo.flow.ajax-helpers :refer (default-ajax-config)]
             [cljs.core.async :as async]
             [ajax.core :refer (ajax-request json-format GET POST PUT DELETE)])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
 
 (def app-state (atom {:current-page {:path [:surveys]}}))
-
-(def default-ajax-config
-  {:error-handler #(.error js/console %)
-   :format (json-format {:keywords? false})
-   :response-format :json
-   :keywords? false})
 
 (GET "/rest/devices"
      (merge default-ajax-config

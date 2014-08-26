@@ -3,6 +3,7 @@
             [org.akvo.flow.routes :as routes]
             [org.akvo.flow.components.dialog :refer (dialog)]
             [org.akvo.flow.components.grid :refer (grid)]
+            [org.akvo.flow.ajax-helpers :refer (default-ajax-config)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]
@@ -90,7 +91,8 @@
 
 (defn generate-apikeys [owner user]
   (POST (str "/rest/users/" (get user "keyId") "/apikeys")
-        {:handler (fn [response]
+        (merge default-ajax-config
+               {:handler (fn [response]
                     (let [access-key (get-in response ["apikeys" "accessKey"])
                           secret (get-in response ["apikeys" "secret"])]
                       (om/set-state! owner {:access-key access-key
@@ -104,23 +106,16 @@
                         (go (<! nav-chan)
                             (dispatcher/unregister :navigate nav-chan)
                             (dispatch :new-access-key {:access-key access-key
-                                                       :user user})))))
-         :error-handler #(.error js/console %)
-         :format (json-format {:keywords? false})
-         :response-format :json
-         :keywords? false}))
+                                                       :user user})))))})))
 
 (defn revoke-apikeys [owner user]
   (DELETE (str "/rest/users/" (get user "keyId") "/apikeys")
-          {:handler (fn [response]
-                      (om/set-state! owner (om/set-state! owner {:access-key nil
-                                                                 :secret nil}))
-                      (dispatch :new-access-key {:access-key nil
-                                                 :user user}))
-           :error-handler #(.error js/console %)
-           :format (json-format {:keywords? false})
-           :response-format :json
-           :keywords? false}))
+          (merge default-ajax-config
+                 {:handler (fn [response]
+                             (om/set-state! owner (om/set-state! owner {:access-key nil
+                                                                        :secret nil}))
+                             (dispatch :new-access-key {:access-key nil
+                                                        :user user}))})))
 
 (defn manage-apikeys [user]
   (fn [data owner]
