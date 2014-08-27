@@ -3,6 +3,7 @@
             [org.akvo.flow.routes]
             [org.akvo.flow.components.header :refer (header)]
             [org.akvo.flow.components.devices :as devices]
+            [org.akvo.flow.components.data :as data]
             [org.akvo.flow.components.users :as users]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
@@ -33,11 +34,25 @@
     (render [this]
       (om/build devices/devices data {:opts devices/manual-survey-transfer}))))
 
-(defmethod page [:data] [data owner]
-  (reify
-    om/IRender
+(defmethod page [:data :inspect] [data owner]
+  (reify om/IRender
     (render [this]
-      (dom/h1 nil "Data"))))
+      (om/build data/data-tab data {:opts data/inspect}))))
+
+(defmethod page [:data :bulk-upload] [data owner]
+  (reify om/IRender
+    (render [this]
+      (om/build data/data-tab data {:opts data/bulk-upload}))))
+
+(defmethod page [:data :data-cleaning] [data owner]
+  (reify om/IRender
+    (render [this]
+      (om/build data/data-tab data {:opts data/data-cleaning}))))
+
+(defmethod page [:data :monitoring] [data owner]
+  (reify om/IRender
+    (render [this]
+      (om/build data/data-tab data {:opts data/monitoring}))))
 
 (defmethod page [:reports] [data owner]
   (reify

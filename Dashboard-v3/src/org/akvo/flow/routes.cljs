@@ -37,8 +37,18 @@
 (defroute manual-survey-transfer "/devices/manual-survey-transfer" {:as params}
   (swap! app-state assoc :current-page {:path [:devices :manual-survey-transfer]}))
 
-(defroute data "/data" {:as params}
-  (swap! app-state assoc :current-page {:path [:data]}))
+(defroute data-inspect "/data/inspect" {:as params}
+  (swap! app-state assoc :current-page {:path [:data :inspect]}))
+
+(defroute data-bulk-upload "/data/bulk-upload" {:as params}
+  (swap! app-state assoc :current-page {:path [:data :bulk-upload]}))
+
+(defroute data-cleaning "/data/data-cleaning" {:as params}
+  (swap! app-state assoc :current-page {:path [:data :data-cleaning]}))
+
+(defroute data-monitoring "/data/monitoring" {:as params}
+  (swap! app-state assoc :current-page {:path [:data :monitoring]}))
+
 
 (defroute reports "/reports" {:as params}
   (swap! app-state assoc :current-page {:path [:reports]}))

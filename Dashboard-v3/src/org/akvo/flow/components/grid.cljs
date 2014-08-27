@@ -1,6 +1,6 @@
 (ns ^{:doc "Reusable grid component"}
   org.akvo.flow.components.grid
-  (:require [cljs.core.async :as async] 
+  (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)])
@@ -9,7 +9,7 @@
 (comment
 
   ;; Example
-  
+
   (def the-data
     [{:user-id 134321
       :username "abc"
@@ -18,7 +18,7 @@
       :username "xyz"
       :email "zyx@gmail.com"}])
 
-  (om/build grid 
+  (om/build grid
             {;; The id of this table
              :id "deviceDataTable"
              ;; The data to be rendered
@@ -55,13 +55,13 @@
     [:tr
      (->> (:columns data)
           (map :title)
-          (map-indexed 
+          (map-indexed
            (fn [idx item]
              [:th {:class (if (= sort-idx idx)
                             (if (= sort-order :ascending)
                               "sorting_asc"
                               "sorting_desc")
-                            "")} 
+                            "")}
               [:a {:href (route-fn {:query-params {:sort-idx idx
                                                    :sort-order (if (= idx sort-idx)
                                                                  (name (change-direction sort-order))
@@ -99,4 +99,3 @@
       [:table.dataTable {:id (:id data)}
        [:thead (om/build table-head data)]
        [:tbody (om/build-all (table-row (:columns data)) grid-data)]]))))
-

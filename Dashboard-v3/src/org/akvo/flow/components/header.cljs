@@ -24,7 +24,7 @@
           [:li {:class (class-str current-page :devices)}
            [:a {:href (routes/devices-list)} "Devices"]]
           [:li {:class (class-str current-page :data)}
-           [:a {:href (routes/data)} "Data"]]
+           [:a {:href (routes/data-inspect)} "Data"]]
           [:li {:class (class-str current-page :reports)}
            [:a {:href (routes/reports)} "Reports"]]
           [:li {:class (class-str current-page :maps)}
