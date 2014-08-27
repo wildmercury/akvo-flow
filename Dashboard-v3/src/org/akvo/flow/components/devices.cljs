@@ -8,23 +8,6 @@
 (defn active [current-page page]
   (if (= current-page page) "active" ""))
 
-(defn devices [data owner child]
-  (let [[_ current-page] (:path (:current-page data))]
-    (om/component
-     (html
-      [:div
-       [:section {:class "devicesSection floats-in" :id "main" :role "main"}
-        [:div {:id "tabs"}
-         [:nav {:class "tabNav floats-in"}
-          [:ul
-           [:li {:class (active current-page :devices-list)}
-            [:a {:href (routes/devices-list)} "Devices list"]]
-           [:li {:class (active current-page :assignments-list)}
-            [:a {:href (routes/assignments-list)} "Assignments list"]]
-           [:li {:class (active current-page :manual-survey-transfer)}
-            [:a {:href (routes/manual-survey-transfer)} "Manual survey transfer"]]]]
-         (om/build child data)]]]))))
-
 (defn devices-list [data owner]
   (om/component
    (html
@@ -60,3 +43,25 @@
   (reify om/IRender
     (render [this]
       (dom/h1 nil "Manual survey transfer"))))
+
+(def pages
+  {:devices-list devices-list
+   :assignments-list assignments-list
+   :manual-survey-transfer manual-survey-transfer})
+
+(defn devices [data owner]
+  (om/component
+   (let [current-page (routes/active-page data)]
+     (html
+      [:div
+       [:section {:class "devicesSection floats-in" :id "main" :role "main"}
+        [:div {:id "tabs"}
+         [:nav {:class "tabNav floats-in"}
+          [:ul
+           [:li {:class (active current-page :devices-list)}
+            [:a {:href (routes/devices-list)} "Devices list"]]
+           [:li {:class (active current-page :assignments-list)}
+            [:a {:href (routes/assignments-list)} "Assignments list"]]
+           [:li {:class (active current-page :manual-survey-transfer)}
+            [:a {:href (routes/manual-survey-transfer)} "Manual survey transfer"]]]]
+         (om/build routes/active-component (assoc data :pages pages))]]]))))

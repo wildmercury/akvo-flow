@@ -2,6 +2,7 @@
   (:require [org.akvo.flow.app-state :refer (app-state)]
             [org.akvo.flow.dispatcher :as dispatcher]
             [secretary.core :as secretary :include-macros true :refer (defroute)]
+            [om.core :as om :include-macros true]
             [goog.events :as events]
             [goog.history.EventType :as EventType])
   (:require-macros [cljs.core.async.macros :refer (go-loop)])
@@ -14,6 +15,21 @@
     (let [[_ path] (<! chan)]
       (set! js/window.location.hash path))
     (recur)))
+
+(defn active-page
+  "Returns the keyword name for the active page"
+  [data]
+  (-> data :current-page :path first))
+
+(defn active-component
+  "TODO: explain this"
+  [data owner]
+  (let [page (active-page data)
+        data (update-in data [:current-page :path] subvec 1)]
+    (reify om/IRender
+      (render [this]
+        (om/build (-> data :pages page) data)))))
+
 
 (defn parse-sort-params [query-params]
   (let [query-params (if-let [idx (:sort-idx query-params)]

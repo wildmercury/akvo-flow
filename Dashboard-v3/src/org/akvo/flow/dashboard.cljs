@@ -1,91 +1,42 @@
 (ns org.akvo.flow.dashboard
   (:require [org.akvo.flow.app-state :refer (app-state)]
-            [org.akvo.flow.routes]
+            [org.akvo.flow.routes :as router]
             [org.akvo.flow.components.header :refer (header)]
             [org.akvo.flow.components.devices :as devices]
             [org.akvo.flow.components.data :as data]
             [org.akvo.flow.components.users :as users]
+            [org.akvo.flow.components.reports :as reports]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]))
+            [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros (html)]))
 
 (enable-console-print!)
 
-(defmulti page (fn [data owner]
-                 (:path (:current-page data))))
+(defn placeholder-page [title]
+  (fn [data owner]
+    (om/component
+     (html
+      [:h1 title]))))
 
-(defmethod page [:surveys] [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/h1 nil "Surveys"))))
+(def pages
+  {:surveys (placeholder-page "Surveys")
+   :devices devices/devices
+   :data    data/data
+   :reports reports/reports
+   :maps    (placeholder-page "Maps")
+   :users users/users
+   :messages (placeholder-page "Messages")})
 
-(defmethod page [:devices :devices-list] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build devices/devices data {:opts devices/devices-list}))))
-
-(defmethod page [:devices :assignments-list] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build devices/devices data {:opts devices/assignments-list}))))
-
-(defmethod page [:devices :manual-survey-transfer] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build devices/devices data {:opts devices/manual-survey-transfer}))))
-
-(defmethod page [:data :inspect] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build data/data-tab data {:opts data/inspect}))))
-
-(defmethod page [:data :bulk-upload] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build data/data-tab data {:opts data/bulk-upload}))))
-
-(defmethod page [:data :data-cleaning] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build data/data-tab data {:opts data/data-cleaning}))))
-
-(defmethod page [:data :monitoring] [data owner]
-  (reify om/IRender
-    (render [this]
-      (om/build data/data-tab data {:opts data/monitoring}))))
-
-(defmethod page [:reports] [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/h1 nil "Reports"))))
-
-(defmethod page [:maps] [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/h1 nil "Maps"))))
-
-(defmethod page [:users] [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (om/build users/users data))))
-
-(defmethod page [:messages] [data owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/h1 nil "Messages"))))
 
 (defn app [data owner]
   (reify
     om/IRender
     (render [this]
-      (dom/div nil
-               (om/build header data)
-               (dom/div #js {:id "pageWrap"}
-                        (om/build page data))))))
+      (let [data (om/-value data)]
+        (html
+         [:div
+          (om/build header data)
+          [:div#pageWrap (om/build router/active-component (assoc data :pages pages))]])))))
 
 (om/root app
          app-state

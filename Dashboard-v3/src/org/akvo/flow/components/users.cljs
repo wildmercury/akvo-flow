@@ -70,7 +70,7 @@
              :content (user-form user)
              :buttons [{:caption "Save"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :edit-user {:user (merge @user
+                        :action #(do (dispatch :edit-user {:user (merge user
                                                                         (extract-user-data))})
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
@@ -83,7 +83,7 @@
              :text "This can not be undone!!!"
              :buttons [{:caption "Ok"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :delete-user @user)
+                        :action #(do (dispatch :delete-user user)
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
                         :class "cancel"
@@ -135,9 +135,9 @@
                   [:label "Secret:"]
                   [:input {:type "text" :size 40 :value secret}]
                   [:p "The secret key will never be shown again! If it is lost a new one must be generated"]])
-               [:a.ok.smallBtn {:on-click #(generate-apikeys owner @user)} "(Re)generate"]
+               [:a.ok.smallBtn {:on-click #(generate-apikeys owner user)} "(Re)generate"]
                " "
-               [:a.ok.smallBtn {:on-click #(revoke-apikeys owner @user)} "Revoke"]])))))
+               [:a.ok.smallBtn {:on-click #(revoke-apikeys owner user)} "Revoke"]])))))
 
 (defn manage-apikeys-dialog [owner user]
   (om/build dialog
