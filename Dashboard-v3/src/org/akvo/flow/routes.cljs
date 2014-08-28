@@ -24,11 +24,15 @@
 (defn active-component
   "TODO: explain this"
   [data owner]
-  (let [page (active-page data)
-        data (update-in data [:current-page :path] subvec 1)]
+  (if-let [page (active-page data)]
+    (let [data (update-in data [:current-page :path] subvec 1)]
+      (reify om/IRender
+         (render [this]
+           (om/build (-> data :pages page) data))))
+    ;; Render default?
     (reify om/IRender
       (render [this]
-        (om/build (-> data :pages page) data)))))
+        nil))))
 
 
 (defn parse-sort-params [query-params]
@@ -78,22 +82,18 @@
                                           :query-params query-params})))
 
 (defroute users-add "/users/add" {:as params}
-  (swap! app-state assoc :current-page {:path [:users]
-                                        :dialog :add}))
+  (swap! app-state assoc :current-page {:path [:users :add]}))
 
 (defroute users-edit "/users/edit/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users]
-                                        :dialog :edit
+  (swap! app-state assoc :current-page {:path [:users :edit]
                                         :user-id (js/parseInt id)}))
 
 (defroute users-delete "/users/delete/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users]
-                                        :dialog :delete
+  (swap! app-state assoc :current-page {:path [:users :delete]
                                         :user-id (js/parseInt id)}))
 
 (defroute users-manage-apikeys "/users/manage-apikeys/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users]
-                                        :dialog :manage-apikeys
+  (swap! app-state assoc :current-page {:path [:users :manage-apikeys]
                                         :user-id (js/parseInt id)}))
 
 (defroute messages "/messages" {:as params}

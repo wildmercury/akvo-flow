@@ -49,8 +49,14 @@
            [:option {:value "10"} "Admin"]
            [:option {:value "20"} "User"]]])))))
 
-(defn new-user-dialog [owner]
-  (om/build dialog
+(defn get-current-user [data]
+  (let [user-id (-> data :current-page :user-id)]
+    (or (get (:users data) user-id)
+        (throw (str "No such user: " user-id)))))
+
+(defn new-user-dialog [data owner]
+  (om/component
+   (om/build dialog
             {:title "Add new user"
              :text "Please provide a user name, email address and permission level below."
              :content (user-form)
@@ -61,33 +67,37 @@
                                      (dispatch :navigate "/users"))}
                        {:caption "Cancel"
                         :class "cancel"
-                        :action #(dispatch :navigate "/users")}]}))
+                        :action #(dispatch :navigate "/users")}]})))
 
-(defn edit-user-dialog [owner user]
-  (om/build dialog
-            {:title "Edit user"
-             :text "Please edit the user name, email address and permission level below."
-             :content (user-form user)
-             :buttons [{:caption "Save"
-                        :class "ok smallBtn"
-                        :action #(do (dispatch :edit-user {:user (merge user
-                                                                        (extract-user-data))})
-                                     (dispatch :navigate "/users"))}
-                       {:caption "Cancel"
-                        :class "cancel"
-                        :action #(dispatch :navigate "/users")}]}))
+(defn edit-user-dialog [data owner]
+  (om/component
+   (let [user (get-current-user data)]
+     (om/build dialog
+               {:title "Edit user"
+                :text "Please edit the user name, email address and permission level below."
+                :content (user-form user)
+                :buttons [{:caption "Save"
+                           :class "ok smallBtn"
+                           :action #(do (dispatch :edit-user {:user (merge user
+                                                                           (extract-user-data))})
+                                        (dispatch :navigate "/users"))}
+                          {:caption "Cancel"
+                           :class "cancel"
+                           :action #(dispatch :navigate "/users")}]}))))
 
-(defn delete-user-dialog [owner user]
-  (om/build dialog
-            {:title "Are you sure you want to delete this user?"
-             :text "This can not be undone!!!"
-             :buttons [{:caption "Ok"
-                        :class "ok smallBtn"
-                        :action #(do (dispatch :delete-user user)
-                                     (dispatch :navigate "/users"))}
-                       {:caption "Cancel"
-                        :class "cancel"
-                        :action #(dispatch :navigate "/users")}]}))
+(defn delete-user-dialog [data owner]
+  (om/component
+   (let [user (get-current-user data)]
+     (om/build dialog
+               {:title "Are you sure you want to delete this user?"
+                :text "This can not be undone!!!"
+                :buttons [{:caption "Ok"
+                           :class "ok smallBtn"
+                           :action #(do (dispatch :delete-user user)
+                                        (dispatch :navigate "/users"))}
+                          {:caption "Cancel"
+                           :class "cancel"
+                           :action #(dispatch :navigate "/users")}]}))))
 
 (defn generate-apikeys [owner user]
   (POST (str "/rest/users/" (get user "keyId") "/apikeys")
@@ -139,19 +149,25 @@
                " "
                [:a.ok.smallBtn {:on-click #(revoke-apikeys owner user)} "Revoke"]])))))
 
-(defn manage-apikeys-dialog [owner user]
-  (om/build dialog
-            {:title "Manage API keys"
-             :text "You can (re)generate or revoke an api key for this user"
-             :content (manage-apikeys user)
-             :buttons [{:caption "Close"
-                        :class "cancel"
-                        :action #(dispatch :navigate "/users")}]}))
+(defn manage-apikeys-dialog [data owner]
+  (om/component
+   (let [user (get-current-user data)]
+     (om/build dialog
+               {:title "Manage API keys"
+                :text "You can (re)generate or revoke an api key for this user"
+                :content (manage-apikeys user)
+                :buttons [{:caption "Close"
+                           :class "cancel"
+                           :action #(dispatch :navigate "/users")}]}))))
 
+(def dialogs
+  {:add new-user-dialog
+   :edit edit-user-dialog
+   :delete delete-user-dialog
+   :manage-apikeys manage-apikeys-dialog})
 
 (defn users [data owner]
   (reify
-
     om/IRender
     (render [this]
       (let [current-page (:current-page data)]
@@ -184,10 +200,4 @@
                                               [:a.edit {:href (routes/users-edit {:id (get user "keyId")})} "Edit"]
                                               [:a.remove {:href (routes/users-delete {:id (get user "keyId")})} "Remove"]
                                               [:a.api {:href (routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
-          (let [current-user (get (:users data) (:user-id current-page))]
-            (condp = (:dialog current-page)
-              :add (new-user-dialog owner)
-              :edit (edit-user-dialog owner current-user)
-              :delete (delete-user-dialog owner current-user)
-              :manage-apikeys (manage-apikeys-dialog owner current-user)
-              [:div]))])))))
+          (om/build routes/active-component (assoc data :pages dialogs))])))))
