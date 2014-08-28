@@ -177,8 +177,7 @@
                       {:id "usersListTable"
                        :route-fn routes/users
                        :data (vals (:users data))
-                       :sort-idx (-> data :current-page :query-params :sort-idx)
-                       :sort-order (-> data :current-page :query-params :sort-order)
+                       :query-params (-> current-page :query-params)
                        :columns [{:title "User name"
                                   :cell-fn #(get % "userName")}
                                  {:title "Email"

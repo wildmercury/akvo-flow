@@ -34,20 +34,27 @@
       (render [this]
         nil))))
 
+(defn parse-int [s]
+  (let [n (js/parseInt s)]
+    (if-not (js/isNaN n)
+      n)))
 
-(defn parse-sort-params [query-params]
-  (let [query-params (if-let [idx (:sort-idx query-params)]
-                       {:sort-idx (js/parseInt idx)
-                        :sort-order (if (= (:sort-order query-params) "descending")
-                                      :descending
-                                      :ascending)})]
-    query-params))
+(defn parse-grid-params [query-params]
+  (let [sort-idx (parse-int (:sort-idx query-params))
+        sort-order (:sort-order query-params)
+        offset (parse-int (:offset query-params))
+        limit (parse-int (:limit query-params))]
+    (cond-> {}
+            sort-idx (assoc :sort-idx sort-idx)
+            sort-order (assoc :sort-order sort-order)
+            offset (assoc :offset offset)
+            limit (assoc :limit limit))))
 
 (defroute surveys "/surveys" {:as params}
   (swap! app-state assoc :current-page {:path [:surveys]}))
 
 (defroute devices-list "/devices/devices-list" [query-params]
-  (let [query-params (parse-sort-params query-params)]
+  (let [query-params (parse-grid-params query-params)]
     (swap! app-state assoc :current-page {:path [:devices :devices-list]
                                           :query-params query-params})))
 
@@ -77,7 +84,7 @@
   (swap! app-state assoc :current-page {:path [:maps]}))
 
 (defroute users "/users" [query-params]
-  (let [query-params (parse-sort-params query-params)]
+  (let [query-params (parse-grid-params query-params)]
     (swap! app-state assoc :current-page {:path [:users]
                                           :query-params query-params})))
 
