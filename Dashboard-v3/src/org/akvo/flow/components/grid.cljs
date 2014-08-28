@@ -104,10 +104,13 @@
         (if (= limit 20) " 20" [:a {:href (route-fn {:query-params (assoc query-params :limit 20)})} " 20"])
         (if (= limit 50) " 50" [:a {:href (route-fn {:query-params (assoc query-params :limit 50)})} " 50"])]
        [:span {:style {:float "right"}}
-        [:a {:href (route-fn {:query-params (assoc query-params
-                                              :offset (- offset limit)
-                                              :limit limit)})}
-         "«previous"]
+        (if (zero? offset)
+          "«previous"
+          [:a {:href (route-fn {:query-params (assoc query-params
+                                                :offset (let [new-offset (- offset limit)]
+                                                          (if (neg? new-offset) 0 new-offset))
+                                                :limit limit)})}
+           "«previous"])
         (str " " offset " - " (+ offset limit) " ")
         [:a {:href (route-fn {:query-params (assoc query-params
                                               :offset (+ offset limit)
