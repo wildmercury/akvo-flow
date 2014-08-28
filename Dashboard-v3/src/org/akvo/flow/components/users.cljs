@@ -103,20 +103,12 @@
   (POST (str "/rest/users/" (get user "keyId") "/apikeys")
         (merge default-ajax-config
                {:handler (fn [response]
-                    (let [access-key (get-in response ["apikeys" "accessKey"])
-                          secret (get-in response ["apikeys" "secret"])]
-                      (om/set-state! owner {:access-key access-key
-                                            :secret secret})
-                      ;; Wait until we navigate away from the dialog
-                      ;; before updating the app-state with the new
-                      ;; access-key, otherwise we do an immidiate
-                      ;; re-render and the secret key is immediately
-                      ;; hidden from the user.
-                      (let [nav-chan (dispatcher/register :navigate)]
-                        (go (<! nav-chan)
-                            (dispatcher/unregister :navigate nav-chan)
-                            (dispatch :new-access-key {:access-key access-key
-                                                       :user user})))))})))
+                           (let [access-key (get-in response ["apikeys" "accessKey"])
+                                 secret (get-in response ["apikeys" "secret"])]
+                             (om/set-state! owner {:access-key access-key
+                                                   :secret secret})
+                             (dispatch :new-access-key {:access-key access-key
+                                                        :user user})))})))
 
 (defn revoke-apikeys [owner user]
   (DELETE (str "/rest/users/" (get user "keyId") "/apikeys")
@@ -127,38 +119,40 @@
                              (dispatch :new-access-key {:access-key nil
                                                         :user user}))})))
 
-(defn manage-apikeys [user]
-  (fn [data owner]
-    (reify
-      om/IInitState
-      (init-state [this]
-        {:secret nil
-         :access-key (get user "accessKey")})
-
-      om/IRenderState
-      (render-state [this {:keys [secret access-key]}]
-        (html [:div
-               [:label "Access key:"]
-               [:input {:type "text" :size 40 :value access-key}]
-               (when secret
-                 [:div
-                  [:label "Secret:"]
-                  [:input {:type "text" :size 40 :value secret}]
-                  [:p "The secret key will never be shown again! If it is lost a new one must be generated"]])
-               [:a.ok.smallBtn {:on-click #(generate-apikeys owner user)} "(Re)generate"]
-               " "
-               [:a.ok.smallBtn {:on-click #(revoke-apikeys owner user)} "Revoke"]])))))
+(defn manage-apikeys [{:keys [user secret access-key owner]} _]
+  (om/component
+   (html [:div
+          [:label "Access key:"]
+          [:input {:type "text" :size 40 :value access-key}]
+          (when secret
+            [:div
+             [:label "Secret:"]
+             [:input {:type "text" :size 40 :value secret}]
+             [:p "The secret key will never be shown again! If it is lost a new one must be generated"]])
+          [:a.ok.smallBtn {:on-click #(generate-apikeys owner user)} "(Re)generate"]
+          " "
+          [:a.ok.smallBtn {:on-click #(revoke-apikeys owner user)} "Revoke"]])))
 
 (defn manage-apikeys-dialog [data owner]
-  (om/component
-   (let [user (get-current-user data)]
-     (om/build dialog
-               {:title "Manage API keys"
-                :text "You can (re)generate or revoke an api key for this user"
-                :content (manage-apikeys user)
-                :buttons [{:caption "Close"
-                           :class "cancel"
-                           :action #(dispatch :navigate "/users")}]}))))
+  (reify
+    om/IInitState
+    (init-state [this]
+      {:secret nil
+       :access-key (get (get-current-user data) "accessKey")})
+    om/IRenderState
+    (render-state [this {:keys [secret access-key]}]
+      (let [user (get-current-user data)]
+        (om/build dialog
+                  {:title "Manage API keys"
+                   :text "You can (re)generate or revoke an api key for this user"
+                   :content-data {:user user
+                                  :secret secret
+                                  :access-key access-key
+                                  :owner owner}
+                   :content manage-apikeys
+                   :buttons [{:caption "Close"
+                              :class "cancel"
+                              :action #(dispatch :navigate "/users")}]})))))
 
 (def dialogs
   {:add new-user-dialog

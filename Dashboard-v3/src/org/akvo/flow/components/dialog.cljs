@@ -6,7 +6,7 @@
 
 
 (comment
-  
+
   ;; Example usage
   (om/build dialog {:title "Add user"
                     :text "Fill in the form below to create a new user"
@@ -17,7 +17,7 @@
                                :action #(some action)}
                               {:caption "Cancel"
                                :action #(some action)}]})
-  
+
   )
 
 (defn button-item [data owner]
@@ -29,16 +29,16 @@
             caption]]))))
 
 (defn dialog [data owner]
-  (let [{:keys [title text content buttons]} data]
+  (let [{:keys [title text content buttons content-data]} data]
     (om/component
-     (html 
+     (html
       [:div.overlay.display
        [:div.blanket]
        [:div.dialogWrap
         [:div.confirmDialog.dialog
          [:h2 title]
          [:p.dialogMsg text]
-         (if content (om/build content {}) [:div])
+         (if content (om/build content content-data) [:div])
          [:div.buttons.menuCentre
           (apply dom/ul nil
                  (om/build-all button-item buttons))]]]]))))
