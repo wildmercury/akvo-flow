@@ -41,6 +41,13 @@ import com.gallatinsystems.common.Constants;
 import com.gallatinsystems.user.app.gwt.client.UserDto;
 import com.gallatinsystems.user.dao.UserDao;
 import com.gallatinsystems.user.domain.User;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.users.UserServiceFactory;
 
 @Controller
@@ -285,5 +292,46 @@ public class UserRestService {
         byte bytes[] = new byte[32];
         secureRandom.nextBytes(bytes);
         return Base64.encodeBase64String(bytes).trim();
+    }
+
+    /*
+     * pagination support
+     */
+
+    private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    private Query.SortDirection getSortDirection(String dir) {
+	return "descending".equals(dir) ? SortDirection.DESCENDING : SortDirection.ASCENDING;
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/fetch")
+    @ResponseBody
+    public Map<String, Object> fetchUsers(
+	    @RequestParam(value = "sort-by")
+	    String sortBy,
+	    @RequestParam(value = "sort-order")
+	    String sortOrder,
+	    @RequestParam(value = "limit")
+	    Integer limit,
+	    @RequestParam(value = "offset")
+	    Integer offset) {
+
+	Query query = new Query("User").addSort(sortBy, getSortDirection(sortOrder));
+
+	PreparedQuery pq = datastore.prepare(query);
+	List<Map<String, Object>> users = new ArrayList<Map<String,Object>>();
+	for (Entity entity : pq.asIterable(FetchOptions.Builder.withOffset(offset).limit(limit))) {
+	    Map<String, Object> user = new HashMap<String, Object>();
+	    user.put("keyId", entity.getKey().getId());
+	    user.put("userName", entity.getProperty("userName"));
+	    user.put("emailAddress", entity.getProperty("emailAddress"));
+	    user.put("permissionList", entity.getProperty("permissionList"));
+	    users.add(user);
+	}
+
+	Map<String, Object> result = new HashMap<String, Object>();
+	result.put("users", users);
+	return result;
     }
 }

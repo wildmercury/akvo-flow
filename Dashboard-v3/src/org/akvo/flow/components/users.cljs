@@ -1,5 +1,6 @@
 (ns org.akvo.flow.components.users
-  (:require [org.akvo.flow.dispatcher :as dispatcher :refer (dispatch)]
+  (:require [clojure.string :as s]
+            [org.akvo.flow.dispatcher :as dispatcher :refer (dispatch)]
             [org.akvo.flow.routes :as routes]
             [org.akvo.flow.components.dialog :refer (dialog)]
             [org.akvo.flow.components.grid :refer (grid)]
@@ -7,7 +8,7 @@
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]
-            [ajax.core :refer (ajax-request json-format POST PUT DELETE)])
+            [ajax.core :refer (ajax-request json-format GET POST PUT DELETE)])
   (:require-macros [cljs.core.async.macros :refer (go)]))
 
 (def empty-user
@@ -160,10 +161,49 @@
    :delete delete-user-dialog
    :manage-apikeys manage-apikeys-dialog})
 
+(def default-fetch-params
+  {:sort-order "ascending"
+   :sort-by "emailAddress"
+   :offset 0
+   :limit 20})
+
+(defn query-str [params]
+  (->> params
+       (map (fn [[k v]] (str (name k) "=" v)))
+       (s/join "&")
+       (str "?")))
+
+(defn sort-idx->sort-by [idx]
+  (condp = idx
+    0 "userName"
+    1 "emailAddress"
+    2 "permissionList"
+    "emailAddress"))
+
+(defn fetch-users [data callback]
+  (let [query-params (-> data :current-page :query-params)
+        sort-idx (:sort-idx query-params)
+        query-params (-> query-params
+                         (assoc :sort-by (sort-idx->sort-by sort-idx))
+                         (dissoc :sort-idx))]
+    (GET (str "/rest/users/fetch" (query-str (merge default-fetch-params
+                                                    query-params)))
+         (merge default-ajax-config
+                {:handler (fn [response] (callback (get response "users")))}))))
+
 (defn users [data owner]
   (reify
-    om/IRender
-    (render [this]
+
+    om/IInitState
+    (init-state [this]
+      {:users []})
+
+    om/IWillReceiveProps
+    (will-receive-props [this next-props]
+      (fetch-users next-props #(om/set-state! owner :users %)))
+
+    om/IRenderState
+    (render-state [this state]
       (let [current-page (:current-page data)]
         (html
          [:div
@@ -176,7 +216,7 @@
             (om/build grid
                       {:id "usersListTable"
                        :route-fn routes/users
-                       :data (vals (:users data))
+                       :data (:users state)
                        :query-params (-> current-page :query-params)
                        :columns [{:title "User name"
                                   :cell-fn #(get % "userName")}
