@@ -89,19 +89,35 @@
                                           :query-params query-params})))
 
 (defroute users-add "/users/add" {:as params}
-  (swap! app-state assoc :current-page {:path [:users :add]}))
+  (let [parent-route-args {:query-params (get-in @app-state
+                                                 [:current-page :query-params])}]
+    (swap! app-state assoc :current-page {:path [:users :add]
+                                          :parent-route (fn []
+                                                          (users parent-route-args))})))
 
 (defroute users-edit "/users/edit/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users :edit]
-                                        :user-id (js/parseInt id)}))
+  (let [parent-route-args {:query-params (get-in @app-state
+                                                 [:current-page :query-params])}]
+    (swap! app-state assoc :current-page {:path [:users :edit]
+                                          :parent-route (fn []
+                                                          (users parent-route-args))
+                                          :user-id (js/parseInt id)})))
 
 (defroute users-delete "/users/delete/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users :delete]
-                                        :user-id (js/parseInt id)}))
+  (let [parent-route-args {:query-params (get-in @app-state
+                                                 [:current-page :query-params])}]
+    (swap! app-state assoc :current-page {:path [:users :delete]
+                                          :user-id (js/parseInt id)
+                                          :parent-route (fn []
+                                                          (users parent-route-args))})))
 
 (defroute users-manage-apikeys "/users/manage-apikeys/:id" [id]
-  (swap! app-state assoc :current-page {:path [:users :manage-apikeys]
-                                        :user-id (js/parseInt id)}))
+  (let [parent-route-args {:query-params (get-in @app-state
+                                                 [:current-page :query-params])}]
+    (swap! app-state assoc :current-page {:path [:users :manage-apikeys]
+                                          :user-id (js/parseInt id)
+                                          :parent-route (fn []
+                                                          (users parent-route-args))})))
 
 (defroute messages "/messages" {:as params}
   (swap! app-state assoc :current-page {:path [:messages]}))

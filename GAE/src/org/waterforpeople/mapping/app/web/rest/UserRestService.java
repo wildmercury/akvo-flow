@@ -47,6 +47,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -317,7 +319,8 @@ public class UserRestService {
 	    @RequestParam(value = "offset")
 	    Integer offset) {
 
-	Query query = new Query("User").addSort(sortBy, getSortDirection(sortOrder));
+	Query query = new Query("User")
+		.addSort(sortBy, getSortDirection(sortOrder));
 
 	PreparedQuery pq = datastore.prepare(query);
 	List<Map<String, Object>> users = new ArrayList<Map<String,Object>>();
@@ -327,6 +330,7 @@ public class UserRestService {
 	    user.put("userName", entity.getProperty("userName"));
 	    user.put("emailAddress", entity.getProperty("emailAddress"));
 	    user.put("permissionList", entity.getProperty("permissionList"));
+	    user.put("createdDateTime", entity.getProperty("createdDateTime"));
 	    users.add(user);
 	}
 

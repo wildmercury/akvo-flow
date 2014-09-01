@@ -5,6 +5,7 @@
             [org.akvo.flow.components.dialog :refer (dialog)]
             [org.akvo.flow.components.grid :refer (grid)]
             [org.akvo.flow.ajax-helpers :refer (default-ajax-config)]
+            [org.akvo.flow.stores.users :as store]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]
@@ -52,8 +53,24 @@
 
 (defn get-current-user [data]
   (let [user-id (-> data :current-page :user-id)]
-    (or (get (:users data) user-id)
+    (or (get-in data [:users :by-id user-id])
         (throw (str "No such user: " user-id)))))
+
+(defn get-current-user-id [data]
+  (let [user-id (-> data :current-page :user-id)]
+    user-id))
+
+(defn parent-route [data]
+  ((-> data :current-page :parent-route)))
+
+
+
+;;
+;; Dialogs
+;;
+
+(def no-such-user {:title "No such user"
+                  :text (str "A user with this id has not been loaded yet")})
 
 (defn new-user-dialog [data owner]
   (om/component
@@ -65,26 +82,28 @@
                         :class "ok smallBtn"
                         :action #(do (dispatch :new-user (merge empty-user
                                                                 (extract-user-data)))
-                                     (dispatch :navigate "/users"))}
+                                     (dispatch :navigate (parent-route data)))}
                        {:caption "Cancel"
                         :class "cancel"
-                        :action #(dispatch :navigate "/users")}]})))
+                        :action #(dispatch :navigate (parent-route data))}]})))
 
 (defn edit-user-dialog [data owner]
   (om/component
-   (let [user (get-current-user data)]
-     (om/build dialog
-               {:title "Edit user"
-                :text "Please edit the user name, email address and permission level below."
-                :content (user-form user)
-                :buttons [{:caption "Save"
-                           :class "ok smallBtn"
-                           :action #(do (dispatch :edit-user {:user (merge user
-                                                                           (extract-user-data))})
-                                        (dispatch :navigate "/users"))}
-                          {:caption "Cancel"
-                           :class "cancel"
-                           :action #(dispatch :navigate "/users")}]}))))
+   (let [user-id (get-current-user-id data)
+         user (store/get-by-id user-id)]
+     (if-not user
+       (om/build dialog no-such-user)
+       (om/build dialog
+                 {:title "Edit user"
+                  :text "Please edit the user name, email address and permission level below."
+                  :content (user-form user)
+                  :buttons [{:caption "Save"
+                             :class "ok smallBtn"
+                             :action #(do (dispatch :edit-user {:user (merge user (extract-user-data))})
+                                          (dispatch :navigate (parent-route data)))}
+                            {:caption "Cancel"
+                             :class "cancel"
+                             :action #(dispatch :navigate (parent-route data))}]})))))
 
 (defn delete-user-dialog [data owner]
   (om/component
@@ -95,10 +114,10 @@
                 :buttons [{:caption "Ok"
                            :class "ok smallBtn"
                            :action #(do (dispatch :delete-user user)
-                                        (dispatch :navigate "/users"))}
+                                        (dispatch :navigate (parent-route data)))}
                           {:caption "Cancel"
                            :class "cancel"
-                           :action #(dispatch :navigate "/users")}]}))))
+                           :action #(dispatch :navigate (parent-route data))}]}))))
 
 (defn generate-apikeys [owner user]
   (POST (str "/rest/users/" (get user "keyId") "/apikeys")
@@ -139,11 +158,13 @@
     om/IInitState
     (init-state [this]
       {:secret nil
-       :access-key (get (get-current-user data) "accessKey")})
+       :access-key (get (store/get-by-id (get-current-user-id data)) "accessKey")})
     om/IRenderState
     (render-state [this {:keys [secret access-key]}]
-      (let [user (get-current-user data)]
-        (om/build dialog
+      (let [user (store/get-by-id (get-current-user-id data))]
+        (if-not user
+          (om/build dialog no-such-user)
+          (om/build dialog
                   {:title "Manage API keys"
                    :text "You can (re)generate or revoke an api key for this user"
                    :content-data {:user user
@@ -153,25 +174,13 @@
                    :content manage-apikeys
                    :buttons [{:caption "Close"
                               :class "cancel"
-                              :action #(dispatch :navigate "/users")}]})))))
+                              :action #(dispatch :navigate (parent-route data))}]}))))))
 
 (def dialogs
   {:add new-user-dialog
    :edit edit-user-dialog
    :delete delete-user-dialog
    :manage-apikeys manage-apikeys-dialog})
-
-(def default-fetch-params
-  {:sort-order "ascending"
-   :sort-by "emailAddress"
-   :offset 0
-   :limit 20})
-
-(defn query-str [params]
-  (->> params
-       (map (fn [[k v]] (str (name k) "=" v)))
-       (s/join "&")
-       (str "?")))
 
 (defn sort-idx->sort-by [idx]
   (condp = idx
@@ -180,31 +189,13 @@
     2 "permissionList"
     "emailAddress"))
 
-(defn fetch-users [data callback]
-  (let [query-params (-> data :current-page :query-params)
-        sort-idx (:sort-idx query-params)
-        query-params (-> query-params
-                         (assoc :sort-by (sort-idx->sort-by sort-idx))
-                         (dissoc :sort-idx))]
-    (GET (str "/rest/users/fetch" (query-str (merge default-fetch-params
-                                                    query-params)))
-         (merge default-ajax-config
-                {:handler (fn [response] (callback (get response "users")))}))))
-
 (defn users [data owner]
   (reify
-
-    om/IInitState
-    (init-state [this]
-      {:users []})
-
-    om/IWillReceiveProps
-    (will-receive-props [this next-props]
-      (fetch-users next-props #(om/set-state! owner :users %)))
-
-    om/IRenderState
-    (render-state [this state]
-      (let [current-page (:current-page data)]
+    om/IRender
+    (render [this]
+      (let [current-page (:current-page data)
+            query-params (:query-params current-page)
+            sort-idx (:sort-idx query-params)]
         (html
          [:div
           [:div.greyBg
@@ -216,7 +207,11 @@
             (om/build grid
                       {:id "usersListTable"
                        :route-fn routes/users
-                       :data (:users state)
+                       :data (let [data (store/get-by-range (-> query-params
+                                                                (assoc :sort-by (sort-idx->sort-by sort-idx))
+                                                                (dissoc :sort-idx)))]
+                               (when-not (= data :pending)
+                                 data))
                        :query-params (-> current-page :query-params)
                        :columns [{:title "User name"
                                   :cell-fn #(get % "userName")}
