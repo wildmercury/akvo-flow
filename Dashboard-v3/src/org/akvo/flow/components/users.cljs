@@ -194,8 +194,7 @@
     om/IRender
     (render [this]
       (let [current-page (:current-page data)
-            query-params (:query-params current-page)
-            sort-idx (:sort-idx query-params)]
+            query-params (:query-params current-page)]
         (html
          [:div
           [:div.greyBg
@@ -206,17 +205,23 @@
              "Add new user"]
             (om/build grid
                       {:id "usersListTable"
-                       :route-fn routes/users
-                       :data (let [data (store/get-by-range (-> query-params
-                                                                (assoc :sort-by (sort-idx->sort-by sort-idx))
-                                                                (dissoc :sort-idx)))]
+                       :data (let [data (store/get-by-range query-params)]
                                (when-not (= data :pending)
                                  data))
-                       :query-params (-> current-page :query-params)
+                       :sort (select-keys query-params [:sort-by :sort-order])
+                       :on-sort #(dispatch :navigate (routes/users {:query-params (merge query-params
+                                                                                         {:sort-by %1
+                                                                                          :sort-order %2})}))
+                       :range (select-keys query-params [:offset :limit])
+                       :on-range #(dispatch :navigate (routes/users {:query-params (merge query-params
+                                                                                          {:offset %1
+                                                                                           :limit %2})}))
                        :columns [{:title "User name"
-                                  :cell-fn #(get % "userName")}
+                                  :cell-fn #(get % "userName")
+                                  :sort-by "userName"}
                                  {:title "Email"
-                                  :cell-fn #(get % "emailAddress")}
+                                  :cell-fn #(get % "emailAddress")
+                                  :sort-by "emailAddress"}
                                  {:title "Permission list"
                                   :cell-fn #(if (= (get % "permissionList") "10")
                                               "Admin"

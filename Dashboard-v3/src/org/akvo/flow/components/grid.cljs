@@ -26,20 +26,25 @@
              ;; The route to this grid. Used by e.g. sorting
              :route-fn route-fn
 
-             :query-params {;; The column (zero based) index used for sorting
-                            :sort-idx 2
-                            ;; The sort order (either "ascending" or "descending")
-                            :sort-order "ascending"
-                            ;; Maximum number of rows
-                            :limit 20
-                            ;; Pagination offset
-                            :offset 100}
+             ;; On sort callback. Will be called with :sort-id and :sort-order
+             :on-sort callback
+             :sort {:sort-by "username"
+                    :sort-order "ascending"}
+
+             ;; on-range will be called with :offset and :limit
+             :on-range callback
+             :range {:offset 100
+                     :limit 20}
+
 
              ;; Description of the columns
              :columns [{:title "Id"
                         :cell-fn :user-id}
                        {;; The title of this column
                         :title "Username"
+                        ;; Make the column sortable by adding a :sort-by
+                        :sort-by "username"
+
                         ;; A function that returns the cell value. This function can return a
                         ;; * simple value: string/number/nil etc.
                         ;; * a sablono vector
@@ -51,89 +56,79 @@
                        {:title "Actions"
                         :cell-fn edit-and-delete-component}]}))
 
+(defn pagination-controls [{:keys [range on-range]} owner]
+  (om/component
+   (let [offset (or (:offset range) 0)
+         limit (or (:limit range) 20)]
+     (html
+      [:div {:style {:padding-top "5px"
+                     :font-size "1.2em"}}
+       [:span "Show:"
+        (if (= limit 10) " 10" [:a {:on-click #(on-range offset 10)} " 10"])
+        (if (= limit 20) " 20" [:a {:on-click #(on-range offset 20)} " 20"])
+        (if (= limit 50) " 50" [:a {:on-click #(on-range offset 50)} " 50"])]
+       [:span {:style {:float "right"}}
+        (if (zero? offset)
+          "«previous"
+          [:a {:on-click #(on-range (let [new-offset (- offset limit)]
+                                      (if (neg? new-offset) 0 new-offset))
+                                    limit)}
+           "«previous"])
+        (str " " offset " - " (+ offset limit) " ")
+        [:a {:on-click #(on-range (+ offset limit) limit)}
+         "next»"]]]))))
+
 (defn change-direction [dir]
   (if (= dir "ascending")
     "descending"
     "ascending"))
 
-(defn table-head [{:keys [query-params route-fn] :as data} owner]
+(defn table-head [{:keys [columns sort on-sort] :as data} owner]
   (om/component
-   (let [sort-idx (:sort-idx query-params)
-         sort-order (:sort-order query-params)]
-     (html
-       [:tr
-        (->> (:columns data)
-             (map :title)
-             (map-indexed
-              (fn [idx item]
-                [:th {:class (if (= sort-idx idx)
-                               (if (= sort-order "ascending")
-                                 "sorting_asc"
-                                 "sorting_desc")
-                               "")}
-                 [:a {:href (route-fn {:query-params (assoc query-params
-                                                       :offset 0
-                                                       :sort-idx idx
-                                                       :sort-order (if (= idx sort-idx)
-                                                                     (change-direction sort-order)
-                                                                     "ascending"))})}
-                  (if (fn? item) (om/build item {}) item)]])))]))))
-
-(defn table-row [columns]
-  (fn [data owner]
-    (om/component
+   (let [current-sort-by (:sort-by sort)
+         current-sort-order (:sort-order sort)]
      (html
       [:tr
-       (for [col columns]
-         (let [class (:class col)
-               item ((:cell-fn col) data)]
-           [:td {:class (if class class "")}
-            (if (fn? item)
-              (om/build item {})
-              item)]))]))))
+       (->> columns
+            (map-indexed
+             (fn [idx {:keys [title sort-by]}]
+               [:th {:class (if (and sort-by
+                                     (= current-sort-by sort-by))
+                              (if (= current-sort-order "ascending")
+                                "sorting_asc"
+                                "sorting_desc")
+                              "")}
+                [:a (when sort-by
+                      {:on-click #(on-sort sort-by
+                                           (if (= current-sort-by sort-by)
+                                             (change-direction current-sort-order)
+                                             "ascending"))})
+                 (if (fn? title)
+                   (om/build title {})
+                   title)]])))]))))
 
-(defn pagination-controls [{:keys [query-params route-fn]} owner]
+(defn table-row [{:keys [row columns]} owner]
   (om/component
-   (let [offset (or (:offset query-params) 0)
-         limit (or (:limit query-params) 20)]
-     (html
-      [:div {:style {:padding-top "5px"
-                     :font-size "1.2em"}}
-       [:span "Show:"
-        (if (= limit 10) " 10" [:a {:href (route-fn {:query-params (assoc query-params :limit 10)})} " 10"])
-        (if (= limit 20) " 20" [:a {:href (route-fn {:query-params (assoc query-params :limit 20)})} " 20"])
-        (if (= limit 50) " 50" [:a {:href (route-fn {:query-params (assoc query-params :limit 50)})} " 50"])]
-       [:span {:style {:float "right"}}
-        (if (zero? offset)
-          "«previous"
-          [:a {:href (route-fn {:query-params (assoc query-params
-                                                :offset (let [new-offset (- offset limit)]
-                                                          (if (neg? new-offset) 0 new-offset))
-                                                :limit limit)})}
-           "«previous"])
-        (str " " offset " - " (+ offset limit) " ")
-        [:a {:href (route-fn {:query-params (assoc query-params
-                                              :offset (+ offset limit)
-                                              :limit limit)})}
-         "next»"]]]))))
-
-(defn comparator-complement
-  "Like cljs.core/complement for comparator functions"
-  [comparator]
-  (fn [x y]
-    (comparator y x)))
+   (html
+    [:tr
+     (for [col columns]
+       (let [class (:class col)
+             item ((:cell-fn col) row)]
+         [:td {:class (if class class "")}
+          (if (fn? item)
+            (om/build item {})
+            item)]))])))
 
 (defn grid [data owner]
   (om/component
-   (let [key-fn (or (get-in data [:columns (:sort-idx (:query-params data)) :cell-fn])
-                    identity)
-         descending? (boolean (= (:sort-order (:query-params data)) "descending"))
-         ;; TODO optional custom comparator
-         comparator (if descending? (comparator-complement compare) compare)
-         grid-data (sort-by key-fn comparator (:data data))]
-     (html
-      [:div
-       (om/build pagination-controls data)
-       [:table.dataTable {:id (:id data)}
-       [:thead (om/build table-head data)]
-       [:tbody (om/build-all (table-row (:columns data)) grid-data)]]]))))
+   (html
+    [:div
+     (om/build pagination-controls (select-keys data [:range :on-range]))
+     [:table.dataTable {:id (:id data)}
+      [:thead (om/build table-head (select-keys data [:columns :sort :on-sort]))]
+      [:tbody (om/build-all table-row
+                            (map (fn [row columns]
+                                   {:row row
+                                    :columns columns})
+                                 (:data data)
+                                 (repeat (:columns data))))]]])))

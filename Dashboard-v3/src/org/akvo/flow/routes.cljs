@@ -40,12 +40,12 @@
       n)))
 
 (defn parse-grid-params [query-params]
-  (let [sort-idx (parse-int (:sort-idx query-params))
+  (let [sort-by (:sort-by query-params)
         sort-order (:sort-order query-params)
         offset (parse-int (:offset query-params))
         limit (parse-int (:limit query-params))]
     (cond-> {}
-            sort-idx (assoc :sort-idx sort-idx)
+            sort-by (assoc :sort-by sort-by)
             sort-order (assoc :sort-order sort-order)
             offset (assoc :offset offset)
             limit (assoc :limit limit))))
