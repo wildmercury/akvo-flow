@@ -92,12 +92,13 @@
        (->> columns
             (map-indexed
              (fn [idx {:keys [title sort-by]}]
-               [:th {:class (if (and sort-by
-                                     (= current-sort-by sort-by))
-                              (if (= current-sort-order "ascending")
-                                "sorting_asc"
-                                "sorting_desc")
-                              "")}
+               [:th {:class (if sort-by
+                              (if (= current-sort-by sort-by)
+                                (if (= current-sort-order "ascending")
+                                  "sorting_asc"
+                                  "sorting_desc")
+                                "")
+                              "noArrows")}
                 [:a (when sort-by
                       {:on-click #(on-sort sort-by
                                            (if (= current-sort-by sort-by)
