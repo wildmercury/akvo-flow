@@ -6,6 +6,7 @@
             [org.akvo.flow.components.data :as data]
             [org.akvo.flow.components.users :as users]
             [org.akvo.flow.components.reports :as reports]
+            [org.akvo.flow.components.messages :as messages]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))
@@ -25,8 +26,7 @@
    :reports reports/reports
    :maps    (placeholder-page "Maps")
    :users users/users
-   :messages (placeholder-page "Messages")})
-
+   :messages messages/messages})
 
 (defn app [data owner]
   (reify

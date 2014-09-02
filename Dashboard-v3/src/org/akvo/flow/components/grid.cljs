@@ -23,8 +23,6 @@
              :id "deviceDataTable"
              ;; The data to be rendered
              :data the-data
-             ;; The route to this grid. Used by e.g. sorting
-             :route-fn route-fn
 
              ;; On sort callback. Will be called with :sort-id and :sort-order
              :on-sort callback
@@ -35,7 +33,6 @@
              :on-range callback
              :range {:offset 100
                      :limit 20}
-
 
              ;; Description of the columns
              :columns [{:title "Id"
@@ -123,8 +120,9 @@
 (defn grid [data owner]
   (om/component
    (html
-    [:div
-     (om/build pagination-controls (select-keys data [:range :on-range]))
+    [:div {}
+     (when (:on-range data)
+       (om/build pagination-controls (select-keys data [:range :on-range])))
      [:table.dataTable {:id (:id data)}
       [:thead (om/build table-head (select-keys data [:columns :sort :on-sort]))]
       [:tbody (om/build-all table-row
