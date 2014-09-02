@@ -74,7 +74,7 @@
                                       (if (neg? new-offset) 0 new-offset))
                                     limit)}
            "«previous"])
-        (str " " offset " - " (+ offset limit) " ")
+        (str " " (inc offset) " - " (+ offset limit) " ")
         [:a {:on-click #(on-range (+ offset limit) limit)}
          "next»"]]]))))
 

@@ -207,7 +207,10 @@
                       {:id "usersListTable"
                        :data (let [data (store/get-by-range query-params)]
                                (when-not (= data :pending)
-                                 data))
+                                 (map (fn [row row-number]
+                                        (assoc row :row-number (inc row-number)))
+                                      data
+                                      (range))))
                        :sort (select-keys query-params [:sort-by :sort-order])
                        :on-sort #(dispatch :navigate (routes/users {:query-params (merge query-params
                                                                                          {:sort-by %1
@@ -216,7 +219,9 @@
                        :on-range #(dispatch :navigate (routes/users {:query-params (merge query-params
                                                                                           {:offset %1
                                                                                            :limit %2})}))
-                       :columns [{:title "User name"
+                       :columns [{:title "#"
+                                  :cell-fn :row-number}
+                                 {:title "User name"
                                   :cell-fn #(get % "userName")
                                   :sort-by "userName"}
                                  {:title "Email"
