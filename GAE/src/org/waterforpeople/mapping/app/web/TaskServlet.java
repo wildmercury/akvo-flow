@@ -506,6 +506,13 @@ public class TaskServlet extends AbstractRestApiServlet {
                                     SurveyalRestRequest.INGEST_INSTANCE_ACTION).param(
                                     SurveyalRestRequest.SURVEY_INSTANCE_PARAM,
                                     instance.getKey().getId() + ""));
+                    
+                    defaultQueue.add(TaskOptions.Builder.withUrl("/app_worker/kafkaservlet")
+                            .param(
+                                    SurveyalRestRequest.ACTION_PARAM,
+                                    SurveyalRestRequest.INGEST_INSTANCE_ACTION).param(
+                                    SurveyalRestRequest.SURVEY_INSTANCE_PARAM,
+                                    instance.getKey().getId() + ""));
                 }
             }
             SurveyUtils.notifyReportService(surveyMap.keySet(), "invalidate");
