@@ -26,7 +26,7 @@
           [:li {:class (class-str current-page :data)}
            [:a {:href (routes/data-inspect)} "Data"]]
           [:li {:class (class-str current-page :reports)}
-           [:a {:href (routes/reports)} "Reports"]]
+           [:a {:href (routes/reports-charts)} "Reports"]]
           [:li {:class (class-str current-page :maps)}
            [:a {:href (routes/maps)} "maps"]]
           [:li {:class (class-str current-page :users)}

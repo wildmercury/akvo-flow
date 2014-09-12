@@ -76,9 +76,11 @@
 (defroute data-monitoring "/data/monitoring" {:as params}
   (swap! app-state assoc :current-page {:path [:data :monitoring]}))
 
+(defroute reports-charts "/reports/charts" {:as params}
+  (swap! app-state assoc :current-page {:path [:reports :charts]}))
 
-(defroute reports "/reports" {:as params}
-  (swap! app-state assoc :current-page {:path [:reports]}))
+(defroute reports-export "/reports/export" {:as params}
+  (swap! app-state assoc :current-page {:path [:reports :export]}))
 
 (defroute maps "/maps" {:as params}
   (swap! app-state assoc :current-page {:path [:maps]}))
