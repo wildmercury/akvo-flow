@@ -5,18 +5,11 @@
             [ajax.core :refer (ajax-request json-format GET POST PUT DELETE)])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
 
-(def app-state (atom {:current-page {:path [:surveys]}}))
+(def app-state (atom {:current-page {:path [:surveys]}
+                      :current-locale :en}))
 
-(GET "/rest/devices"
-     (merge default-ajax-config
-            {:handler (fn [response]
-                        (swap! app-state
-                               assoc
-                               :devices
-                               (get response "devices")))}))
-
-(defn index-users-by-id [users]
-  (reduce-kv (fn [res k v]
-               (assoc res k (first v)))
-             {}
-             (group-by #(get % "keyId") users)))
+(let [chan (dispatcher/register :locale-changed)]
+  (go-loop []
+    (let [[_ new-locale] (<! chan)]
+      (swap! app-state assoc :current-locale new-locale)
+      (recur))))
