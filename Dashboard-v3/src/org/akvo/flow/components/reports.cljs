@@ -10,14 +10,13 @@
   [owner]
   (fn [evt]
     (let [id (-> evt .-target .-value)]
-      (GET (str "/rest/surveys?surveyGrouId=" id)
+      (GET (str "/rest/surveys?surveyGroupId=" id)
          (merge ajax/default-ajax-config
                 {:handler #(om/set-state! owner :surveys (get % "surveys"))})))))
 
 (defn handle-survey-selected [owner]
   (fn [evt]
     (let [id (-> evt .-target .-value)]
-      (println id)
       (GET (str "/rest/questions?optionQuestionsOnly=true&surveyId=" id)
            (merge ajax/default-ajax-config
                   {:handler #(om/set-state! owner :questions (get % "questions"))})))))
