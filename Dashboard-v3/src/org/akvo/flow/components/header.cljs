@@ -21,7 +21,7 @@
                               (dispatch :locale-changed new-locale))}
        [:option {:value "en"} "English"]
        [:option {:value "es"} "Español"]
-       [:option {:value "fr"} "Francais"]]]])))
+       [:option {:value "fr"} "Français"]]]])))
 
 (defn header [data owner]
   (let [[current-page] (:path (:current-page data))]
