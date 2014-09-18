@@ -44,22 +44,23 @@
     (render-state [this state]
       (html
        [:section#reportBlocks.fullWidth.reportTools
-        [:h1 "Chart Builder"]
-        [:select {:on-change (handle-survey-group-selected owner)}
-         [:option {:value "" :disabled true} "Select survey group"]
-         (options-for (:survey-groups state))]
-        [:select {:on-change (handle-survey-selected owner)}
-         [:option {:value "" :disabled true} "Select survey"]
-         (options-for (:surveys state))]
-        [:select
-         [:option {:value "" :disabled true} "Select question"]
-         (options-for (:questions state))]
-        [:div.chartSettings
+        [:div
+         [:h1 "Chart Builder"]
+         [:select {:on-change (handle-survey-group-selected owner)}
+          [:option {:value "" :disabled true} "Select survey group"]
+          (options-for (:survey-groups state))]
+         [:select {:on-change (handle-survey-selected owner)}
+          [:option {:value "" :disabled true} "Select survey"]
+          (options-for (:surveys state))]
          [:select
-          [:option {:value "" :disabled true} "Select chart type"]
-          [:option "Doughnut chart"]
-          [:option "Vertical bar chart"]
-          [:option "Horizontal bar chart"]]]]))))
+          [:option {:value "" :disabled true} "Select question"]
+          (options-for (:questions state))]
+         [:div.chartSettings
+          [:select
+           [:option {:value "" :disabled true} "Select chart type"]
+           [:option "Doughnut chart"]
+           [:option "Vertical bar chart"]
+           [:option "Horizontal bar chart"]]]]]))))
 
 (defn raw-data-report [{:keys [on-click]} owner]
   (reify
@@ -151,13 +152,12 @@
 
 (defn reports [data owner]
   (om/component
-   (html [:div
-          [:section {:class "devicesSection floats-in" :id "main" :role "main"}
-           [:div {:id "tabs"}
-            [:nav {:class "tabNav floats-in"}
-             [:ul
-              [:li {:class (active data :charts)}
-               [:a {:href (routes/reports-charts)} (t :charts)]]
-              [:li {:class (active data :export)}
-               [:a {:href (routes/reports-export)} (t :export-reports)]]]]]
+   (html [:section {:class "reportsSection floats-in middleSection" :id "main" :role "main"}
+          [:div {:id "tabs"}
+           [:nav {:class "tabNav floats-in"}
+            [:ul
+             [:li {:class (active data :charts)}
+              [:a {:href (routes/reports-charts)} (t :charts)]]
+             [:li {:class (active data :export)}
+              [:a {:href (routes/reports-export)} (t :export-reports)]]]]
            (om/build routes/active-component (assoc data :pages pages))]])))
