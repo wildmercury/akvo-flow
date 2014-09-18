@@ -2,6 +2,7 @@
   (:require [org.akvo.flow.app-state :refer (app-state)]
             [org.akvo.flow.routes :as router]
             [org.akvo.flow.components.header :refer (header)]
+            [org.akvo.flow.components.footer :refer (footer)]
             [org.akvo.flow.components.devices :as devices]
             [org.akvo.flow.components.data :as data]
             [org.akvo.flow.components.map :as map]
@@ -40,7 +41,7 @@
           [:div.floats-in
            [:div#pageWrap.widthConstraing.belowHeader
             (om/build router/active-component (assoc data :pages pages))]]
-          ])))))
+          (om/build footer data)])))))
 
 (om/root app
          app-state
