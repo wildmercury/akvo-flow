@@ -4,6 +4,7 @@
             [org.akvo.flow.components.header :refer (header)]
             [org.akvo.flow.components.devices :as devices]
             [org.akvo.flow.components.data :as data]
+            [org.akvo.flow.components.map :as map]
             [org.akvo.flow.components.users :as users]
             [org.akvo.flow.components.reports :as reports]
             [org.akvo.flow.components.messages :as messages]
@@ -24,7 +25,7 @@
    :devices devices/devices
    :data    data/data
    :reports reports/reports
-   :maps    (placeholder-page "Maps")
+   :maps    map/map-view
    :users users/users
    :messages messages/messages})
 
