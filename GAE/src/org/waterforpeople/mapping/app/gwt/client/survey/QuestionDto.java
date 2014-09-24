@@ -49,6 +49,7 @@ public class QuestionDto extends BaseDto implements NamedObject {
     private Long metricId;
     private QuestionDependencyDto questionDependency = null;
     private Long surveyId;
+    private String questionId;
     private Long questionGroupId;
     private Boolean collapseable;
     private Boolean immutable;
@@ -407,9 +408,13 @@ public class QuestionDto extends BaseDto implements NamedObject {
 
     public Boolean getAllowExternalSources() {
         return allowExternalSources;
+    public String getQuestionId() {
+	return questionId;
     }
 
     public void setAllowExternalSources(Boolean allowExternalSources) {
         this.allowExternalSources = allowExternalSources;
+    public void setQuestionId(String questionId) {
+	this.questionId = questionId;
     }
 }
