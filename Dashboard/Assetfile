@@ -116,6 +116,13 @@ input 'app' do
 
 end
 
+output '../GAE/war/admin/frames'
+input 'app/cljs' do
+  match "**/*" do
+    copy
+  end
+end
+
 output '../GAE/war/vendorjs'
 input 'app' do
   match "js/vendor/**/*.js" do
