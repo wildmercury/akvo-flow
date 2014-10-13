@@ -1,12 +1,13 @@
 #!/bin/bash
 
+# Usage e.g. DASHBOARD_TAB=users lein cljsbuild auto users
+
 OUT_ROOT=../../../../GAE/war/admin/frames/
 
 if [[ $* == Successfully* ]]; then
-    echo "Copying 'projects/' files to ../GAE/war/admin"
-    cp projects.js ${OUT_ROOT}projects.js
-    cp projects.html ${OUT_ROOT}projects.html
-    # TODO: if PRODUCTION == false
+    echo "Copying $DASHBOARD_TAB files to ../GAE/war/admin"
+    cp ${DASHBOARD_TAB}.js ${OUT_ROOT}${DASHBOARD_TAB}.js
+    cp html/${DASHBOARD_TAB}.html ${OUT_ROOT}${DASHBOARD_TAB}.html
     rsync -a out $OUT_ROOT
     echo "Done."
 fi
