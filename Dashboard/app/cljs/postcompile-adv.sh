@@ -2,7 +2,7 @@
 
 # Usage e.g. DASHBOARD_TAB=users lein cljsbuild once adv
 
-OUT_ROOT=../../../../GAE/war/admin/frames/
+OUT_ROOT=../../../GAE/war/admin/frames/
 
 if [[ $* == Successfully* ]]; then
     echo "Copying files $DASHBOARD_TAB to GAE/war/admin"
