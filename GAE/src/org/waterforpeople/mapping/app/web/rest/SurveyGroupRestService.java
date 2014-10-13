@@ -41,6 +41,7 @@ import com.gallatinsystems.survey.dao.SurveyDAO;
 import com.gallatinsystems.survey.dao.SurveyGroupDAO;
 import com.gallatinsystems.survey.domain.Survey;
 import com.gallatinsystems.survey.domain.SurveyGroup;
+import com.gallatinsystems.survey.domain.SurveyGroup.ProjectType;
 
 @Controller
 @RequestMapping("/survey_groups")
@@ -186,10 +187,22 @@ public class SurveyGroupRestService {
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public Map<String, Object> saveNewSurveyGroup(
-            @RequestBody
-            SurveyGroupPayload payLoad) {
+            @RequestBody Map<String, Map<String, Object>> payLoad) {
 
-        final SurveyGroupDto surveyGroupDto = payLoad.getSurvey_group();
+        Map<String, Object> params = payLoad.get("survey_group");
+
+        final SurveyGroupDto surveyGroupDto = new SurveyGroupDto();
+
+        surveyGroupDto.setCode((String) params.get("code"));
+        surveyGroupDto.setDescription((String) params.get("description"));
+        surveyGroupDto.setMonitoringGroup((Boolean) params.get("monitoringGroup"));
+        surveyGroupDto.setName((String) params.get("name"));
+        surveyGroupDto.setNewLocaleSurveyId((Long) params.get("newLocaleSurveyId"));
+        surveyGroupDto.setParent((Long) params.get("parent"));
+        surveyGroupDto.setProjectType(params.get("projectType") == "PROJECT" ? ProjectType.PROJECT
+                : ProjectType.PROJECT_FOLDER);
+
+
         final Map<String, Object> response = new HashMap<String, Object>();
         SurveyGroupDto dto = null;
 
@@ -217,5 +230,4 @@ public class SurveyGroupRestService {
         response.put("survey_group", dto);
         return response;
     }
-
 }
