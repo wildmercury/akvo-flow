@@ -5,6 +5,64 @@ Read more about the [Akvo Platform](http://www.akvo.org/blog/?p=4822).
 
 Akvo FLOW Dashboard release notes
 ----
+#1.7.4.2
+Date: 07 October 2014
+
+## Resolved issues
+
+* Include textual question identifier as part of QuestionAnswer responses [#831]
+
+#1.7.4.1
+Date: 25 September 2014
+
+## Resolved issues
+
+* Display Name column empty in the RAW DATA report [#797]
+* Question id" value when copying questions [#807]
+
+#1.7.4
+Date: 25 September 2014
+
+## New and noteworthy
+
+* Enable double entry for number questions [#759] - in survey definitions, it is now possible to also select the double entry verification option for number questions
+
+## Resolved issues
+
+* CreationSurveyId not set on new surveyedLocales [#798]
+* Screen does not scroll up [#778]
+* Remove hyperlink from survey title [#775]
+* Dashboard Translation for Monitoring Features Text [#774]
+* Add css generation to the dashboard build process [#768]
+* Use Akvo FLOW Favicon [#739]
+* Data points show up as "Unknown" [#735]
+* Copy functionality on Question Groups [#435]
+* Add survey title and question group name to survey xml so their translation can be viewed on the device [#299]
+
+#1.7.3.1
+Date: 7 September 2014
+
+## Resolved issues
+* Survey responses not processed when a question is deleted from survey definition [#771]
+
+#1.7.3
+Date: 5 September 2014
+
+## New and noteworthy
+* Implement read API [#717] - Akvo FLOW now has a full read API! Details can be found [here](https://github.com/akvo/akvo-flow/wiki/Akvo-FLOW-API)
+* Stylesheet cleaning and refactor [#609, #612] - The user interface has been given a makeover. In addition to various other details, surveys are now displayed in a list, which makes finding them easier. 
+* Introduce textual question identifier [#650] - A question can now be given a textual identifier, which can be used as a column heading when exporting data, and which is present in the read API. This makes it easier to transfer FLOW data to other databases.
+
+## Resolved issues
+* RAW DATA export keeps using "use question id" in Data Cleaning tab [#756] 
+* Copying a copied survey across instances breaks survey publishing [#744] 
+* Non-specified surveyGroupId query param in SurveyedLocaleRestService causes a JDOUserException [#727] 		
+* Various small UI changes:
+	* Change of wording: "record" => "data point" [#753, #740] 
+	* Monitoring tab style is broken [#751] 
+	* Dashboard tooltips are shown twice  [#745] 
+	* Footer layout breaks using Spanish|French and low resolution [#570] 
+	* Master language tooltip incorrect [#442] 
 
 #1.7.2.2
 

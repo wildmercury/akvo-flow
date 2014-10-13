@@ -38,9 +38,9 @@
        <a {{action "cancelSurveyGroupNameEdit" target="this"}}>{{t _cancel}}</a>
         {{else}}
           <!-- show selected survey group and edit name button --> 
-          <h2>{{FLOW.selectedControl.selectedSurveyGroup.code}}</h2> 
-          <a {{action "editSurveyGroupName" target="this"}} class="editGroupName">{{t _edit_name}}</a>
-          <a {{action confirm FLOW.dialogControl.delSG target="FLOW.dialogControl"}} class="deleteGroup">{{t _delete_this_group}}</a>
+            <h2>{{FLOW.selectedControl.selectedSurveyGroup.code}}</h2> 
+            <a {{action "editSurveyGroupName" target="this"}} class="editGroupName">{{t _edit_name}}</a>
+            <a {{action confirm FLOW.dialogControl.delSG target="FLOW.dialogControl"}} class="deleteGroup">{{t _delete_this_group}}</a>
         {{/if}}
       {{/if}}
       
@@ -62,7 +62,7 @@
       {{#if FLOW.Env.showMonitoringFeature }}
         {{#if view.monitoringGroup}}
 		    <a class="makeMonitorGroup">{{t _monitoring_enabled}}</a> 
-		      <div> <p>Survey that creates new monitored entities:</p> {{view Ember.Select 
+		      <div> <p>{{t _select_monitoring_survey}}:</p> {{view Ember.Select
          		contentBinding="FLOW.surveyControl.content" 
                 selectionBinding="FLOW.surveyControl.newLocaleSurvey"
          		optionLabelPath="content.name" 

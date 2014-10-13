@@ -2,7 +2,7 @@
 
 FLOW.ReportLoader = Ember.Object.create({
   criteria: null,
-  timeout: 6000,
+  timeout: 30000,
   requestInterval: 3000,
 
   payloads: {
@@ -13,7 +13,8 @@ FLOW.ReportLoader = Ember.Object.create({
         locale: 'en',
         exportMode: 'RAW_DATA',
         generateTabFormat: 'false',
-        lastCollection: 'false'
+        lastCollection: 'false',
+        useQuestionId: 'false'
       }
     },
     RAW_DATA_TEXT: {
@@ -65,6 +66,7 @@ FLOW.ReportLoader = Ember.Object.create({
     }
 
     criteria.opts.lastCollection = '' + (exportType === 'RAW_DATA' && FLOW.selectedControl.get('selectedSurveyGroup').get('monitoringGroup') && !!FLOW.editControl.lastCollection);
+    criteria.opts.useQuestionId = '' + !!FLOW.editControl.useQuestionId;
 
     this.set('criteria', criteria);
     FLOW.savingMessageControl.numLoadingChange(1);
@@ -80,7 +82,7 @@ FLOW.ReportLoader = Ember.Object.create({
     if (resp.message === 'PROCESSING') {
       this.set('processing', false);
       Ember.run.later(this, this.requestReport, this.requestInterval);
-    } else if (resp.file) {
+    } else if (resp.file && this.get('processing')) {
       FLOW.savingMessageControl.numLoadingChange(-1);
       this.set('processing', false);
       this.set('criteria', null);
@@ -96,7 +98,8 @@ FLOW.ReportLoader = Ember.Object.create({
         criteria: JSON.stringify(this.get('criteria'))
       },
       jsonpCallback: 'FLOW.ReportLoader.handleResponse',
-      dataType: 'jsonp'
+      dataType: 'jsonp',
+      timeout: this.timeout
     });
 
     Ember.run.later(this, this.handleError, this.timeout);
@@ -132,6 +135,7 @@ FLOW.ExportReportsAppletView = FLOW.View.extend({
 
   didInsertElement: function () {
     FLOW.selectedControl.set('selectedSurvey', null);
+    FLOW.editControl.set('useQuestionId', false);
     FLOW.uploader.registerEvents();
   },
 
@@ -155,7 +159,7 @@ FLOW.ExportReportsAppletView = FLOW.View.extend({
     }
     FLOW.ReportLoader.load('RAW_DATA', sId);
   },
-  
+
   showRawTextFileExport: function () {
 	var sId = this.get('selectedSurvey');
     if (!sId) {

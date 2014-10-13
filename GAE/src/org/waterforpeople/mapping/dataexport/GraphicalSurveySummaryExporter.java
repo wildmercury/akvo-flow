@@ -71,7 +71,7 @@ import com.gallatinsystems.framework.dataexport.applet.ProgressDialog;
 
 /**
  * Enhancement of the SurveySummaryExporter to support writing to Excel and including chart images.
- * 
+ *
  * @author Christopher Fagiani
  */
 public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
@@ -286,6 +286,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
     private Map<Long, QuestionDto> questionsById;
     private boolean lastCollection = false;
     private boolean monitoringGroup = false;
+    private List<Long> displayNameQuestionIds = new ArrayList<Long>();
 
     @Override
     public void export(Map<String, String> criteria, File fileName,
@@ -302,6 +303,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
         currentStep = 1;
         this.serverBase = serverBase;
         PrintWriter pw = null;
+        boolean useQuestionId = "true".equals(options.get("useQuestionId"));
         try {
             SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
                     LOADING_QUESTIONS.get(locale)));
@@ -321,6 +323,9 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
                 for (List<QuestionDto> qList : questionMap.values()) {
                     for (QuestionDto q : qList) {
                         questionsById.put(q.getKeyId(), q);
+                        if (q.getLocaleNameFlag() != null && q.getLocaleNameFlag()) {
+                            displayNameQuestionIds.add(q.getKeyId());
+                        }
                     }
                 }
             }
@@ -350,7 +355,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
                 SummaryModel model = fetchAndWriteRawData(
                         criteria.get(SurveyRestRequest.SURVEY_ID_PARAM),
                         serverBase, questionMap, wb, isFullReport, fileName,
-                        criteria.get("apiKey"), lastCollection);
+                        criteria.get("apiKey"), lastCollection, useQuestionId);
                 if (isFullReport) {
                     SwingUtilities.invokeLater(new StatusUpdater(currentStep++,
                             WRITING_SUMMARY.get(locale)));
@@ -402,7 +407,8 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
     protected SummaryModel fetchAndWriteRawData(String surveyId,
             final String serverBase,
             Map<QuestionGroupDto, List<QuestionDto>> questionMap, Workbook wb,
-            final boolean generateSummary, File outputFile, String apiKey, boolean lastCollection)
+            final boolean generateSummary, File outputFile, String apiKey, boolean lastCollection,
+            boolean useQuestionId)
             throws Exception {
         final SummaryModel model = new SummaryModel();
         final String key = apiKey;
@@ -424,7 +430,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
             }
         }
 
-        Object[] results = createRawDataHeader(wb, sheet, questionMap);
+        Object[] results = createRawDataHeader(wb, sheet, questionMap, useQuestionId);
         final List<String> questionIdList = (List<String>) results[0];
         final List<String> unsummarizable = (List<String>) results[1];
 
@@ -629,7 +635,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 
     /**
      * creates the header for the raw data tab
-     * 
+     *
      * @param row
      * @param questionMap
      * @return - returns a 2 element array. The first element is a List of String objects
@@ -638,7 +644,8 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
      *         NUMBER questions)
      */
     protected Object[] createRawDataHeader(Workbook wb, Sheet sheet,
-            Map<QuestionGroupDto, List<QuestionDto>> questionMap) {
+            Map<QuestionGroupDto, List<QuestionDto>> questionMap,
+            boolean useQuestionId) {
         Row row = null;
 
         row = getRow(0, sheet);
@@ -664,26 +671,49 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
                 if (questionMap.get(group) != null) {
                     for (QuestionDto q : questionMap.get(group)) {
                         questionIdList.add(q.getKeyId().toString());
+
+                        String questionId = q.getQuestionId();
+                        boolean useQID = useQuestionId
+                                && questionId != null
+                                && !questionId.equals("");
+
+                        String columnLocale = useQID ? "en" : locale;
+
                         if (QuestionType.GEO == q.getType()) {
-                            createCell(row, offset++, q.getKeyId().toString()
-                                    + "|" + LAT_LABEL.get(locale), headerStyle);
                             createCell(row, offset++,
-                                    "--GEOLON--|" + LON_LABEL.get(locale),
+                                    (useQID ? questionId + "_" : q.getKeyId().toString() + "|")
+                                            + LAT_LABEL.get(columnLocale),
                                     headerStyle);
-                            createCell(row, offset++, "--GEOELE--|"
-                                    + ELEV_LABEL.get(locale), headerStyle);
-                            createCell(row, offset++, "--GEOCODE--|"
-                                    + CODE_LABEL.get(locale), headerStyle);
+                            createCell(row, offset++,
+                                    (useQID ? questionId + "_" : "--GEOLON--|")
+                                            + LON_LABEL.get(columnLocale),
+                                    headerStyle);
+                            createCell(row, offset++,
+                                    (useQID ? questionId + "_" : "--GEOELE--|")
+                                            + ELEV_LABEL.get(columnLocale),
+                                    headerStyle);
+                            String codeLabel = CODE_LABEL.get(columnLocale);
+                            createCell(row, offset++,
+                                    useQID ? questionId + "_" + codeLabel.replaceAll("\\s", "")
+                                            : "--GEOCODE--|" + codeLabel,
+                                    headerStyle);
                         } else {
+                            String header = "";
+                            if (useQID) {
+                                header = questionId;
+                            } else {
+                                header = q.getKeyId().toString()
+                                        + "|"
+                                        + getLocalizedText(q.getText(),
+                                                q.getTranslationMap())
+                                                .replaceAll("\n", "")
+                                                .trim();
+                            }
                             createCell(
                                     row,
                                     offset++,
-                                    q.getKeyId().toString()
-                                            + "|"
-                                            + getLocalizedText(q.getText(),
-                                                    q.getTranslationMap())
-                                                    .replaceAll("\n", "")
-                                                    .trim(), headerStyle);
+                                    header,
+                                    headerStyle);
                         }
                         if (!(QuestionType.NUMBER == q.getType() || QuestionType.OPTION == q
                                 .getType())) {
@@ -985,7 +1015,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 
     /**
      * finds or creates the row at the given index
-     * 
+     *
      * @param index
      * @param rowLocalMax
      * @param sheet
@@ -1011,7 +1041,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
     /**
      * sets instance variables to the values passed in in the Option map. If the option is not set,
      * the default values are used.
-     * 
+     *
      * @param options
      */
     protected void processOptions(Map<String, String> options) {
@@ -1067,7 +1097,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
 
     /**
      * call the server to augment the data already loaded in each QuestionDto in the map passed in.
-     * 
+     *
      * @param questionMap
      */
     private void loadFullQuestions(
@@ -1092,7 +1122,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
     /**
      * uses the locale and the translation map passed in to determine what value to use for the
      * string
-     * 
+     *
      * @param text
      * @param translationMap
      * @return
@@ -1138,6 +1168,7 @@ public class GraphicalSurveySummaryExporter extends SurveySummaryExporter {
         options.put(LOCALE_OPT, "en");
         options.put(TYPE_OPT, RAW_ONLY_TYPE);
         options.put(LAST_COLLECTION_OPT, "true");
+        options.put("useQuestionId", "true");
         criteria.put(SurveyRestRequest.SURVEY_ID_PARAM, args[2]);
         criteria.put("apiKey", args[3]);
         exporter.export(criteria, new File(args[0]), args[1], options);
