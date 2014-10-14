@@ -1,10 +1,10 @@
-(ns org.akvo.flow.ajax-helpers
+(ns org.akvo.flow.dashboard.ajax-helpers
   (:require [clojure.string :as s]
-            [ajax.core :refer (json-format)]))
+            [ajax.core :refer (json-response-format)]))
 
 (def default-ajax-config
   {:error-handler #(.error js/console %)
-   :format (json-format {:keywords? false})
+   :format (json-response-format {:keywords? false})
    :response-format :json
    :keywords? false})
 

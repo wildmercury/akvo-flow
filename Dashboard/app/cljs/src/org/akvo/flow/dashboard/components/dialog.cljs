@@ -1,5 +1,5 @@
 (ns ^{:doc "Reusable dialog component"}
-  org.akvo.flow.components.dialog
+  org.akvo.flow.dashboard.components.dialog
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]))

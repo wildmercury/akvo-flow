@@ -1,4 +1,5 @@
 (ns org.akvo.flow.locale
+  (:refer-clojure :exclude (munge))
   (:require [clojure.java.io :as io]
             [clojure.string :as s])
   (:import [java.util Properties]))
@@ -14,10 +15,10 @@
       (.load props r))
     (into {} props)))
 
-(def locales {:ui (load-props "../GAE/src/locale/ui-strings.properties")
-              :en (load-props "../GAE/src/locale/en.properties")
-              :fr (load-props "../GAE/src/locale/fr.properties")
-              :es (load-props "../GAE/src/locale/es.properties")})
+(def locales {:ui (load-props "../../../GAE/src/locale/ui-strings.properties")
+              :en (load-props "../../../GAE/src/locale/en.properties")
+              :fr (load-props "../../../GAE/src/locale/fr.properties")
+              :es (load-props "../../../GAE/src/locale/es.properties")})
 
 (defn munge [k]
   (s/replace (str "_" (name k)) "-" "_"))

@@ -1,4 +1,4 @@
-(ns org.akvo.flow.dispatcher
+(ns org.akvo.flow.dashboard.dispatcher
   (:require [cljs.core.async :as async :refer [chan put! pub sub unsub]]))
 
 (let [dispatch-chan (chan)

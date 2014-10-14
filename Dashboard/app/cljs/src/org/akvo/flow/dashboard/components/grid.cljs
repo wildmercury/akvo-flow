@@ -1,5 +1,5 @@
 (ns ^{:doc "Reusable grid component"}
-  org.akvo.flow.components.grid
+  org.akvo.flow.dashboard.components.grid
   (:require [cljs.core.async :as async]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]

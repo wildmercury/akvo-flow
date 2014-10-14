@@ -1,8 +1,8 @@
-(ns org.akvo.flow.stores.users
+(ns org.akvo.flow.dashboard.users.store
   (:require  [clojure.set :as set]
-             [org.akvo.flow.app-state :refer (app-state)]
-             [org.akvo.flow.dispatcher :as dispatcher]
-             [org.akvo.flow.ajax-helpers :as ajax]
+             [org.akvo.flow.dashboard.app-state :refer (app-state)]
+             [org.akvo.flow.dashboard.dispatcher :as dispatcher]
+             [org.akvo.flow.dashboard.ajax-helpers :as ajax]
              [cljs.core.async :as async]
              [ajax.core :refer (GET POST PUT DELETE)])
   (:require-macros [cljs.core.async.macros :refer (go go-loop)]))
