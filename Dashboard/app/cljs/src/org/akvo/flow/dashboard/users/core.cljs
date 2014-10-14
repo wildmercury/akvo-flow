@@ -214,16 +214,16 @@
              "Add new user"]
             (om/build grid
                       {:id "usersListTable"
-                       :data (let [data (store/get-by-range (:pagination state))]
+                       :data (let [data (store/get-by-range (merge (:pagination state)
+                                                                   (:sort state)))]
                                (when-not (= data :pending)
                                  (map (fn [row row-number]
                                         (assoc row :row-number (inc row-number)))
                                       data
                                       (range))))
-                       :sort (select-keys query-params [:sort-by :sort-order])
-                       :on-sort #(dispatch :navigate "#" #_(routes/users {:query-params (merge query-params
-                                                                                         {:sort-by %1
-                                                                                          :sort-order %2})}))
+                       :sort (:sort state)
+                       :on-sort (fn [sort-by sort-order]
+                                  (om/set-state! owner :sort {:sort-by sort-by :sort-order sort-order}))
                        :range (:pagination state)
                        :on-range (fn [offset limit]
                                    (om/set-state! owner :pagination {:offset offset :limit limit}))
