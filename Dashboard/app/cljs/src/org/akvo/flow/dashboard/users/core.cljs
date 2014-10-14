@@ -5,6 +5,7 @@
             [org.akvo.flow.dashboard.components.grid :refer (grid)]
             [org.akvo.flow.dashboard.ajax-helpers :refer (default-ajax-config)]
             [org.akvo.flow.dashboard.users.store :as store]
+            [org.akvo.flow.dashboard.app-state :refer (app-state)]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros (html)]
@@ -238,3 +239,8 @@
                                               [:a.remove {:href "#" #_(routes/users-delete {:id (get user "keyId")})} "Remove"]
                                               [:a.api {:href "#" #_(routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
           #_(om/build routes/active-component (assoc data :pages dialogs))])))))
+
+(defn ^:export init []
+  (om/root users
+           app-state
+           {:target (.getElementById js/document "app")}))

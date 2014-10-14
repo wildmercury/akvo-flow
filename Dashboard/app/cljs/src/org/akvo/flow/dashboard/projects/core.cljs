@@ -1,4 +1,4 @@
-(ns projects.core
+(ns org.akvo.flow.dashboard.projects.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [ajax.core :as ajax :refer (GET POST)]
@@ -175,6 +175,8 @@
              (om/build projects-list (om/value data))
              (om/build edit-project current-project))]])))))
 
-(om/root projects
-         app-state
-         {:target (.getElementById js/document "app")})
+(defn ^:export init []
+  js/debugger
+  (om/root projects
+           app-state
+           {:target (.getElementById js/document "app")}))
