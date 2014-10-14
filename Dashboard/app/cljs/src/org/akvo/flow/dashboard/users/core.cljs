@@ -12,6 +12,8 @@
             [ajax.core :refer (ajax-request GET POST PUT DELETE)])
   (:require-macros [cljs.core.async.macros :refer (go)]))
 
+(enable-console-print!)
+
 (def empty-user
   {"admin" false
    "logoutUrl" nil
@@ -191,8 +193,15 @@
 
 (defn users [data owner]
   (reify
-    om/IRender
-    (render [this]
+    om/IInitState
+    (init-state [this]
+      {:pagination {:offset 0
+                    :limit 20}
+       :sort {:sort-by "emailAddress"
+              :sort-order "ascending"}})
+
+    om/IRenderState
+    (render-state [this state]
       (let [current-page (:current-page data)
             query-params (:query-params current-page)]
         (html
@@ -205,7 +214,7 @@
              "Add new user"]
             (om/build grid
                       {:id "usersListTable"
-                       :data (let [data (store/get-by-range query-params)]
+                       :data (let [data (store/get-by-range (:pagination state))]
                                (when-not (= data :pending)
                                  (map (fn [row row-number]
                                         (assoc row :row-number (inc row-number)))
@@ -215,10 +224,9 @@
                        :on-sort #(dispatch :navigate "#" #_(routes/users {:query-params (merge query-params
                                                                                          {:sort-by %1
                                                                                           :sort-order %2})}))
-                       :range (select-keys query-params [:offset :limit])
-                       :on-range #(dispatch :navigate "#" #_(routes/users {:query-params (merge query-params
-                                                                                          {:offset %1
-                                                                                           :limit %2})}))
+                       :range (:pagination state)
+                       :on-range (fn [offset limit]
+                                   (om/set-state! owner :pagination {:offset offset :limit limit}))
                        :columns [{:title "#"
                                   :cell-fn :row-number}
                                  {:title "User name"
