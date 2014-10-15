@@ -24,9 +24,9 @@
 
 (defn get-by-id
   "Find a user by user-id"
-  [user-id]
+  [data user-id]
   {:pre [(integer? user-id)]}
-  (if-let [user (get-in @app-state [:users :by-id user-id])]
+  (if-let [user (get-in data [:users :by-id user-id])]
     user
     (do (fetch-and-update-user user-id)
         nil)))

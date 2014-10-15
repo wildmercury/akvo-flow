@@ -89,23 +89,21 @@
                         :class "cancel"
                         :action #(dispatch :navigate (parent-route data))}]})))
 
-(defn edit-user-dialog [data owner]
+(defn edit-user-dialog [{:keys [user close!]} owner]
   (om/component
-   (let [user-id (get-current-user-id data)
-         user (store/get-by-id user-id)]
-     (if-not user
-       (om/build dialog no-such-user)
-       (om/build dialog
-                 {:title "Edit user"
-                  :text "Please edit the user name, email address and permission level below."
-                  :content (user-form user)
-                  :buttons [{:caption "Save"
-                             :class "ok smallBtn"
-                             :action #(do (dispatch :edit-user {:user (merge user (extract-user-data))})
-                                          (dispatch :navigate (parent-route data)))}
-                            {:caption "Cancel"
-                             :class "cancel"
-                             :action #(dispatch :navigate (parent-route data))}]})))))
+   (if-not user
+     (om/build dialog no-such-user)
+     (om/build dialog
+               {:title "Edit user"
+                :text "Please edit the user name, email address and permission level below."
+                :content (user-form user)
+                :buttons [{:caption "Save"
+                           :class "ok smallBtn"
+                           :action #(do (dispatch :edit-user {:user (merge user (extract-user-data))})
+                                        (close!))}
+                          {:caption "Cancel"
+                           :class "cancel"
+                           :action close!}]}))))
 
 (defn delete-user-dialog [data owner]
   (om/component
@@ -198,7 +196,8 @@
       {:pagination {:offset 0
                     :limit 20}
        :sort {:sort-by "emailAddress"
-              :sort-order "ascending"}})
+              :sort-order "ascending"}
+       :dialog nil})
 
     om/IRenderState
     (render-state [this state]
@@ -241,12 +240,23 @@
                                 :class "action"
                                 :cell-fn (fn [user]
                                            [:span
-                                            [:a.edit {:href "#" #_(routes/users-edit {:id (get user "keyId")})} "Edit"]
+                                            [:a.edit {:on-click #(om/set-state! owner :dialog {:component edit-user-dialog
+                                                                                               :user-id (get user "keyId")})} "Edit"]
                                             [:a.remove {:href "#" #_(routes/users-delete {:id (get user "keyId")})} "Remove"]
                                             [:a.api {:href "#" #_(routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
-        #_(om/build routes/active-component (assoc data :pages dialogs))]))))
+        (if-let [dialog (:dialog state)]
+          (let [{:keys [component user-id]} dialog]
+            (pr-str user-id)
+            (om/build component {:user (store/get-by-id data user-id)
+                                 :close! #(om/set-state! owner :dialog nil)})))]))))
+
+(defn value-component [data owner {:keys [component]}]
+  (reify om/IRender
+    (render [this]
+      (om/build component (om/value data)))))
 
 (defn ^:export init []
-  (om/root users
+  (om/root value-component
            app-state
-           {:target (.getElementById js/document "app")}))
+           {:opts {:component users}
+            :target (.getElementById js/document "app")}))
