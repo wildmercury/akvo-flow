@@ -72,9 +72,9 @@
 ;;
 
 (def no-such-user {:title "No such user"
-                  :text (str "A user with this id has not been loaded yet")})
+                   :text (str "A user with this id has not been loaded yet")})
 
-(defn new-user-dialog [data owner]
+(defn new-user-dialog [{:keys [close!]} owner]
   (om/component
    (om/build dialog
             {:title "Add new user"
@@ -82,12 +82,11 @@
              :content (user-form)
              :buttons [{:caption "Save"
                         :class "ok smallBtn"
-                        :action #(do (dispatch :new-user (merge empty-user
-                                                                (extract-user-data)))
-                                     (dispatch :navigate (parent-route data)))}
+                        :action #(do (dispatch :new-user (merge empty-user (extract-user-data)))
+                                     (close!))}
                        {:caption "Cancel"
                         :class "cancel"
-                        :action #(dispatch :navigate (parent-route data))}]})))
+                        :action close!}]})))
 
 (defn edit-user-dialog [{:keys [user close!]} owner]
   (om/component
@@ -105,19 +104,18 @@
                            :class "cancel"
                            :action close!}]}))))
 
-(defn delete-user-dialog [data owner]
+(defn delete-user-dialog [{:keys [user close!]} owner]
   (om/component
-   (let [user (get-current-user data)]
-     (om/build dialog
-               {:title "Are you sure you want to delete this user?"
-                :text "This can not be undone!!!"
-                :buttons [{:caption "Ok"
-                           :class "ok smallBtn"
-                           :action #(do (dispatch :delete-user user)
-                                        (dispatch :navigate (parent-route data)))}
-                          {:caption "Cancel"
-                           :class "cancel"
-                           :action #(dispatch :navigate (parent-route data))}]}))))
+   (om/build dialog
+             {:title "Are you sure you want to delete this user?"
+              :text "This can not be undone!!!"
+              :buttons [{:caption "Ok"
+                         :class "ok smallBtn"
+                         :action #(do (dispatch :delete-user user)
+                                      (close!))}
+                        {:caption "Cancel"
+                         :class "cancel"
+                         :action close!}]})))
 
 (defn generate-apikeys [owner user]
   (POST (str "/rest/users/" (get user "keyId") "/apikeys")
@@ -153,18 +151,17 @@
           " "
           [:a.ok.smallBtn {:on-click #(revoke-apikeys owner user)} "Revoke"]])))
 
-(defn manage-apikeys-dialog [data owner]
+(defn manage-apikeys-dialog [{:keys [user close!]} owner]
   (reify
     om/IInitState
     (init-state [this]
       {:secret nil
-       :access-key (get (store/get-by-id (get-current-user-id data)) "accessKey")})
+       :access-key (get user "accessKey")})
     om/IRenderState
     (render-state [this {:keys [secret access-key]}]
-      (let [user (store/get-by-id (get-current-user-id data))]
-        (if-not user
-          (om/build dialog no-such-user)
-          (om/build dialog
+      (if-not user
+        (om/build dialog no-such-user)
+        (om/build dialog
                   {:title "Manage API keys"
                    :text "You can (re)generate or revoke an api key for this user"
                    :content-data {:user user
@@ -174,7 +171,7 @@
                    :content manage-apikeys
                    :buttons [{:caption "Close"
                               :class "cancel"
-                              :action #(dispatch :navigate (parent-route data))}]}))))))
+                              :action close!}]})))))
 
 (def dialogs
   {:add new-user-dialog
@@ -207,7 +204,7 @@
          [:section.fullWidth.usersList
           [:h1 "Manage users and user rights"]
           [:a.standardBtn.btnAboveTable
-           {:href "#" #_(routes/users-add)}
+           {:on-click #(om/set-state! owner :dialog {:component new-user-dialog})}
            "Add new user"]
           (om/build grid
                     {:id "usersListTable"
@@ -242,12 +239,14 @@
                                            [:span
                                             [:a.edit {:on-click #(om/set-state! owner :dialog {:component edit-user-dialog
                                                                                                :user-id (get user "keyId")})} "Edit"]
-                                            [:a.remove {:href "#" #_(routes/users-delete {:id (get user "keyId")})} "Remove"]
-                                            [:a.api {:href "#" #_(routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
+                                            [:a.remove {:on-click #(om/set-state! owner :dialog {:component delete-user-dialog
+                                                                                                 :user-id (get user "keyId")})} "Remove"]
+                                            [:a.api {:on-click #(om/set-state! owner :dialog {:component manage-apikeys-dialog
+                                                                                              :user-id (get user "keyId")})} "api"]])}]})]]
         (if-let [dialog (:dialog state)]
           (let [{:keys [component user-id]} dialog]
             (pr-str user-id)
-            (om/build component {:user (store/get-by-id data user-id)
+            (om/build component {:user (if user-id (store/get-by-id data user-id))
                                  :close! #(om/set-state! owner :dialog nil)})))]))))
 
 (defn value-component [data owner {:keys [component]}]

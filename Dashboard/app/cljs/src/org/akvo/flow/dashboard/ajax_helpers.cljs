@@ -1,6 +1,6 @@
 (ns org.akvo.flow.dashboard.ajax-helpers
   (:require [clojure.string :as s]
-            [ajax.core :refer (json-response-format json-request-format)]))
+            [ajax.core :refer (json-request-format)]))
 
 (def default-ajax-config
   {:error-handler #(.error js/console %)
