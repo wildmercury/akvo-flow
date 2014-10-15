@@ -202,51 +202,49 @@
 
     om/IRenderState
     (render-state [this state]
-      (let [current-page (:current-page data)
-            query-params (:query-params current-page)]
-        (html
-         [:div
-          [:div.greyBg
-           [:section.fullWidth.usersList
-            [:h1 "Manage users and user rights"]
-            [:a.standardBtn.btnAboveTable
-             {:href "#" #_(routes/users-add)}
-             "Add new user"]
-            (om/build grid
-                      {:id "usersListTable"
-                       :data (let [data (store/get-by-range (merge (:pagination state)
-                                                                   (:sort state)))]
-                               (when-not (= data :pending)
-                                 (map (fn [row row-number]
-                                        (assoc row :row-number (inc row-number)))
-                                      data
-                                      (range))))
-                       :sort (:sort state)
-                       :on-sort (fn [sort-by sort-order]
-                                  (om/set-state! owner :sort {:sort-by sort-by :sort-order sort-order}))
-                       :range (:pagination state)
-                       :on-range (fn [offset limit]
-                                   (om/set-state! owner :pagination {:offset offset :limit limit}))
-                       :columns [{:title "#"
-                                  :cell-fn :row-number}
-                                 {:title "User name"
-                                  :cell-fn #(get % "userName")
-                                  :sort-by "userName"}
-                                 {:title "Email"
-                                  :cell-fn #(get % "emailAddress")
-                                  :sort-by "emailAddress"}
-                                 {:title "Permission list"
-                                  :cell-fn #(if (= (get % "permissionList") "10")
-                                              "Admin"
-                                              "User")}
-                                 {:title "Actions"
-                                  :class "action"
-                                  :cell-fn (fn [user]
-                                             [:span
-                                              [:a.edit {:href "#" #_(routes/users-edit {:id (get user "keyId")})} "Edit"]
-                                              [:a.remove {:href "#" #_(routes/users-delete {:id (get user "keyId")})} "Remove"]
-                                              [:a.api {:href "#" #_(routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
-          #_(om/build routes/active-component (assoc data :pages dialogs))])))))
+      (html
+       [:div
+        [:div.greyBg
+         [:section.fullWidth.usersList
+          [:h1 "Manage users and user rights"]
+          [:a.standardBtn.btnAboveTable
+           {:href "#" #_(routes/users-add)}
+           "Add new user"]
+          (om/build grid
+                    {:id "usersListTable"
+                     :data (let [data (store/get-by-range (merge (:pagination state)
+                                                                 (:sort state)))]
+                             (when-not (= data :pending)
+                               (map (fn [row row-number]
+                                      (assoc row :row-number (inc row-number)))
+                                    data
+                                    (range))))
+                     :sort (:sort state)
+                     :on-sort (fn [sort-by sort-order]
+                                (om/set-state! owner :sort {:sort-by sort-by :sort-order sort-order}))
+                     :range (:pagination state)
+                     :on-range (fn [offset limit]
+                                 (om/set-state! owner :pagination {:offset offset :limit limit}))
+                     :columns [{:title "#"
+                                :cell-fn :row-number}
+                               {:title "User name"
+                                :cell-fn #(get % "userName")
+                                :sort-by "userName"}
+                               {:title "Email"
+                                :cell-fn #(get % "emailAddress")
+                                :sort-by "emailAddress"}
+                               {:title "Permission list"
+                                :cell-fn #(if (= (get % "permissionList") "10")
+                                            "Admin"
+                                            "User")}
+                               {:title "Actions"
+                                :class "action"
+                                :cell-fn (fn [user]
+                                           [:span
+                                            [:a.edit {:href "#" #_(routes/users-edit {:id (get user "keyId")})} "Edit"]
+                                            [:a.remove {:href "#" #_(routes/users-delete {:id (get user "keyId")})} "Remove"]
+                                            [:a.api {:href "#" #_(routes/users-manage-apikeys {:id (get user "keyId")})} "api"]])}]})]]
+        #_(om/build routes/active-component (assoc data :pages dialogs))]))))
 
 (defn ^:export init []
   (om/root users
