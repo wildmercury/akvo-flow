@@ -58,7 +58,8 @@ public class SurveyGroupRestService {
     @ResponseBody
     public Map<String, Object> listSurveyGroups(
             @RequestParam(value = "preflight", defaultValue = "") String preflight,
-            @RequestParam(value = "surveyGroupId", defaultValue = "") Long surveyGroupId) {
+            @RequestParam(value = "surveyGroupId", defaultValue = "") Long surveyGroupId,
+            @RequestParam(value = "parentId", defaultValue = "") Long parentId) {
         final Map<String, Object> response = new HashMap<String, Object>();
         List<SurveyGroupDto> results = new ArrayList<SurveyGroupDto>();
         RestStatusDto statusDto = new RestStatusDto();
@@ -82,7 +83,7 @@ public class SurveyGroupRestService {
         }
 
         // if we are here, it is a regular request
-        List<SurveyGroup> surveys = surveyGroupDao.listAllFilteredByUserAuthorization();
+        List<SurveyGroup> surveys = surveyGroupDao.listAllFilteredByUserAuthorization(parentId);
         SurveyDAO surveyDao = new SurveyDAO();
         if (surveys != null) {
             for (SurveyGroup s : surveys) {
