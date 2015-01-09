@@ -73,11 +73,17 @@ public class EventRestServlet extends AbstractRestApiServlet {
     		// extract name of class (strip of first part of fully qualified name)
 			String kindName = eReq.getKind().substring(eReq.getKind().lastIndexOf('.') + 1);
     		BaseDAO<?> dao  = new BaseDAO(kindClass);
-    		Object o = dao.getByKey(eReq.getId());
-    		if (o != null){
+    		Boolean deleted = eReq.getActionType().equals(EventRestRequest.ACTION_DELETED);
+    		Object o = null;
+    		if (!deleted){
+    			o = dao.getByKey(eReq.getId());
+    		}
+
+    		if (o != null || deleted){
     			EventSubject eSubj = new EventSubject(eReq.getOrgId(), eReq.getUserId());
     			action = kindName + eReq.getActionType() ;
-    			EventObject eObj = new EventObject(kindName,o);
+    			// if it is a deleted object, o will be null here.
+    			EventObject eObj = new EventObject(kindName, o, eReq.getId());
     			EventContext eCont = new EventContext(eReq.getTimestamp());
     			Event newEvent = new Event(eSubj, action, eObj, eCont);
 

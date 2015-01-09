@@ -94,27 +94,10 @@ public class BaseDAO<T extends BaseDomain> {
         this.concreteClass = e;
     }
 
-    /**
-     * saves an object to the data store. This method will set the lastUpdateDateTime on the domain
-     * object prior to saving and will set the createdDateTime (if it is null).
-     *
-     * @param <E>
-     * @param obj
-     * @return
-     */
-    public <E extends BaseDomain> E save(E obj) {
-    	String actionType = EventRestRequest.ACTION_UPDATED;   // the default
-        PersistenceManager pm = PersistenceFilter.getManager();
-        if (obj.getCreatedDateTime() == null) {
-            obj.setCreatedDateTime(new Date());
-            actionType = EventRestRequest.ACTION_CREATED;
-        }
-        obj.setLastUpdateDateTime(new Date());
-        obj = pm.makePersistent(obj);
+    private <E extends BaseDomain> void unifiedLog(E obj, String actionType){
+    	String objectKind = this.concreteClass.getName();
 
-        String objectKind = this.concreteClass.getName();
-
-        // if we are interested in this object, fire an event task
+    	 // if we are interested in this object, fire an event task
         if (EventRestRequest.HANDLED_EVENTS.contains(objectKind)){
         	// get the authentication information so we can get at the userId
         	final Authentication authentication = SecurityContextHolder.getContext()
@@ -137,6 +120,26 @@ public class BaseDAO<T extends BaseDomain> {
         			.param(EventRestRequest.ORG_ID_PARAM, orgId)
         			.param(EventRestRequest.TIMESTAMP_PARAM, unixTimestamp.toString()));
         }
+    }
+    
+    /**
+     * saves an object to the data store. This method will set the lastUpdateDateTime on the domain
+     * object prior to saving and will set the createdDateTime (if it is null).
+     *
+     * @param <E>
+     * @param obj
+     * @return
+     */
+    public <E extends BaseDomain> E save(E obj) {
+    	String actionType = EventRestRequest.ACTION_UPDATED;   // the default
+        PersistenceManager pm = PersistenceFilter.getManager();
+        if (obj.getCreatedDateTime() == null) {
+            obj.setCreatedDateTime(new Date());
+            actionType = EventRestRequest.ACTION_CREATED;
+        }
+        obj.setLastUpdateDateTime(new Date());
+        obj = pm.makePersistent(obj);
+        unifiedLog(obj,actionType);
         return obj;
     }
 
@@ -591,6 +594,7 @@ public class BaseDAO<T extends BaseDomain> {
      */
     public <E extends BaseDomain> void delete(E obj) {
         PersistenceManager pm = PersistenceFilter.getManager();
+        unifiedLog(obj, EventRestRequest.ACTION_DELETED);
         pm.deletePersistent(obj);
     }
 

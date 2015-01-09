@@ -18,11 +18,13 @@ package com.gallatinsystems.events;
 
 public class EventObject {
 	private String kind;
+	private Long keyId;
 	private Object data;
 	
-	public EventObject (String kind, Object data) {
+	public EventObject (String kind, Object data, Long keyId) {
 		this.setKind(kind);
 		this.setData(data);
+		this.setKeyId(keyId);
 	}
 
 	public String getKind() {
@@ -39,5 +41,13 @@ public class EventObject {
 
 	public void setData(Object data) {
 		this.data = data;
+	}
+
+	public Long getKeyId() {
+		return keyId;
+	}
+
+	public void setKeyId(Long keyId) {
+		this.keyId = keyId;
 	}
 }
