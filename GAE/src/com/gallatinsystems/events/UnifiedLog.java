@@ -33,7 +33,7 @@ public class UnifiedLog {
 	 
 	public static void dispatch(String topic, String message){
 		 try {
-	            URL url = new URL("http://requestb.in/15hzbqz1");  //http://flowdev1.akvo.org:3030/event
+	            URL url = new URL("http://flowdev1.akvo.org:3030/event");
 	            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 	            connection.setDoOutput(true);
 	            connection.setRequestMethod("POST");
