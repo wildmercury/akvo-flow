@@ -29,7 +29,7 @@ import org.waterforpeople.mapping.app.web.EventRestServlet;
 
 public class UnifiedLog {
 	private static final Logger log = Logger
-	            .getLogger(EventRestServlet.class.getName());
+	            .getLogger(UnifiedLog.class.getName());
 	 
 	public static void dispatch(String topic, String message){
 		 try {
@@ -43,9 +43,7 @@ public class UnifiedLog {
 	            writer.write(message);
 	            writer.close();
 	    
-	            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-	            	log.log(Level.INFO, "Unified log message written successfully");
-	            } else {
+	            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
 	            	log.log(Level.SEVERE, "Unified log message failed");
 	            }
 	        } catch (MalformedURLException e) {

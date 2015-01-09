@@ -32,8 +32,6 @@ import javax.jdo.PersistenceManager;
 
 import net.sf.jsr107cache.CacheException;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.SerializationUtils;
 import org.datanucleus.store.appengine.query.JDOCursorHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,24 +103,19 @@ public class BaseDAO<T extends BaseDomain> {
      * @return
      */
     public <E extends BaseDomain> E save(E obj) {
-    	Boolean created = false;
+    	String actionType = EventRestRequest.ACTION_UPDATED;   // the default
         PersistenceManager pm = PersistenceFilter.getManager();
         if (obj.getCreatedDateTime() == null) {
             obj.setCreatedDateTime(new Date());
-            created = true;
+            actionType = EventRestRequest.ACTION_CREATED;
         }
         obj.setLastUpdateDateTime(new Date());
         obj = pm.makePersistent(obj);
 
-        String fullClass = this.concreteClass.toString();
-        String objectKind = fullClass.substring(fullClass.lastIndexOf('.') + 1);
+        String objectKind = this.concreteClass.getName();
 
         // if we are interested in this object, fire an event task
-        if (objectKind.equals(EventRestRequest.SURVEY_GROUP) ||
-        		objectKind.equals(EventRestRequest.SURVEY) ||
-        		objectKind.equals(EventRestRequest.QUESTION_GROUP) ||
-        		objectKind.equals(EventRestRequest.QUESTION)){
-
+        if (EventRestRequest.HANDLED_EVENTS.contains(objectKind)){
         	// get the authentication information so we can get at the userId
         	final Authentication authentication = SecurityContextHolder.getContext()
                   .getAuthentication();
@@ -132,14 +125,14 @@ public class BaseDAO<T extends BaseDomain> {
         	String orgId = props.getProperty("s3bucket");
 
         	// create a timestamp
-        	Long unixTimestamp = (long)(System.currentTimeMillis() / 1000L);
+        	Long unixTimestamp = System.currentTimeMillis();
 
         	// fire the event task
         	Queue eventQueue = QueueFactory.getQueue("events");
         	eventQueue.add(TaskOptions.Builder.withUrl("/app_worker/eventservlet")
         			.param(EventRestRequest.ID_PARAM, obj.getKey().getId() + "")
         			.param(EventRestRequest.KIND_PARAM, objectKind)
-        			.param(EventRestRequest.CREATED_PARAM, created.toString())
+        			.param(EventRestRequest.ACTION_TYPE_PARAM, actionType)
         			.param(EventRestRequest.USER_ID_PARAM, authentication.getCredentials().toString())
         			.param(EventRestRequest.ORG_ID_PARAM, orgId)
         			.param(EventRestRequest.TIMESTAMP_PARAM, unixTimestamp.toString()));

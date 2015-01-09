@@ -16,7 +16,9 @@
 
 package org.waterforpeople.mapping.app.web;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -30,19 +32,25 @@ import com.gallatinsystems.framework.rest.RestRequest;
 public class EventRestRequest extends RestRequest {
 
     private static final long serialVersionUID = -1002622416183902696L;
-    public static final String SURVEY_GROUP = "SurveyGroup";
-    public static final String SURVEY = "Survey";
-    public static final String QUESTION_GROUP = "QuestionGroup";
-    public static final String QUESTION = "Question";
     public static final String KIND_PARAM = "kind";
     public static final String ID_PARAM = "id";
-    public static final String CREATED_PARAM = "created";
+    public static final String ACTION_TYPE_PARAM = "actionType";
     public static final String USER_ID_PARAM = "userId";
     public static final String ORG_ID_PARAM = "orgId";
     public static final String TIMESTAMP_PARAM = "timestamp";
-    
+    public static final String ACTION_DELETED = "Deleted";
+    public static final String ACTION_CREATED = "Created";
+    public static final String ACTION_UPDATED = "Updated";
+
+    //list of handled classes.
+    public static final List<String> HANDLED_EVENTS = Arrays.asList(
+    		"com.gallatinsystems.survey.domain.SurveyGroup",
+    		"com.gallatinsystems.survey.domain.Survey",
+    		"com.gallatinsystems.survey.domain.QuestionGroup",
+    		"com.gallatinsystems.survey.domain.Question");
+
     private String kind;
-    private Boolean created;
+    private String actionType;
     private Long userId;
     private Long id;
     private String orgId;
@@ -55,8 +63,8 @@ public class EventRestRequest extends RestRequest {
     		setKind(req.getParameter(KIND_PARAM));
     	}
     	
-    	if (req.getParameter(CREATED_PARAM) != null) {
-    		setCreated(Boolean.valueOf(req.getParameter(CREATED_PARAM)));
+    	if (req.getParameter(ACTION_TYPE_PARAM) != null) {
+    		setActionType(req.getParameter(ACTION_TYPE_PARAM));
     	}
 
     	if (req.getParameter(USER_ID_PARAM) != null) {
@@ -86,7 +94,7 @@ public class EventRestRequest extends RestRequest {
     	if (req.getParameter(TIMESTAMP_PARAM) != null) {
     		try {
                 Long unixTimeStamp = Long.parseLong(req.getParameter(TIMESTAMP_PARAM).trim());
-                setTimestamp(new Date(unixTimeStamp*1000L));
+                setTimestamp(new Date(unixTimeStamp));
             } catch (Exception e) {
                 addError(new RestError(RestError.BAD_DATATYPE_CODE,
                         RestError.BAD_DATATYPE_MESSAGE, TIMESTAMP_PARAM
@@ -108,12 +116,12 @@ public class EventRestRequest extends RestRequest {
 		this.kind = kind;
 	}
 
-	public Boolean getCreated() {
-		return created;
+	public String getActionType() {
+		return actionType;
 	}
 
-	public void setCreated(Boolean created) {
-		this.created = created;
+	public void setActionType(String actionType) {
+		this.actionType = actionType;
 	}
 
 	public Long getUserId() {
