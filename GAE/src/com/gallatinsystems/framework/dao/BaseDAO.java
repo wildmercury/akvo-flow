@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010-2012 Stichting Akvo (Akvo Foundation)
+ *  Copyright (C) 2010-2015 Stichting Akvo (Akvo Foundation)
  *
  *  This file is part of Akvo FLOW.
  *
@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -31,9 +32,12 @@ import javax.jdo.PersistenceManager;
 
 import net.sf.jsr107cache.CacheException;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.SerializationUtils;
 import org.datanucleus.store.appengine.query.JDOCursorHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.waterforpeople.mapping.app.web.EventRestRequest;
 import org.waterforpeople.mapping.app.web.rest.security.AppRole;
 
 import com.gallatinsystems.common.Constants;
@@ -47,6 +51,9 @@ import com.gallatinsystems.user.domain.UserAuthorization;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
  * This is a reusable data access object that supports basic operations (save, find by property,
@@ -64,6 +71,7 @@ public class BaseDAO<T extends BaseDomain> {
     protected static final String EQ_OP = " == ";
     protected static final String GTE_OP = " >= ";
     protected static final String LTE_OP = " <= ";
+
     private Class<T> concreteClass;
     protected Logger log;
 
@@ -97,14 +105,45 @@ public class BaseDAO<T extends BaseDomain> {
      * @return
      */
     public <E extends BaseDomain> E save(E obj) {
-
+    	Boolean created = false;
         PersistenceManager pm = PersistenceFilter.getManager();
         if (obj.getCreatedDateTime() == null) {
             obj.setCreatedDateTime(new Date());
+            created = true;
         }
         obj.setLastUpdateDateTime(new Date());
         obj = pm.makePersistent(obj);
 
+        String fullClass = this.concreteClass.toString();
+        String objectKind = fullClass.substring(fullClass.lastIndexOf('.') + 1);
+
+        // if we are interested in this object, fire an event task
+        if (objectKind.equals(EventRestRequest.SURVEY_GROUP) ||
+        		objectKind.equals(EventRestRequest.SURVEY) ||
+        		objectKind.equals(EventRestRequest.QUESTION_GROUP) ||
+        		objectKind.equals(EventRestRequest.QUESTION)){
+
+        	// get the authentication information so we can get at the userId
+        	final Authentication authentication = SecurityContextHolder.getContext()
+                  .getAuthentication();
+
+        	// get the orgId from the system properties. We use the s3bucket property
+        	Properties props = System.getProperties();
+        	String orgId = props.getProperty("s3bucket");
+
+        	// create a timestamp
+        	Long unixTimestamp = (long)(System.currentTimeMillis() / 1000L);
+
+        	// fire the event task
+        	Queue eventQueue = QueueFactory.getQueue("events");
+        	eventQueue.add(TaskOptions.Builder.withUrl("/app_worker/eventservlet")
+        			.param(EventRestRequest.ID_PARAM, obj.getKey().getId() + "")
+        			.param(EventRestRequest.KIND_PARAM, objectKind)
+        			.param(EventRestRequest.CREATED_PARAM, created.toString())
+        			.param(EventRestRequest.USER_ID_PARAM, authentication.getCredentials().toString())
+        			.param(EventRestRequest.ORG_ID_PARAM, orgId)
+        			.param(EventRestRequest.TIMESTAMP_PARAM, unixTimestamp.toString()));
+        }
         return obj;
     }
 
