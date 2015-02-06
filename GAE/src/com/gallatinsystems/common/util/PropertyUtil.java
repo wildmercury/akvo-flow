@@ -64,6 +64,11 @@ public class PropertyUtil {
     public static HashMap<String, String> getPropertiesMap(
             ArrayList<String> keyList) {
         HashMap<String, String> propertyMap = new HashMap<String, String>();
+
+        if (props == null) {
+            props = System.getProperties();
+        }
+
         for (String key : keyList) {
             String value = props.getProperty(key);
             propertyMap.put(key, value);
