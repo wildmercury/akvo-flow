@@ -1,4 +1,4 @@
-## Akvo FLOW -- Field Level Operations Watch
+## Akvo FLOW
 
 This is the main repository of the Akvo FLOW system, and consists in 2 parts:
 
