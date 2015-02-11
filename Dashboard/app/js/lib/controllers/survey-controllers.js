@@ -558,7 +558,22 @@ FLOW.surveyControl = Ember.ArrayController.create({
 
   selectForm: function(evt) {
     FLOW.selectedControl.set('selectedSurvey', evt.context);
-  }
+  },
+
+  userCanDeleteData: function(surveyId) {
+    var survey;
+    this.get('content').forEach(function(item){
+        if(item.get('keyId') === surveyId) {
+            survey = item;
+        }
+    });
+
+    if(survey && survey.get('path')) {
+        return FLOW.userControl.canDeleteData(survey.get('path'))
+    } else {
+        return false; // need survey and survey path, otherwise prevent delete
+    }
+  },
 });
 
 
