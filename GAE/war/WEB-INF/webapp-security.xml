@@ -3,8 +3,10 @@
 <b:beans xmlns="http://www.springframework.org/schema/security"
     xmlns:b="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+    http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
 
 	<http pattern="/api/v1/**" use-expressions="true" entry-point-ref="apiEntryPoint" authentication-manager-ref="apiAuthenticationManager" >
@@ -23,7 +25,9 @@
 		<custom-filter position="PRE_AUTH_FILTER" ref="apiFilter"/>
 	</http>
 
-    <http use-expressions="true" entry-point-ref="gaeEntryPoint" authentication-manager-ref="authenticationManager"
+    <http use-expressions="true" auto-config="false" disable-url-rewriting="true"
+        entry-point-ref="oidcAuthenticationEntryPoint"
+        authentication-manager-ref="oidcAuthenticationManager"
         access-decision-manager-ref="accessDecisionManager">
         <intercept-url pattern="/remote_api**" access="permitAll"/>
         <intercept-url pattern="/admin/logout.html" access="permitAll"/>
@@ -34,11 +38,11 @@
         <intercept-url pattern="/rest/users" access="hasRole('ADMIN')"/>
         <intercept-url pattern="/rest/user_roles" access="hasRole('ADMIN')"/>
         <intercept-url pattern="/rest/user_auth" access="hasRole('ADMIN')"/>
-        <intercept-url pattern="/rest/**" access="hasRole('USER')"/>
-        <intercept-url pattern="/admin/**" access="hasRole('USER')"/>
+        <intercept-url pattern="/rest/**" access="isAuthenticated()"/>
+        <intercept-url pattern="/admin/**" access="isAuthenticated()"/>
         <intercept-url pattern="/**" access="permitAll"/>
-        <logout logout-success-url="/" delete-cookies="JSESSIONID"/>
-		<custom-filter position="PRE_AUTH_FILTER" ref="gaeFilter"/>
+		<custom-filter position="PRE_AUTH_FILTER" ref="openIdConnectAuthenticationFilter"/>
+		<logout />
     </http>
 
     <b:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
@@ -48,6 +52,119 @@
 				<b:bean class="org.springframework.security.web.access.expression.WebExpressionVoter" />
 			</b:list>
 		</b:property>
+	</b:bean>
+
+    <!-- Keycloak Auth -->
+
+    <b:bean id="oidcAuthenticationEntryPoint" class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <b:property name="loginFormUrl" value="/openid_connect_login" />
+    </b:bean>
+
+    <authentication-manager alias="oidcAuthenticationManager">
+      <authentication-provider ref="openIdConnectAuthenticationProvider" />
+    </authentication-manager>
+
+    <b:bean id="openIdConnectAuthenticationProvider" class="org.mitre.openid.connect.client.OIDCAuthenticationProvider">
+        <!--
+        <b:property name="authoritiesMapper">
+                <b:bean class="org.mitre.openid.connect.client.NamedAdminAuthoritiesMapper">
+                        <b:property name="admins" ref="namedAdmins" />
+                </b:bean>
+        </b:property>-->
+    </b:bean>
+
+    <b:bean id="openIdConnectAuthenticationFilter" class="org.mitre.openid.connect.client.OIDCAuthenticationFilter">
+               <b:property name="authenticationManager" ref="oidcAuthenticationManager" />
+               <b:property name="issuerService" ref="staticIssuerService" />
+               <b:property name="serverConfigurationService" ref="staticServerConfigurationService" />
+               <b:property name="clientConfigurationService" ref="staticClientConfigurationService" />
+               <b:property name="authRequestOptionsService" ref="staticAuthRequestOptionsService" />
+               <b:property name="authRequestUrlBuilder" ref="plainAuthRequestUrlBuilder" />
+        </b:bean>
+
+     <b:bean class="org.mitre.openid.connect.client.service.impl.StaticSingleIssuerService" id="staticIssuerService">
+         <b:property name="issuer" value="https://login.akvotest.org/auth/realms/akvo" />
+     </b:bean>
+
+     <b:bean class="org.mitre.openid.connect.client.service.impl.StaticServerConfigurationService" id="staticServerConfigurationService">
+		<b:property name="servers">
+			<b:map>
+				<b:entry key="https://login.akvotest.org/auth/realms/akvo">
+					<b:bean class="org.mitre.openid.connect.config.ServerConfiguration">
+						<b:property name="issuer" value="https://login.akvotest.org/auth/realms/akvo" />
+						<b:property name="authorizationEndpointUri"	value="https://login.akvotest.org/auth/realms/akvo/protocol/openid-connect/auth" />
+						<b:property name="tokenEndpointUri"	value="https://login.akvotest.org/auth/realms/akvo/protocol/openid-connect/token" />
+						<b:property name="userInfoUri" value="https://login.akvotest.org/auth/realms/akvo/protocol/openid-connect/userinfo" />
+						<b:property name="jwksUri" value="https://login.akvotest.org/auth/realms/akvo/protocol/openid-connect/certs" />
+					</b:bean>
+				</b:entry>
+			</b:map>
+		</b:property>
+	</b:bean>
+
+     <b:bean class="org.mitre.openid.connect.client.service.impl.StaticClientConfigurationService" id="staticClientConfigurationService">
+		<b:property name="clients">
+			<b:map>
+				<b:entry key="https://login.akvotest.org/auth/realms/akvo">
+					<b:bean class="org.mitre.oauth2.model.RegisteredClient">
+						<b:property name="clientId" value="akvoflow-local" />
+						<b:property name="clientSecret" value="b2705d17-e783-4b04-bb37-4b552c1a3c0f" />
+						<b:property name="scope">
+							<b:set value-type="java.lang.String">
+								<b:value>openid</b:value>
+								<b:value>email</b:value>
+								<b:value>address</b:value>
+								<b:value>profile</b:value>
+								<b:value>phone</b:value>
+							</b:set>
+						</b:property>
+						<b:property name="tokenEndpointAuthMethod" value="SECRET_BASIC" />
+						<b:property name="redirectUris">
+							<b:set>
+								<b:value>http://localhost:8888/openid_connect_login</b:value>
+							</b:set>
+						</b:property>
+					</b:bean>
+				</b:entry>
+			</b:map>
+  		</b:property>
+	</b:bean>
+
+     <b:bean class="org.mitre.openid.connect.client.service.impl.StaticAuthRequestOptionsService" id="staticAuthRequestOptionsService">
+		<b:property name="options">
+			<b:map>
+				<!-- Entries in this map are sent as key-value parameters to the auth request -->
+				<!--
+				<entry key="display" value="page" />
+				<entry key="max_age" value="30" />
+				<entry key="prompt" value="none" />
+				-->
+			</b:map>
+		</b:property>
+	</b:bean>
+
+	<b:bean class="org.mitre.openid.connect.client.service.impl.PlainAuthRequestUrlBuilder" id="plainAuthRequestUrlBuilder" />
+
+	<b:bean class="org.mitre.openid.connect.client.service.impl.EncryptedAuthRequestUrlBuilder" id="encryptedAuthRequestUrlBuilder">
+	  <b:property name="encrypterService" ref="validatorCache" />
+	    <b:property name="alg">
+	      <util:constant static-field="com.nimbusds.jose.JWEAlgorithm.RSA1_5"/>
+	    </b:property>
+	    <b:property name="enc">
+	      <util:constant static-field="com.nimbusds.jose.EncryptionMethod.A128GCM"/>
+	    </b:property>
+	</b:bean>
+
+    <b:bean id="validatorCache" class="org.mitre.jwt.signer.service.impl.JWKSetCacheService" />
+
+    <b:bean id="defaultSignerService" class="org.mitre.jwt.signer.service.impl.DefaultJwtSigningAndValidationService">
+		<b:constructor-arg name="keyStore">
+			<b:bean id="defaultKeyStore" class="org.mitre.jose.keystore.JWKSetKeyStore">
+				<b:property name="location" value="classpath:keystore.jwks" />
+			</b:bean>
+		</b:constructor-arg>
+		<b:property name="defaultSignerKeyId" value="rsa1" />
+ 		<b:property name="defaultSigningAlgorithmName" value="RS256" />
 	</b:bean>
 
 	<!-- API Authentication -->

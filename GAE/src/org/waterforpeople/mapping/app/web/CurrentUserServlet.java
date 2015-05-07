@@ -83,8 +83,7 @@ public class CurrentUserServlet extends HttpServlet {
 
         final VelocityContext context = new VelocityContext();
         final UserDao uDao = new UserDao();
-        final String currentUserEmail = UserServiceFactory.getUserService()
-                .getCurrentUser().getEmail().toLowerCase();
+        final String currentUserEmail = "test@example.com";
         final User currentUser = uDao.findUserByEmail(currentUserEmail);
 
         context.put("user", currentUser);
