@@ -36,6 +36,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mitre.openid.connect.model.OIDCAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.waterforpeople.mapping.app.web.rest.security.AppRole;
 
 import com.gallatinsystems.common.Constants;
@@ -126,6 +128,9 @@ public class EnvServlet extends HttpServlet {
             }
         }
         props.put("countries", jsonArray.toString());
+
+        final OIDCAuthenticationToken authentication = (OIDCAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        props.put("access_token", authentication.getAccessTokenValue());
 
         context.put("env", props);
 
