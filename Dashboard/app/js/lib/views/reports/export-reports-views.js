@@ -108,6 +108,9 @@ FLOW.ReportLoader = Ember.Object.create({
   requestReport: function () {
     this.set('processing', true);
     $.ajax({
+      headers: {
+        'Authorization': 'Bearer ' + FLOW.Env.access_token
+      },
       url: FLOW.Env.flowServices + '/generate',
       data: {
         criteria: JSON.stringify(this.get('criteria'))

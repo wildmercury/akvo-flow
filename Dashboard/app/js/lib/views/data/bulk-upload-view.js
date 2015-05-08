@@ -6,6 +6,9 @@ FLOW.uuid = function (file) {
 
 FLOW.uploader = Ember.Object.create({
   r: new Resumable({
+    headers: {
+      'Authorization': 'Bearer ' + FLOW.Env.access_token
+    },
     target: FLOW.Env.flowServices + '/upload',
     uploadDomain: FLOW.Env.surveyuploadurl.split('/')[2],
     simultaneousUploads: 1,
@@ -120,6 +123,9 @@ FLOW.uploader = Ember.Object.create({
 
       setTimeout(function() {
         $.ajax({
+          headers: {
+            'Authorization': 'Bearer ' + FLOW.Env.access_token
+          },
           url : target,
           cache : false,
           type : 'POST',
